@@ -1,0 +1,83 @@
+// Project tasks configuration. See https://zed.dev/docs/tasks for documentation.
+[
+  {
+    "label": "Build Rust",
+    "command": "rust/task_build.sh",
+    "reveal": "no_focus",
+    "hide": "on_success",
+    "shell": {
+      "with_arguments": {
+        "program": "/usr/bin/env",
+        "args": ["bash"],
+      },
+    },
+    "save": "all",
+  },
+  {
+    "label": "Build Windows Rust",
+    "command": "rust/task_build.sh --win",
+    "reveal": "no_focus",
+    "hide": "on_success",
+    "shell": {
+      "with_arguments": {
+        "program": "/usr/bin/env",
+        "args": ["bash"],
+      },
+    },
+    "save": "all",
+  },
+  {
+    "label": "Build All Rust",
+    "command": "rust/task_build.sh --all",
+    "reveal": "no_focus",
+    "reveal_target": "dock",
+    "hide": "on_success",
+    "shell": {
+      "with_arguments": {
+        "program": "/usr/bin/env",
+        "args": ["bash"],
+      },
+    },
+    "save": "all",
+  },
+  {
+    "label": "Build Rust Release",
+    "command": "rust/task_build.sh --release",
+    "reveal": "no_focus",
+    "hide": "on_success",
+    "shell": {
+      "with_arguments": {
+        "program": "/usr/bin/env",
+        "args": ["bash"],
+      },
+    },
+    "save": "all",
+  },
+  {
+    "label": "Build Windows Rust Release",
+    "command": "rust/task_build.sh --win --release",
+    "reveal": "no_focus",
+    "hide": "on_success",
+    "shell": {
+      "with_arguments": {
+        "program": "/usr/bin/env",
+        "args": ["bash"],
+      },
+    },
+    "save": "all",
+  },
+  {
+    "label": "Build All Rust Release",
+    "command": "rust/task_build.sh --all --release",
+    "reveal": "no_focus",
+    "reveal_target": "dock",
+    "hide": "on_success",
+    "shell": {
+      "with_arguments": {
+        "program": "/usr/bin/env",
+        "args": ["bash"],
+      },
+    },
+    "save": "all",
+  },
+]

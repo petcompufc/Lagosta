@@ -1,0 +1,10 @@
+# Godot 4+ specific ignores
+.godot/
+/android/
+
+# Ignore rust compilation files
+target/
+
+# Ignore local zed configs
+.zed/*
+!.zed/tasks.json

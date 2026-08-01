@@ -1,0 +1,20 @@
+[package]
+name = "lago"
+version = "0.1.0"
+edition = "2024"
+
+[lib]
+crate-type = ["cdylib"]
+
+[dependencies]
+godot = "0.5.4"
+
+[profile.release]
+opt-level = 3
+lto = "fat"
+codegen-units = 1
+debug = false
+
+[profile.dev]
+opt-level = 1
+debug = false

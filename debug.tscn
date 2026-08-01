@@ -1,0 +1,6 @@
+[gd_scene format=3 uid="uid://dbnk37sbg6o5m"]
+
+[ext_resource type="Script" uid="uid://ywtm3m44rdad" path="res://debug.gd" id="1_1uwqr"]
+
+[node name="Debug" type="Node2D" unique_id=1746145270]
+script = ExtResource("1_1uwqr")
