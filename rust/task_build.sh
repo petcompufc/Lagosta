@@ -22,6 +22,6 @@ if command -v git >/dev/null 2>&1; then
         "$IMAGE_NAME" \
         bash -c './build.sh "$@" && chown -R '$(id -u):$(id -g)' /addons' -- "$@"
 else
-    echo "BUILDING IN HOST"
+    echo "BUILDING NATIVELY"
     ./build.sh "$@"
 fi

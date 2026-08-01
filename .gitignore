@@ -8,3 +8,6 @@ target/
 # Ignore local zed configs
 .zed/*
 !.zed/tasks.json
+
+bin/*
+!bin/.gdignore
