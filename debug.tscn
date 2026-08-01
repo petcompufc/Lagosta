@@ -2,5 +2,21 @@
 
 [ext_resource type="Script" uid="uid://ywtm3m44rdad" path="res://debug.gd" id="1_1uwqr"]
 
-[node name="Debug" type="Node2D" unique_id=1746145270]
+[node name="Debug" type="Control" unique_id=1768301541]
+layout_mode = 3
+anchors_preset = 0
 script = ExtResource("1_1uwqr")
+
+[node name="TRect2" type="TextureRect" parent="." unique_id=1455868027]
+unique_name_in_owner = true
+layout_mode = 0
+offset_left = 541.0
+offset_top = 1.0
+offset_right = 961.0
+offset_bottom = 312.0
+
+[node name="TRect1" type="TextureRect" parent="." unique_id=1011723238]
+unique_name_in_owner = true
+layout_mode = 0
+offset_right = 420.0
+offset_bottom = 311.0
