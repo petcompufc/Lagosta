@@ -1,5 +1,8 @@
 # Lagosta 🦞
-Leitor automático de gabaritos pra OCI ;)
+<img width="128" height="128" alt="Lagosta" src="assets/lagosta.png" />
+
+[Ícone tirado do emoji kitchen da google](https://emojikitchen.dev/)
+
 # Compilação
 Requer `cargo`, `godot` e, opcionalmente, `docker`
 
@@ -33,4 +36,3 @@ Com o projeto aberto dentro da Godot, vá em `Project > Export` e exporte a vers
 
 <img width="244" height="118" alt="image" src="https://github.com/user-attachments/assets/2446b915-91f1-4c21-a561-328d124451ac" />
 <img width="646" height="292" alt="image" src="https://github.com/user-attachments/assets/c8730373-0d33-4734-b979-16bf60160eee" />
-
