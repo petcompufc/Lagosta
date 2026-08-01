@@ -8,3 +8,6 @@ linux.debug.x86_64 =     "bin/liblago_debug.so"
 linux.release.x86_64 =   "bin/liblago.so"
 windows.debug.x86_64 =   "bin/lago_debug.dll"
 windows.release.x86_64 = "bin/lago.dll"
+
+[icons]
+ImageReader="icons/notepad.svg"

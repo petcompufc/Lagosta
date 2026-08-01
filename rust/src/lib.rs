@@ -1,4 +1,5 @@
 mod image_reader;
+mod imgtools;
 use godot::prelude::*;
 
 struct Lago;

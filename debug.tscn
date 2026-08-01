@@ -4,19 +4,39 @@
 
 [node name="Debug" type="Control" unique_id=1768301541]
 layout_mode = 3
-anchors_preset = 0
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
 script = ExtResource("1_1uwqr")
 
-[node name="TRect2" type="TextureRect" parent="." unique_id=1455868027]
+[node name="ImageReader" type="ImageReader" parent="." unique_id=703451182]
+image_path = "/home/julia/Desktop/Godot/serious/Lagosta/assets/test_scans/out0010.png"
 unique_name_in_owner = true
-layout_mode = 0
-offset_left = 541.0
-offset_top = 1.0
-offset_right = 961.0
-offset_bottom = 312.0
 
-[node name="TRect1" type="TextureRect" parent="." unique_id=1011723238]
+[node name="HBoxContainer" type="HBoxContainer" parent="." unique_id=107681769]
+layout_mode = 1
+anchors_preset = 10
+anchor_right = 1.0
+offset_bottom = 800.0
+grow_horizontal = 2
+
+[node name="TRect1" type="TextureRect" parent="HBoxContainer" unique_id=1011723238]
 unique_name_in_owner = true
-layout_mode = 0
-offset_right = 420.0
-offset_bottom = 311.0
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 0
+expand_mode = 5
+stretch_mode = 5
+
+[node name="TRect2" type="TextureRect" parent="HBoxContainer" unique_id=1455868027]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 0
+expand_mode = 5
+stretch_mode = 5
+
+[connection signal="image_loaded" from="ImageReader" to="." method="_on_image_reader_image_loaded"]
+[connection signal="image_processed" from="ImageReader" to="." method="_on_image_reader_image_processed"]
