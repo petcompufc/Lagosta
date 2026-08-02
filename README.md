@@ -7,9 +7,12 @@
 Requer `cargo`, `godot` e, opcionalmente, `docker`
 
 ## 1. Biblioteca
+
+> _a lagosta veio do lago_
+
 O projeto é composto de duas partes:
-- Uma biblioteca GDExtension, escrita em Rust
-- O projeto geral, feito em Godot
+- Uma biblioteca GDExtension, escrita em Rust - `Lago`
+- O projeto geral, feito em Godot - `Lagosta`
 
 A gente usa um script auxiliar de build pra compilar a biblioteca.
 Ele detecta se o sistema tem o docker instalado e usa ele pra compilar uma versão cross-platform.

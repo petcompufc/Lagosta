@@ -1,7 +1,9 @@
+mod data;
 mod image_reader;
 mod imgtools;
-mod data;
-mod barcode_writer;
+mod sheet_writer;
+mod debug;
+
 use godot::prelude::*;
 
 struct Lago;

@@ -7,14 +7,19 @@ edition = "2024"
 crate-type = ["cdylib"]
 
 [dependencies]
+base64 = "0.23.0"
 godot = {
   version = "0.5.4",
   features = ["api-4-7", "experimental-threads", "register-docs"]
 }
-imageproc = { version = "0.27.0", features = ["rayon"] }
-zxing-cpp = { version = "0.5.3", features = ["bundled", "image"] }
+imageproc = "0.27.0"
 rayon = "1.12.0"
-base64 = "0.23.0"
+resvg = {
+  version = "0.48.1",
+  default-features = false,
+  features = ["memmap-fonts", "text", "raster-images"]
+}
+zxing-cpp = { version = "0.5.3", features = ["bundled", "image"] }
 
 [profile.dev]
 opt-level = 1
