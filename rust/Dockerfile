@@ -2,6 +2,7 @@ FROM rust:1.97-slim-bullseye
 RUN apt-get update && apt-get install -y \
     gcc-mingw-w64-x86-64 \
     pkg-config \
+    cmake \
     && rm -rf /var/lib/apt/lists/*
 
 RUN rustup target add \

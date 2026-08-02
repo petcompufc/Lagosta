@@ -5,7 +5,7 @@ cd "$(dirname "$0")"
 RUST_DIR="$(pwd)"
 IMAGE_NAME="lago-builder"
 
-if command -v docker >/dev/null 2>&1; then
+if false; then
     echo "BUILDING IN DOCKER"
     if ! docker image inspect "$IMAGE_NAME" >/dev/null 2>&1; then
         echo "Building Docker image '$IMAGE_NAME'..."

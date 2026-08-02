@@ -9,6 +9,7 @@ use imageproc::{
     image::{self, GrayImage},
     morphology,
 };
+use zxingcpp::BarcodeFormat;
 
 #[derive(GodotClass)]
 #[class(base=Node, init, tool)]
@@ -16,6 +17,10 @@ struct ImageReader {
     #[export(global_file = "*.png,*.jpg,*.jpeg,*.bmp,*.webp")]
     #[var(set = load_image)]
     image_path: GString,
+
+    #[export]
+    #[init(val = true)]
+    barcode: bool,
 
     imgdata: Option<GrayImage>,
     processed_imgdata: Option<GrayImage>,
@@ -35,7 +40,7 @@ impl ImageReader {
     fn load_image(&mut self, image_path: GString) {
         self.imgdata = image::open(image_path.to_string())
             .ok()
-            .map(|img| img.to_luma8());
+            .map(|img| img.into_luma8());
 
         if self.imgdata.is_none() && !image_path.is_empty() {
             godot_error!("Couldn't open image {image_path}.");
@@ -60,11 +65,25 @@ impl ImageReader {
     }
 
     #[func]
+    fn read_barcode(&mut self) -> GString {
+        if let Some(imgdata) = self.imgdata.as_ref() {
+            let reader = zxingcpp::read()
+                .formats(&[BarcodeFormat::Aztec])
+                .try_invert(false);
+            let barcodes = reader.from(imgdata).expect("eita porra");
+            return barcodes.first().unwrap().text().as_str().into();
+        }
+        "".into()
+    }
+
+    #[func]
+    #[inline]
     fn create_texture_original(&self) -> Option<Gd<ImageTexture>> {
         Self::create_godot_texture(self.imgdata.as_ref()?)
     }
 
     #[func]
+    #[inline]
     fn create_texture_processed(&self) -> Option<Gd<ImageTexture>> {
         Self::create_godot_texture(self.processed_imgdata.as_ref()?)
     }
@@ -77,6 +96,7 @@ impl ImageReader {
             Format::L8,
             &imgdata.as_ref().into(),
         )?;
-        ImageTexture::create_from_image(&godot_image)
+        let i = ImageTexture::create_from_image(&godot_image);
+        i
     }
 }

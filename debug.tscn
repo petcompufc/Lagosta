@@ -12,7 +12,7 @@ grow_vertical = 2
 script = ExtResource("1_1uwqr")
 
 [node name="ImageReader" type="ImageReader" parent="." unique_id=703451182]
-image_path = "/home/julia/Desktop/Godot/serious/Lagosta/assets/test_scans/out0010.png"
+image_path = "/home/julia/Desktop/Godot/serious/Lagosta/assets/test_scans/base.png"
 unique_name_in_owner = true
 
 [node name="HBoxContainer" type="HBoxContainer" parent="." unique_id=107681769]
