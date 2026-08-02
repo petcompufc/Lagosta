@@ -1,3 +1,4 @@
+use crate::data::{OCIFase, OCIModalidade};
 use base64::{Engine as _, engine::general_purpose as b64};
 use godot::{
     classes::{FileAccess, Image as GDImage, file_access::ModeFlags, image::Format},
@@ -20,6 +21,8 @@ const BASE_TEMPLATE_WIDTH: u32 = 793;
 const BASE_TEMPLATE_HEIGHT: u32 = 559;
 
 static SVG_TEMPLATE: LazyLock<String> = LazyLock::new(|| {
+    // NOTE: o modo de import do arquivo precisa estar como "Keep File" na Godot
+    // pra não dar problema no export final do Lagosta.
     let mut fs = FileAccess::open(
         "res://assets/templates/gabarito_automatico.svg",
         ModeFlags::READ,
@@ -30,7 +33,9 @@ static SVG_TEMPLATE: LazyLock<String> = LazyLock::new(|| {
     s
 });
 
-static FONT_DATA: LazyLock<Arc<FontDatabase>> = LazyLock::new(|| {
+static FONT_DB: LazyLock<Arc<FontDatabase>> = LazyLock::new(|| {
+    // NOTE: o modo de import do arquivo precisa estar como "Keep File" na Godot
+    // pra não dar problema no export final do Lagosta.
     let mut file = FileAccess::open(
         "res://assets/templates/fonts/JetBrainsMono[wght].ttf",
         ModeFlags::READ,
@@ -45,34 +50,52 @@ static FONT_DATA: LazyLock<Arc<FontDatabase>> = LazyLock::new(|| {
     Arc::new(fontdb)
 });
 
+/// Criador de gabaritos. Lida com a criação de gabaritos customizados.
 #[derive(GodotClass)]
 #[class(init, singleton)]
-struct SheetWriter {
-    base: Base<Object>,
-}
+struct SheetWriter {}
 
 #[godot_api]
 impl SheetWriter {
+    /// Cria a imagem de um gabarito para um aluno com base nos dados fornecidos. \
+    /// **Note:** Use as constantes [member Lago.*] na modalidade e fase. [u]**Não use strings.**[/u]
+    // TODO: error handling - retornar uma data class com possíveis erros ao invés de só a imagem
     #[func]
     fn create_answer_sheet(
-        id: GString,
+        inscricao: GString,
         participante: GString,
-        school: GString,
-        modality: GString,
-        phase: GString,
-        edition: GString,
+        escola: GString,
+        modalidade: OCIModalidade,
+        fase: OCIFase,
+        edicao: GString,
+        image_scale: f32,
     ) -> Option<Gd<GDImage>> {
-        let barcode = Self::create_barcode(id.into());
+        // Formato do código de barras: mf00000000
+        // m: letra da modalidade (a, b, p)
+        // f: número da fase (1, 2, 3)
+        let barcode_str = format!(
+            "{}{}{}",
+            modalidade.char(),
+            fase.char(),
+            inscricao.to_string()
+        );
+
+        // Cria a imagem do código de barras e encoda como um png em base64 pra colocar no svg
+        let barcode = Self::create_barcode(barcode_str);
         let png64 = Self::encode_base64(&barcode, ExtendedColorType::La8);
+
+        // Insere as informações numa cópia do template SVG
         let svg_string = SVG_TEMPLATE
             .replace("{BARCODE}", png64.as_str())
             .replace("{PARTICIPANTE}", &participante.to_string())
-            .replace("{ESCOLA}", &school.to_string())
-            .replace("{MODALIDADE}", &modality.to_string())
-            .replace("{FASE}", &phase.to_string())
-            .replace("{EDICAO}", &edition.to_string());
+            .replace("{ESCOLA}", &escola.to_string())
+            .replace("{MODALIDADE}", &modalidade.to_string())
+            .replace("{FASE}", &fase.to_string())
+            .replace("{EDICAO}", &edicao.to_string())
+            .replace("{INSCRICAO}", &inscricao.to_string());
 
-        let imgdata = Self::decode_svg(&svg_string, 4.0);
+        // Decodifica o SVG em um buffer RGBA8 e converte pra uma Image da Godot.
+        let imgdata = Self::decode_svg(&svg_string, image_scale);
         GDImage::create_from_data(
             imgdata.width() as i32,
             imgdata.height() as i32,
@@ -82,12 +105,13 @@ impl SheetWriter {
         )
     }
 
+    /// Encoda uma string em um buffer LumaA8 (grayscale + alpha)
     fn create_barcode(text: String) -> GrayAlphaImage {
         let aztec = zxingcpp::create(zxingcpp::BarcodeFormat::Aztec)
             .from_str(text)
             .ok()
             .unwrap()
-            .to_image_with(&zxingcpp::write().scale(5))
+            .to_image_with(&zxingcpp::write().scale(5)) // TODO: adjust scale
             .ok()
             .unwrap();
         let (width, height) = (aztec.width(), aztec.height());
@@ -107,23 +131,29 @@ impl SheetWriter {
         imgdata
     }
 
+    /// Decoda uma string svg em uma buffer RGBA. \
+    /// Usa RGBA pq é o padrão do `Pixmap` que o `resvg` usa.
     fn decode_svg(svg_string: &str, scale: f32) -> RgbaImage {
         let mut svg_options = Options::default();
-        svg_options.fontdb = FONT_DATA.clone();
+        svg_options.fontdb = FONT_DB.clone();
         svg_options.dpi = 96.0 * scale;
-
         let (width, height) = (
             (BASE_TEMPLATE_WIDTH as f32 * scale).floor() as u32,
             (BASE_TEMPLATE_HEIGHT as f32 * scale).floor() as u32,
         );
+
+        // Safety: width & height > 0
         let mut pix = Pixmap::new(width, height).unwrap();
 
+        // WARN: erros podem acontecer se no parse do template der algum pau no SVG
         let tree = Tree::from_str(svg_string, &svg_options).unwrap();
         resvg::render(&tree, Transform::default(), &mut pix.as_mut());
 
-        RgbaImage::from_raw(width, height, pix.take()).expect("eita porra!")
+        // Safety: pix has same width & height
+        RgbaImage::from_raw(width, height, pix.take()).unwrap()
     }
 
+    /// Encoda um buffer de pixels qualquer em um PNG Base64
     fn encode_base64<P, Container>(
         img: &ImageBuffer<P, Container>,
         color_type: ExtendedColorType,

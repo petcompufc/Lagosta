@@ -2,7 +2,7 @@ use std::fmt::Display;
 
 use godot::prelude::*;
 
-#[derive(GodotConvert, Var, Export, Default, Clone, Debug)]
+#[derive(GodotConvert, Var, Export, Default, Clone, Debug, Copy)]
 #[godot(via=GString)]
 pub enum OCIModalidade {
     #[default]
@@ -17,6 +17,27 @@ pub enum OCIFase {
     #[default]
     Fase1,
     Fase2,
+    Fase3,
+}
+
+impl OCIModalidade {
+    pub fn char(&self) -> &str {
+        match self {
+            Self::IniA => "a",
+            Self::IniB => "b",
+            Self::Prog => "b",
+        }
+    }
+}
+
+impl OCIFase {
+    pub fn char(&self) -> &str {
+        match self {
+            Self::Fase1 => "1",
+            Self::Fase2 => "2",
+            Self::Fase3 => "3",
+        }
+    }
 }
 
 impl Display for OCIModalidade {
@@ -34,6 +55,7 @@ impl Display for OCIFase {
         match self {
             Self::Fase1 => write!(f, "1"),
             Self::Fase2 => write!(f, "2"),
+            Self::Fase3 => write!(f, "3"),
         }
     }
 }

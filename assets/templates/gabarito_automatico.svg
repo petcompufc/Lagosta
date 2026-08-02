@@ -2585,7 +2585,7 @@
            y="224.64684"
            id="tspan180"><tspan
              style="font-weight:bold;font-size:13.3333px;text-align:justify;fill:#000000;stroke:none"
-             id="tspan179">Número de inscrição: 000000000</tspan></tspan></text><rect
+             id="tspan179">Número de inscrição: {INSCRICAO}</tspan></tspan></text><rect
          style="fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.755906;stroke-opacity:1"
          id="rect14"
          width="230.55116"
