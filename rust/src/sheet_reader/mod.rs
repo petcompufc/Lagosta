@@ -1,4 +1,6 @@
-use crate::imgtools::*;
+mod reading;
+
+use crate::tools::imgtools::*;
 use godot::{
     classes::{Image as GDImage, ImageTexture, image::Format},
     prelude::*,
@@ -13,7 +15,7 @@ use zxingcpp::BarcodeFormat;
 
 #[derive(GodotClass)]
 #[class(base=Node, init, tool)]
-struct ImageReader {
+struct SheetReader {
     #[export(global_file = "*.png,*.jpg,*.jpeg,*.bmp,*.webp")]
     #[var(set = load_image)]
     image_path: GString,
@@ -29,7 +31,7 @@ struct ImageReader {
 }
 
 #[godot_api]
-impl ImageReader {
+impl SheetReader {
     #[signal]
     fn image_loaded();
     #[signal]

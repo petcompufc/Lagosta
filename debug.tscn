@@ -11,7 +11,7 @@ grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("1_1uwqr")
 
-[node name="ImageReader" type="ImageReader" parent="." unique_id=703451182]
+[node name="ImageReader" type="Node" parent="." unique_id=703451182]
 unique_name_in_owner = true
 
 [node name="HBoxContainer" type="VBoxContainer" parent="." unique_id=1074754671]

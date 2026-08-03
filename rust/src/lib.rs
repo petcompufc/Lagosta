@@ -1,8 +1,7 @@
-mod data;
-mod image_reader;
-mod imgtools;
+mod sheet_reader;
 mod sheet_writer;
-mod debug;
+mod data;
+mod tools;
 
 use godot::prelude::*;
 

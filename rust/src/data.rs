@@ -1,6 +1,5 @@
-use std::fmt::Display;
-
 use godot::prelude::*;
+use std::fmt::Display;
 
 #[derive(GodotConvert, Var, Export, Default, Clone, Debug, Copy)]
 #[godot(via=GString)]
@@ -57,40 +56,5 @@ impl Display for OCIFase {
             Self::Fase2 => write!(f, "2"),
             Self::Fase3 => write!(f, "3"),
         }
-    }
-}
-
-#[derive(GodotClass)]
-#[class(no_init)]
-pub struct Reading {
-    #[var]
-    nome: GString,
-    #[var]
-    escola: GString,
-    #[var]
-    cpf: GString,
-    #[var]
-    modalidade: OCIModalidade,
-    #[var]
-    fase: OCIFase,
-}
-
-#[godot_api]
-impl Reading {
-    #[func]
-    fn create(
-        nome: GString,
-        escola: GString,
-        cpf: GString,
-        modalidade: OCIModalidade,
-        fase: OCIFase,
-    ) -> Gd<Self> {
-        Gd::from_object(Self {
-            nome,
-            escola,
-            cpf,
-            modalidade,
-            fase,
-        })
     }
 }
