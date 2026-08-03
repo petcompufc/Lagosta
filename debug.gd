@@ -2,7 +2,7 @@ extends Control
 
 
 func _ready() -> void:
-	var tex := SheetWriter.create_answer_sheet(
+	var tex := AnswerSheet.create(
 		"12345678",
 		"Aluno 1",
 		"Escola 1",
@@ -12,7 +12,7 @@ func _ready() -> void:
 		4.0
 	).create_texture()
 	
-	var tex2 := SheetWriter.create_answer_sheet(
+	var tex2 := AnswerSheet.create(
 		"00000000",
 		"Júlia Andrade Ramos",
 		"UFC",

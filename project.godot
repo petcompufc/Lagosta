@@ -11,7 +11,7 @@ config_version=5
 [application]
 
 config/name="Lagosta"
-run/main_scene="uid://dbnk37sbg6o5m"
+run/main_scene="uid://dg1gcbbuo0bd5"
 config/features=PackedStringArray("4.7", "Forward Plus")
 boot_splash/stretch_mode=0
 boot_splash/image="uid://bf2v08powrg4y"

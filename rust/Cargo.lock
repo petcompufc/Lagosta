@@ -782,7 +782,6 @@ name = "lago"
 version = "0.1.0"
 dependencies = [
  "base64",
- "bytemuck",
  "godot",
  "imageproc",
  "rayon",

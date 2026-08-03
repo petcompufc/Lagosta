@@ -1,13 +1,7 @@
-pub mod answer_sheet;
-
-use crate::{
-    data::{OCIFase, OCIModalidade},
-    sheet_writer::answer_sheet::AnswerSheet,
-    time,
-};
+use crate::data::{OCIFase, OCIModalidade};
 use base64::{Engine as _, engine::general_purpose as b64};
 use godot::{
-    classes::{FileAccess, file_access::ModeFlags},
+    classes::{FileAccess, Image as GDImage, ImageTexture, file_access::ModeFlags, image::Format},
     prelude::*,
 };
 use imageproc::image::{self, ExtendedColorType, GrayAlphaImage, ImageEncoder, RgbaImage};
@@ -50,19 +44,42 @@ static FONT_DB: LazyLock<Arc<FontDatabase>> = LazyLock::new(|| {
     Arc::new(fontdb)
 });
 
+#[derive(GodotConvert, Var, Export, Default, Clone, Debug, Copy)]
+#[godot(via=u8)]
+#[repr(u8)]
+pub enum AnswerSheetError {
+    #[default]
+    NoError,
+    BarcodeCreate,
+    BarcodeEncode,
+    SVGParse,
+}
+
 /// Criador de gabaritos. Lida com a criação de gabaritos customizados.
 #[derive(GodotClass)]
-#[class(init, singleton)]
-struct SheetWriter {}
+#[class(init)]
+struct AnswerSheet {
+    imgdata: Option<RgbaImage>,
+    #[var]
+    error: AnswerSheetError,
+}
 
 #[godot_api]
-impl SheetWriter {
+impl AnswerSheet {
+    #[constant]
+    const ERROR_NONE: u8 = AnswerSheetError::NoError as u8;
+    #[constant]
+    const ERROR_BARCODE_CREATE: u8 = AnswerSheetError::BarcodeCreate as u8;
+    #[constant]
+    const ERROR_BARCODE_ENCODE: u8 = AnswerSheetError::BarcodeEncode as u8;
+    #[constant]
+    const ERROR_SVG_PARSE: u8 = AnswerSheetError::SVGParse as u8;
+
     /// Cria a imagem de um gabarito para um aluno com base nos dados fornecidos. \
     /// **Note:** Use as constantes da classe auxiliar [member Lago.*] nos parâmetros
     /// de `modalidade` e `fase`. [u]**Não use strings.**[/u]
-    // TODO: error handling - retornar uma data class com possíveis erros ao invés de só a imagem
     #[func]
-    fn create_answer_sheet(
+    fn create(
         inscricao: GString,
         participante: GString,
         escola: GString,
@@ -70,7 +87,63 @@ impl SheetWriter {
         fase: OCIFase,
         edicao: GString,
         image_scale: f32,
-    ) -> Gd<AnswerSheet> {
+    ) -> Gd<Self> {
+        match Self::new(
+            inscricao,
+            participante,
+            escola,
+            modalidade,
+            fase,
+            edicao,
+            image_scale,
+        ) {
+            Ok(answer_sheet) => Gd::from_object(answer_sheet),
+            Err(error) => Gd::from_object(Self {
+                imgdata: None,
+                error: error,
+            }),
+        }
+    }
+
+    /// Cria uma textura pra Godot com os dados internos. Dá erro se a imagem não for válida.
+    #[func]
+    fn create_texture(&self) -> Gd<ImageTexture> {
+        assert!(
+            self.is_valid(),
+            "Tried creating texture from invalid answersheet."
+        );
+        let imgdata = self.imgdata.as_ref().unwrap();
+        ImageTexture::create_from_image(
+            &GDImage::create_from_data(
+                imgdata.width() as i32,
+                imgdata.height() as i32,
+                false,
+                Format::RGBA8,
+                &imgdata.as_ref().into(),
+            )
+            .unwrap(),
+        )
+        .unwrap()
+    }
+
+    /// Checa se a imagem do gabarito é válida - Se ela existe ou se houve um erro na geração.
+    #[func]
+    #[inline]
+    pub fn is_valid(&self) -> bool {
+        self.imgdata.is_some()
+    }
+}
+
+impl AnswerSheet {
+    pub fn new(
+        inscricao: GString,
+        participante: GString,
+        escola: GString,
+        modalidade: OCIModalidade,
+        fase: OCIFase,
+        edicao: GString,
+        image_scale: f32,
+    ) -> Result<Self, AnswerSheetError> {
         // Formato do código de barras: mf00000000
         // m: letra da modalidade (a, b, p)
         // f: número da fase (1, 2, 3)
@@ -82,14 +155,12 @@ impl SheetWriter {
         );
 
         // Cria a imagem do código de barras e encoda como um png em base64 pra colocar no svg
-        let barcode = time!(
-            "Barcode",
-            Self::into_base64(Self::create_barcode(barcode_str))
-        );
+        let barcode_img = Self::create_barcode(barcode_str)?;
+        let barcode_base64 = Self::into_base64(barcode_img)?;
 
         // Insere as informações numa cópia do template SVG
         let svg_string = SVG_TEMPLATE
-            .replace("{BARCODE}", barcode.as_str())
+            .replace("{BARCODE}", barcode_base64.as_str())
             .replace("{PARTICIPANTE}", &participante.to_string())
             .replace("{ESCOLA}", &escola.to_string())
             .replace("{MODALIDADE}", &modalidade.to_string())
@@ -98,18 +169,20 @@ impl SheetWriter {
             .replace("{INSCRICAO}", &inscricao.to_string());
 
         // Decodifica o SVG em um buffer RGBA8 e converte pra uma Image da Godot.
-        AnswerSheet::new(Some(Self::decode_svg(&svg_string, image_scale)), array![])
+        let imgdata = Self::decode_svg(&svg_string, image_scale)?;
+        Ok(Self {
+            imgdata: Some(imgdata),
+            error: AnswerSheetError::NoError,
+        })
     }
 
     /// Encoda uma string em um buffer LumaA8 (grayscale + alpha)
-    fn create_barcode(text: String) -> GrayAlphaImage {
+    fn create_barcode(text: String) -> Result<GrayAlphaImage, AnswerSheetError> {
         let aztec = zxingcpp::create(zxingcpp::BarcodeFormat::Aztec)
             .from_str(text)
-            .ok()
-            .unwrap()
+            .map_err(|_| AnswerSheetError::BarcodeCreate)?
             .to_image_with(&zxingcpp::write().scale(5)) // TODO: adjust scale
-            .ok()
-            .unwrap();
+            .map_err(|_| AnswerSheetError::BarcodeCreate)?;
         let (width, height) = (aztec.width() as u32, aztec.height() as u32);
 
         // Converts the Luma8 image into LumaA8
@@ -129,12 +202,12 @@ impl SheetWriter {
         let imgdata_ptr = imgdata.into_raw_parts().0 as *mut u8;
         let imgdata_u8 = unsafe { Vec::from_raw_parts(imgdata_ptr, data_size * 2, data_size * 2) };
 
-        GrayAlphaImage::from_raw(width, height, imgdata_u8).unwrap()
+        Ok(GrayAlphaImage::from_raw(width, height, imgdata_u8).unwrap())
     }
 
     /// Decoda uma string svg em uma buffer RGBA. \
     /// Usa RGBA pq é o padrão do `Pixmap` que o `resvg` usa.
-    fn decode_svg(svg_string: &str, scale: f32) -> RgbaImage {
+    fn decode_svg(svg_string: &str, scale: f32) -> Result<RgbaImage, AnswerSheetError> {
         let mut svg_options = Options::default();
         svg_options.fontdb = FONT_DB.clone();
         svg_options.dpi = 96.0 * scale;
@@ -145,15 +218,16 @@ impl SheetWriter {
 
         let mut pix = Pixmap::new(width, height).unwrap();
 
-        // WARN: erros podem acontecer se no parse do template der algum pau no SVG
-        let tree = Tree::from_str(svg_string, &svg_options).unwrap();
+        let tree =
+            Tree::from_str(svg_string, &svg_options).map_err(|_| AnswerSheetError::SVGParse)?;
+
         resvg::render(&tree, Transform::default(), &mut pix.as_mut());
 
-        RgbaImage::from_raw(width, height, pix.take()).unwrap()
+        Ok(RgbaImage::from_raw(width, height, pix.take()).unwrap())
     }
 
     /// Encoda um buffer de pixels LumaA8 em um PNG Base64
-    fn into_base64(img: GrayAlphaImage) -> String {
+    fn into_base64(img: GrayAlphaImage) -> Result<String, AnswerSheetError> {
         let mut pngvec = Vec::new();
         let encoder = image::codecs::png::PngEncoder::new(&mut pngvec);
         encoder
@@ -163,7 +237,7 @@ impl SheetWriter {
                 img.height(),
                 ExtendedColorType::La8,
             )
-            .unwrap();
-        b64::STANDARD.encode(pngvec)
+            .map_err(|_| AnswerSheetError::BarcodeEncode)?;
+        Ok(b64::STANDARD.encode(pngvec))
     }
 }
