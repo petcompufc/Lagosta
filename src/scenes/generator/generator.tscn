@@ -30,6 +30,9 @@ content_margin_bottom = 4.0
 bg_color = Color(0.28235295, 0.26666668, 0.24705882, 1)
 corner_detail = 5
 
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_lmikw"]
+bg_color = Color(0.75686276, 0.07058824, 0.12156863, 1)
+
 [node name="GeneratorPanel" type="Panel" unique_id=501030196]
 anchors_preset = 15
 anchor_right = 1.0
@@ -60,6 +63,7 @@ theme_override_constants/separation = 0
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 3
+tooltip_text = "Caminho no sistema para um arquivo .CSV"
 placeholder_text = "Selecione .CSV"
 clear_button_enabled = true
 drag_and_drop_selection_enabled = false
@@ -70,6 +74,7 @@ caret_blink = true
 unique_name_in_owner = true
 custom_minimum_size = Vector2(32, 32)
 layout_mode = 2
+tooltip_text = "Abre o navegador de arquivos para selecionar um arquivo .CSV"
 theme_override_styles/normal = SubResource("StyleBoxFlat_d7x7f")
 theme_override_styles/pressed = SubResource("StyleBoxFlat_k4cuf")
 theme_override_styles/hover = SubResource("StyleBoxFlat_gjccp")
@@ -94,22 +99,42 @@ size_flags_vertical = 3
 theme_override_constants/separation = 0
 
 [node name="SaveButtonContainer" type="VBoxContainer" parent="HSplitContainer/LeftContainer" unique_id=902448354]
-visible = false
 layout_mode = 2
+theme_override_constants/separation = 8
 
 [node name="HSeparator" type="HSeparator" parent="HSplitContainer/LeftContainer/SaveButtonContainer" unique_id=1078129367]
 layout_mode = 2
 
+[node name="HBoxContainer" type="HBoxContainer" parent="HSplitContainer/LeftContainer/SaveButtonContainer" unique_id=1140712471]
+layout_mode = 2
+theme_override_constants/separation = 32
+alignment = 1
+
+[node name="PNGCheckbox" type="CheckBox" parent="HSplitContainer/LeftContainer/SaveButtonContainer/HBoxContainer" unique_id=833750175]
+layout_mode = 2
+tooltip_text = "Salva todos os gabaritos como arquivos PNG separados."
+button_pressed = true
+text = "PNG"
+alignment = 1
+
+[node name="PDFCheckbox" type="CheckBox" parent="HSplitContainer/LeftContainer/SaveButtonContainer/HBoxContainer" unique_id=380218796]
+layout_mode = 2
+tooltip_text = "(W.I.P) Exporta um único PDF com todos os gabaritos, cada folha A4 contendo 2 gabaritos."
+disabled = true
+text = "PDF"
+
 [node name="MarginContainer" type="MarginContainer" parent="HSplitContainer/LeftContainer/SaveButtonContainer" unique_id=922038330]
 layout_mode = 2
 theme_override_constants/margin_left = 8
-theme_override_constants/margin_top = 8
+theme_override_constants/margin_top = 0
 theme_override_constants/margin_right = 8
 theme_override_constants/margin_bottom = 8
 
-[node name="Button" type="Button" parent="HSplitContainer/LeftContainer/SaveButtonContainer/MarginContainer" unique_id=1377453866]
+[node name="SaveAllButton" type="Button" parent="HSplitContainer/LeftContainer/SaveButtonContainer/MarginContainer" unique_id=1377453866]
 custom_minimum_size = Vector2(0, 32)
 layout_mode = 2
+tooltip_text = "Salva todos os gabaritos em uma pasta escolhida.
+CUIDADO! Isso VAI sobrescrever arquivos já existentes."
 text = "Salvar tudo"
 
 [node name="RightContainer" type="HSplitContainer" parent="HSplitContainer" unique_id=1866171622]
@@ -125,6 +150,10 @@ size_flags_horizontal = 3
 [node name="Label" type="Label" parent="HSplitContainer/RightContainer/ErrorContainer" unique_id=1661454309]
 custom_minimum_size = Vector2(0, 32)
 layout_mode = 2
+tooltip_text = "Avisos e erros sobre a geração dos gabaritos irão aparecer aqui."
+mouse_filter = 1
+theme_override_font_sizes/font_size = 16
+theme_override_styles/normal = SubResource("StyleBoxFlat_lmikw")
 text = "Avisos"
 horizontal_alignment = 1
 vertical_alignment = 1
@@ -165,6 +194,17 @@ grow_vertical = 2
 expand_mode = 1
 stretch_mode = 5
 
+[node name="MouseBlocker" type="Panel" parent="." unique_id=936366587]
+unique_name_in_owner = true
+visible = false
+modulate = Color(1, 1, 1, 0.5019608)
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
 [node name="FileDialog" type="FileDialog" parent="." unique_id=585034300]
 unique_name_in_owner = true
 oversampling_override = 1.0
@@ -173,8 +213,12 @@ file_mode = 0
 access = 2
 filters = PackedStringArray("*.csv")
 use_native_dialog = true
+file_filter_toggle_enabled = false
 
 [connection signal="editing_toggled" from="HSplitContainer/LeftContainer/FileSelectContainer/FileLineEdit" to="." method="_on_file_line_edit_editing_toggled"]
 [connection signal="text_submitted" from="HSplitContainer/LeftContainer/FileSelectContainer/FileLineEdit" to="." method="_on_file_selected"]
 [connection signal="pressed" from="HSplitContainer/LeftContainer/FileSelectContainer/FilePickButton" to="." method="_on_file_pick_button_pressed"]
+[connection signal="pressed" from="HSplitContainer/LeftContainer/SaveButtonContainer/MarginContainer/SaveAllButton" to="." method="_on_save_all_button_pressed"]
+[connection signal="canceled" from="FileDialog" to="." method="hide_mouse_blocker"]
+[connection signal="dir_selected" from="FileDialog" to="." method="_on_dir_selected"]
 [connection signal="file_selected" from="FileDialog" to="." method="_on_file_selected"]

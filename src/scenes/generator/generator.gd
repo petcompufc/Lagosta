@@ -18,11 +18,16 @@ var export_scale := 4.0
 var entries: Array[EntryButton] = []
 var selected_entry: EntryButton
 
-func _on_file_pick_button_pressed() -> void:
-	%FileDialog.popup_file_dialog()
+
+func show_sheet(data: Participante):
+	if data == null:
+		sheet_texture_rect.texture = null
+		return
+	var sheet := data.to_sheet(fase, edicao, export_scale)
+	sheet_texture_rect.texture = sheet.create_texture()
 
 
-func _load_csv() -> void:
+func load_csv() -> void:
 	show_sheet(null)
 	for entry in entries:
 		entry.queue_free()
@@ -58,6 +63,13 @@ func _load_csv() -> void:
 	csv_file.close()
 
 
+func _on_file_pick_button_pressed() -> void:
+	%MouseBlocker.show()
+	%FileDialog.filters = ["*.csv"]
+	%FileDialog.file_mode = FileDialog.FILE_MODE_OPEN_FILE
+	%FileDialog.popup_file_dialog()
+
+
 func _on_entry_toggled(toggle: bool, entry: EntryButton) -> void:
 	if selected_entry:
 		selected_entry.set_pressed_no_signal(false)
@@ -69,21 +81,29 @@ func _on_entry_toggled(toggle: bool, entry: EntryButton) -> void:
 	show_sheet(entry.participant)
 
 
-func show_sheet(data: Participante):
-	if data == null:
-		sheet_texture_rect.texture = null
-		return
-	var sheet := data.to_sheet(fase, edicao, export_scale)
-	sheet_texture_rect.texture = sheet.create_texture()
-
-
 func _on_file_selected(new_file_path: String) -> void:
+	hide_mouse_blocker()
 	if new_file_path.is_empty() or new_file_path.ends_with(".csv") and FileAccess.file_exists(new_file_path):
 		csv_path = new_file_path
 	file_line_edit.text = csv_path # resets to old path if invalid file
-	_load_csv()
+	load_csv()
+
+
+func _on_dir_selected(dir: String) -> void:
+	print("Saving to ", dir)
 
 
 func _on_file_line_edit_editing_toggled(toggled_on: bool) -> void:
 	if not toggled_on:
 		file_line_edit.text = csv_path # resets to old path
+
+
+func _on_save_all_button_pressed() -> void:
+	%MouseBlocker.show()
+	%FileDialog.filters = []
+	%FileDialog.file_mode = FileDialog.FILE_MODE_OPEN_DIR
+	%FileDialog.popup_file_dialog()
+
+
+func hide_mouse_blocker() -> void:
+	%MouseBlocker.hide()

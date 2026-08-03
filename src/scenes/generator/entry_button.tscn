@@ -51,6 +51,7 @@ grow_horizontal = 2
 grow_vertical = 2
 size_flags_horizontal = 3
 size_flags_vertical = 4
+tooltip_text = "Mostra um preview do gabarito na tela"
 theme_override_font_sizes/font_size = 12
 theme_override_styles/normal = SubResource("StyleBoxFlat_jb75j")
 theme_override_styles/pressed = SubResource("StyleBoxFlat_viob7")
