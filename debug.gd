@@ -6,8 +6,8 @@ func _ready() -> void:
 		"12345678",
 		"Aluno 1",
 		"Escola 1",
-		Lago.INI_A,
-		Lago.FASE_1,
+		Lago.Modalidade.PROG,
+		Lago.Fase.FASE_2,
 		"2026",
 		4.0
 	).create_texture()
@@ -16,8 +16,8 @@ func _ready() -> void:
 		"00000000",
 		"Júlia Andrade Ramos",
 		"UFC",
-		Lago.INI_A,
-		Lago.FASE_3,
+		Lago.Modalidade.INI_A,
+		Lago.Fase.FASE_1,
 		"2026",
 		4.0
 	).create_texture()

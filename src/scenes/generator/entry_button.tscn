@@ -1,0 +1,62 @@
+[gd_scene format=3 uid="uid://dvqcq65mt4mji"]
+
+[ext_resource type="Script" uid="uid://bmj2d4tp0rlk" path="res://src/scenes/generator/entry_button.gd" id="1_jb75j"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_jb75j"]
+content_margin_left = 4.0
+content_margin_top = 4.0
+content_margin_right = 4.0
+content_margin_bottom = 4.0
+bg_color = Color(0.12941177, 0.12156863, 0.11764706, 1)
+border_width_bottom = 1
+border_color = Color(0.99215686, 0.9411765, 0.8352941, 0.2509804)
+corner_detail = 5
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_viob7"]
+content_margin_left = 4.0
+content_margin_top = 4.0
+content_margin_right = 4.0
+content_margin_bottom = 4.0
+bg_color = Color(0.18039216, 0.16862746, 0.16078432, 1)
+corner_detail = 5
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_4j4ie"]
+content_margin_left = 4.0
+content_margin_top = 4.0
+content_margin_right = 4.0
+content_margin_bottom = 4.0
+bg_color = Color(0.28235295, 0.26666668, 0.24705882, 1)
+corner_detail = 5
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_kqbpj"]
+content_margin_left = 4.0
+content_margin_top = 4.0
+content_margin_right = 4.0
+content_margin_bottom = 4.0
+bg_color = Color(0.1, 0.1, 0.1, 0.3)
+corner_detail = 5
+
+[node name="EntryButton" type="Button" unique_id=141184720]
+custom_minimum_size = Vector2(0, 16)
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -4.0
+offset_top = -16.0
+offset_right = 106.0
+offset_bottom = 16.0
+grow_horizontal = 2
+grow_vertical = 2
+size_flags_horizontal = 3
+size_flags_vertical = 4
+theme_override_font_sizes/font_size = 12
+theme_override_styles/normal = SubResource("StyleBoxFlat_jb75j")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_viob7")
+theme_override_styles/hover = SubResource("StyleBoxFlat_4j4ie")
+theme_override_styles/disabled = SubResource("StyleBoxFlat_kqbpj")
+toggle_mode = true
+alignment = 0
+clip_text = true
+script = ExtResource("1_jb75j")

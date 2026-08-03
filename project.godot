@@ -13,14 +13,21 @@ config_version=5
 config/name="Lagosta"
 run/main_scene="uid://dg1gcbbuo0bd5"
 config/features=PackedStringArray("4.7", "Forward Plus")
-boot_splash/stretch_mode=0
+boot_splash/bg_color=Color(0.0627451, 0.0627451, 0.0627451, 1)
+boot_splash/show_image=false
 boot_splash/image="uid://bf2v08powrg4y"
 config/icon="uid://bf2v08powrg4y"
 
 [display]
 
-window/stretch/mode="canvas_items"
+window/size/viewport_width=1000
+window/size/viewport_height=600
 window/stretch/aspect="expand"
+
+[gui]
+
+theme/custom="uid://dlbj0n1hn66w3"
+theme/custom_font="uid://dvgqc4oj6mcds"
 
 [physics]
 

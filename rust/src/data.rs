@@ -2,21 +2,23 @@ use godot::prelude::*;
 use std::fmt::Display;
 
 #[derive(GodotConvert, Var, Export, Default, Clone, Debug, Copy)]
-#[godot(via=GString)]
+#[godot(via=u8)]
+#[repr(u8)]
 pub enum OCIModalidade {
     #[default]
-    IniA,
-    IniB,
-    Prog,
+    IniA = 0,
+    IniB = 1,
+    Prog = 2,
 }
 
 #[derive(GodotConvert, Var, Export, Default, Clone, Debug)]
-#[godot(via=GString)]
+#[godot(via=u8)]
+#[repr(u8)]
 pub enum OCIFase {
     #[default]
-    Fase1,
-    Fase2,
-    Fase3,
+    Fase1 = 0,
+    Fase2 = 1,
+    Fase3 = 2,
 }
 
 impl OCIModalidade {

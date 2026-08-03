@@ -3,16 +3,22 @@
 class_name Lago
 extends Object
 
-## Modalidade Iniciação A - [code]OCIModalidade::IniA[/code]
-const INI_A := "IniA"
-## Modalidade Iniciação B - [code]OCIModalidade::IniB[/code]
-const INI_B := "IniB"
-## Modalidade Programação - [code]OCIModalidade::Prog[/code]
-const PROG  := "Prog"
+enum Modalidade {
+	INI_A = 0,
+	INI_B = 1,
+	PROG  = 2,
+}
 
-## Fase 1 - [code]OCIFase::Fase1[/code]
-const FASE_1 := "Fase1"
-## Fase 2 - [code]OCIFase::Fase2[/code]
-const FASE_2 := "Fase2"
-## Fase 3 - [code]OCIFase::Fase3[/code]
-const FASE_3 := "Fase3"
+enum Fase {
+	FASE_1 = 0,
+	FASE_2 = 1,
+	FASE_3 = 2,
+}
+
+
+static func parse_modalidade(input: String) -> Modalidade:
+	match input.to_lower():
+		"a": return Modalidade.INI_A
+		"b": return Modalidade.INI_B
+		"p": return Modalidade.PROG
+		_: return -1
