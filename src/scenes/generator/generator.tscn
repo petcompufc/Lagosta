@@ -4,7 +4,9 @@
 [ext_resource type="Theme" uid="uid://dlbj0n1hn66w3" path="res://assets/resources/ui/ui_theme.tres" id="2_d7x7f"]
 [ext_resource type="Texture2D" uid="uid://dfgei3yc0n60x" path="res://assets/icons/file-dots.svg" id="3_k4cuf"]
 [ext_resource type="Texture2D" uid="uid://bf2v08powrg4y" path="res://assets/lagosta.png" id="4_gjccp"]
+[ext_resource type="FontFile" uid="uid://cd2jyrsxl2d2w" path="res://assets/fonts/mono/MapleMono-Bold.ttf" id="4_k4cuf"]
 [ext_resource type="StyleBox" uid="uid://cr2qqj4i42f74" path="res://assets/resources/ui/bgpanel.tres" id="5_k4cuf"]
+[ext_resource type="Texture2D" uid="uid://cdamnqeka6mtt" path="res://assets/lagosta_triste.png" id="7_gjccp"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_d7x7f"]
 content_margin_left = 4.0
@@ -32,6 +34,14 @@ corner_detail = 5
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_lmikw"]
 bg_color = Color(0.75686276, 0.07058824, 0.12156863, 1)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_ikpo3"]
+bg_color = Color(0.09803922, 0.09411765, 0.09411765, 1)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.99215686, 0.9411765, 0.8352941, 1)
 
 [node name="GeneratorPanel" type="Panel" unique_id=501030196]
 anchors_preset = 15
@@ -81,9 +91,6 @@ theme_override_styles/hover = SubResource("StyleBoxFlat_gjccp")
 icon = ExtResource("3_k4cuf")
 expand_icon = true
 
-[node name="DataContainer" type="HBoxContainer" parent="HSplitContainer/LeftContainer" unique_id=1849399780]
-layout_mode = 2
-
 [node name="HSeparator2" type="HSeparator" parent="HSplitContainer/LeftContainer" unique_id=660072939]
 layout_mode = 2
 
@@ -100,17 +107,19 @@ theme_override_constants/separation = 0
 
 [node name="SaveButtonContainer" type="VBoxContainer" parent="HSplitContainer/LeftContainer" unique_id=902448354]
 layout_mode = 2
-theme_override_constants/separation = 8
+theme_override_constants/separation = 4
 
 [node name="HSeparator" type="HSeparator" parent="HSplitContainer/LeftContainer/SaveButtonContainer" unique_id=1078129367]
 layout_mode = 2
 
 [node name="HBoxContainer" type="HBoxContainer" parent="HSplitContainer/LeftContainer/SaveButtonContainer" unique_id=1140712471]
+visible = false
 layout_mode = 2
 theme_override_constants/separation = 32
 alignment = 1
 
 [node name="PNGCheckbox" type="CheckBox" parent="HSplitContainer/LeftContainer/SaveButtonContainer/HBoxContainer" unique_id=833750175]
+unique_name_in_owner = true
 layout_mode = 2
 tooltip_text = "Salva todos os gabaritos como arquivos PNG separados."
 button_pressed = true
@@ -118,10 +127,69 @@ text = "PNG"
 alignment = 1
 
 [node name="PDFCheckbox" type="CheckBox" parent="HSplitContainer/LeftContainer/SaveButtonContainer/HBoxContainer" unique_id=380218796]
+unique_name_in_owner = true
 layout_mode = 2
 tooltip_text = "(W.I.P) Exporta um único PDF com todos os gabaritos, cada folha A4 contendo 2 gabaritos."
 disabled = true
 text = "PDF"
+
+[node name="MarginContainer2" type="MarginContainer" parent="HSplitContainer/LeftContainer/SaveButtonContainer" unique_id=592695059]
+layout_mode = 2
+theme_override_constants/margin_left = 8
+theme_override_constants/margin_top = 4
+theme_override_constants/margin_right = 8
+theme_override_constants/margin_bottom = 4
+
+[node name="VBoxContainer" type="VBoxContainer" parent="HSplitContainer/LeftContainer/SaveButtonContainer/MarginContainer2" unique_id=953654310]
+layout_mode = 2
+
+[node name="DataTitles" type="HBoxContainer" parent="HSplitContainer/LeftContainer/SaveButtonContainer/MarginContainer2/VBoxContainer" unique_id=1880741237]
+layout_mode = 2
+theme_override_constants/separation = 8
+alignment = 1
+
+[node name="FaseTitle" type="Label" parent="HSplitContainer/LeftContainer/SaveButtonContainer/MarginContainer2/VBoxContainer/DataTitles" unique_id=1708054420]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_fonts/font = ExtResource("4_k4cuf")
+text = "Fase"
+
+[node name="EditionTitle" type="Label" parent="HSplitContainer/LeftContainer/SaveButtonContainer/MarginContainer2/VBoxContainer/DataTitles" unique_id=2058621700]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_fonts/font = ExtResource("4_k4cuf")
+text = "Edição"
+
+[node name="DataContainer" type="HBoxContainer" parent="HSplitContainer/LeftContainer/SaveButtonContainer/MarginContainer2/VBoxContainer" unique_id=1849399780]
+layout_mode = 2
+theme_override_constants/separation = 8
+alignment = 1
+
+[node name="FaseOptionButton" type="OptionButton" parent="HSplitContainer/LeftContainer/SaveButtonContainer/MarginContainer2/VBoxContainer/DataContainer" unique_id=836015851]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+tooltip_text = "Para qual fase da OCI exportar."
+selected = 0
+fit_to_longest_item = false
+item_count = 3
+popup/item_0/text = "Fase 1"
+popup/item_0/id = 0
+popup/item_1/text = "Fase 2"
+popup/item_1/id = 1
+popup/item_2/text = "Fase 3"
+popup/item_2/id = 2
+
+[node name="EditionLineEdit" type="LineEdit" parent="HSplitContainer/LeftContainer/SaveButtonContainer/MarginContainer2/VBoxContainer/DataContainer" unique_id=1147052945]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+tooltip_text = "Para qual edição da OCI exportar."
+placeholder_text = "Edição"
+clear_button_enabled = true
+drag_and_drop_selection_enabled = false
+select_all_on_focus = true
+caret_blink = true
 
 [node name="MarginContainer" type="MarginContainer" parent="HSplitContainer/LeftContainer/SaveButtonContainer" unique_id=922038330]
 layout_mode = 2
@@ -143,11 +211,11 @@ size_flags_horizontal = 3
 size_flags_stretch_ratio = 4.0
 dragger_visibility = 1
 
-[node name="ErrorContainer" type="VBoxContainer" parent="HSplitContainer/RightContainer" unique_id=1666663216]
+[node name="ErrorPanel" type="VBoxContainer" parent="HSplitContainer/RightContainer" unique_id=1666663216]
 layout_mode = 2
 size_flags_horizontal = 3
 
-[node name="Label" type="Label" parent="HSplitContainer/RightContainer/ErrorContainer" unique_id=1661454309]
+[node name="Label" type="Label" parent="HSplitContainer/RightContainer/ErrorPanel" unique_id=1661454309]
 custom_minimum_size = Vector2(0, 32)
 layout_mode = 2
 tooltip_text = "Avisos e erros sobre a geração dos gabaritos irão aparecer aqui."
@@ -158,7 +226,12 @@ text = "Avisos"
 horizontal_alignment = 1
 vertical_alignment = 1
 
-[node name="ErrorContainer2" type="VBoxContainer" parent="HSplitContainer/RightContainer/ErrorContainer" unique_id=694472851]
+[node name="ScrollContainer" type="ScrollContainer" parent="HSplitContainer/RightContainer/ErrorPanel" unique_id=1636198030]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="ErrorList" type="VBoxContainer" parent="HSplitContainer/RightContainer/ErrorPanel/ScrollContainer" unique_id=694472851]
+unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
@@ -197,13 +270,125 @@ stretch_mode = 5
 [node name="MouseBlocker" type="Panel" parent="." unique_id=936366587]
 unique_name_in_owner = true
 visible = false
-modulate = Color(1, 1, 1, 0.5019608)
+self_modulate = Color(1, 1, 1, 0.5019608)
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+
+[node name="LoadingPanel" type="Panel" parent="MouseBlocker" unique_id=840526499]
+unique_name_in_owner = true
+visible = false
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -150.0
+offset_top = -75.0
+offset_right = 150.0
+offset_bottom = 75.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_ikpo3")
+
+[node name="HBoxContainer" type="HBoxContainer" parent="MouseBlocker/LoadingPanel" unique_id=473502308]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -104.5
+offset_top = -20.0
+offset_right = 104.5
+offset_bottom = 20.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="LagostaLoading" type="TextureRect" parent="MouseBlocker/LoadingPanel/HBoxContainer" unique_id=104573213]
+unique_name_in_owner = true
+layout_mode = 2
+offset_transform_enabled = true
+texture = ExtResource("4_gjccp")
+expand_mode = 3
+stretch_mode = 5
+
+[node name="Label" type="Label" parent="MouseBlocker/LoadingPanel/HBoxContainer" unique_id=187092238]
+process_thread_group = 2
+process_thread_group_order = 0
+process_thread_messages = 0
+layout_mode = 2
+text = "Salvando gabaritos...
+(Isso pode demorar um pouco.)"
+horizontal_alignment = 1
+
+[node name="ErrorPanel" type="Panel" parent="MouseBlocker" unique_id=428035261]
+unique_name_in_owner = true
+visible = false
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -150.0
+offset_top = -75.0
+offset_right = 150.0
+offset_bottom = 75.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_ikpo3")
+
+[node name="VBoxContainer" type="VBoxContainer" parent="MouseBlocker/ErrorPanel" unique_id=566965065]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -122.0
+offset_top = -48.0
+offset_right = 122.0
+offset_bottom = 48.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 8
+alignment = 1
+
+[node name="HBoxContainer" type="HBoxContainer" parent="MouseBlocker/ErrorPanel/VBoxContainer" unique_id=1482891974]
+custom_minimum_size = Vector2(0, 64)
+layout_mode = 2
+alignment = 1
+
+[node name="LagostaTriste" type="TextureRect" parent="MouseBlocker/ErrorPanel/VBoxContainer/HBoxContainer" unique_id=652727957]
+layout_mode = 2
+offset_transform_enabled = true
+texture = ExtResource("7_gjccp")
+expand_mode = 3
+stretch_mode = 5
+
+[node name="FloatingErrorLabel" type="Label" parent="MouseBlocker/ErrorPanel/VBoxContainer/HBoxContainer" unique_id=589089715]
+unique_name_in_owner = true
+process_thread_group = 2
+process_thread_group_order = 0
+process_thread_messages = 0
+custom_minimum_size = Vector2(180, 0)
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Ocorreu um erro! :("
+horizontal_alignment = 1
+autowrap_mode = 1
+
+[node name="CloseErrorButton" type="Button" parent="MouseBlocker/ErrorPanel/VBoxContainer" unique_id=1524963212]
+custom_minimum_size = Vector2(0, 32)
+layout_mode = 2
+size_flags_horizontal = 4
+size_flags_vertical = 4
+text = "Ok :("
 
 [node name="FileDialog" type="FileDialog" parent="." unique_id=585034300]
 unique_name_in_owner = true
@@ -218,7 +403,10 @@ file_filter_toggle_enabled = false
 [connection signal="editing_toggled" from="HSplitContainer/LeftContainer/FileSelectContainer/FileLineEdit" to="." method="_on_file_line_edit_editing_toggled"]
 [connection signal="text_submitted" from="HSplitContainer/LeftContainer/FileSelectContainer/FileLineEdit" to="." method="_on_file_selected"]
 [connection signal="pressed" from="HSplitContainer/LeftContainer/FileSelectContainer/FilePickButton" to="." method="_on_file_pick_button_pressed"]
+[connection signal="item_selected" from="HSplitContainer/LeftContainer/SaveButtonContainer/MarginContainer2/VBoxContainer/DataContainer/FaseOptionButton" to="." method="regen_sheet" unbinds=1]
+[connection signal="text_submitted" from="HSplitContainer/LeftContainer/SaveButtonContainer/MarginContainer2/VBoxContainer/DataContainer/EditionLineEdit" to="." method="regen_sheet" unbinds=1]
 [connection signal="pressed" from="HSplitContainer/LeftContainer/SaveButtonContainer/MarginContainer/SaveAllButton" to="." method="_on_save_all_button_pressed"]
+[connection signal="pressed" from="MouseBlocker/ErrorPanel/VBoxContainer/CloseErrorButton" to="." method="_on_close_error_button_pressed"]
 [connection signal="canceled" from="FileDialog" to="." method="hide_mouse_blocker"]
 [connection signal="dir_selected" from="FileDialog" to="." method="_on_dir_selected"]
 [connection signal="file_selected" from="FileDialog" to="." method="_on_file_selected"]

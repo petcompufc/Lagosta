@@ -1,6 +1,8 @@
 use godot::prelude::*;
 use std::fmt::Display;
 
+use crate::answer_sheet::AnswerSheet;
+
 #[derive(GodotConvert, Var, Export, Default, Clone, Debug, Copy)]
 #[godot(via=u8)]
 #[repr(u8)]
@@ -11,7 +13,7 @@ pub enum OCIModalidade {
     Prog = 2,
 }
 
-#[derive(GodotConvert, Var, Export, Default, Clone, Debug)]
+#[derive(GodotConvert, Var, Export, Default, Clone, Debug, Copy)]
 #[godot(via=u8)]
 #[repr(u8)]
 pub enum OCIFase {
@@ -60,3 +62,51 @@ impl Display for OCIFase {
         }
     }
 }
+
+#[derive(GodotClass, Clone)]
+#[class(init)]
+pub struct Participante {
+    #[var]
+    pub inscricao: GString,
+    #[var]
+    pub nome: GString,
+    #[var]
+    pub escola: GString,
+    #[var]
+    pub modalidade: OCIModalidade,
+}
+
+#[godot_api]
+impl Participante {
+    #[func]
+    pub fn create(
+        inscricao: GString,
+        nome: GString,
+        escola: GString,
+        modalidade: OCIModalidade,
+    ) -> Gd<Self> {
+        Gd::from_object(Self {
+            inscricao,
+            nome,
+            escola,
+            modalidade,
+        })
+    }
+
+    #[func]
+    pub fn to_sheet(&self, fase: OCIFase, edicao: GString, image_scale: f32) -> Gd<AnswerSheet> {
+        AnswerSheet::create(
+            self.inscricao.to_owned(),
+            self.nome.to_owned(),
+            self.escola.to_owned(),
+            self.modalidade,
+            fase,
+            edicao,
+            image_scale,
+        )
+    }
+}
+
+unsafe impl Send for Participante {}
+
+unsafe impl Sync for Participante {}

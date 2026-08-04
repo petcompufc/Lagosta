@@ -15,6 +15,13 @@ enum Fase {
 	FASE_3 = 2,
 }
 
+enum AnswerSheetError {
+	NO_ERROR = 0,
+	BARCODE_CREATE = 1,
+	BARCODE_ENCODE = 2,
+	SVG_PARSE = 3,
+}
+
 
 static func parse_modalidade(input: String) -> Modalidade:
 	match input.to_lower():
@@ -22,3 +29,9 @@ static func parse_modalidade(input: String) -> Modalidade:
 		"b": return Modalidade.INI_B
 		"p": return Modalidade.PROG
 		_: return -1
+
+
+static func parse_inscricao(input: String) -> String:
+	if not input.is_valid_int():
+		return ""
+	return "%08d" % input.to_int()

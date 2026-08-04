@@ -1,0 +1,39 @@
+[gd_scene format=3 uid="uid://dvnqqwme5psml"]
+
+[ext_resource type="Script" uid="uid://bqfv11abb1eh0" path="res://src/scenes/generator/error_label.gd" id="1_lghq8"]
+[ext_resource type="Texture2D" uid="uid://csvackctkna8a" path="res://assets/icons/x.svg" id="1_mdlm5"]
+
+[node name="ErrorLabel" type="HBoxContainer" unique_id=314684385]
+custom_minimum_size = Vector2(0, 48)
+offset_right = 242.75
+offset_bottom = 48.0
+size_flags_horizontal = 3
+size_flags_vertical = 4
+theme_override_constants/separation = 16
+script = ExtResource("1_lghq8")
+
+[node name="Label" type="Label" parent="." unique_id=233141054]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(1, 0)
+custom_maximum_size = Vector2(-1, 48)
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 1
+vertical_alignment = 1
+autowrap_mode = 2
+text_overrun_behavior = 5
+
+[node name="Button" type="Button" parent="." unique_id=240902306]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(24, 24)
+layout_mode = 2
+size_flags_horizontal = 4
+size_flags_vertical = 4
+theme_override_colors/icon_normal_color = Color(0.75686276, 0.07058824, 0.12156863, 1)
+theme_override_colors/icon_pressed_color = Color(0.75686276, 0.07058824, 0.12156863, 1)
+theme_override_colors/icon_hover_color = Color(0.75686276, 0.07058824, 0.12156863, 1)
+theme_override_colors/icon_hover_pressed_color = Color(0.75686276, 0.07058824, 0.12156863, 1)
+icon = ExtResource("1_mdlm5")
+expand_icon = true
+
+[connection signal="pressed" from="Button" to="." method="_on_button_pressed"]
