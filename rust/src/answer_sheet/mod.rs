@@ -150,7 +150,7 @@ impl AnswerSheet {
         // Generates the SVGs from the template
         let results: Vec<Result<(Tree, Participante), AnswerSheetError>> = data
             .into_par_iter()
-            .map(|part| Self::new_svg(&part, fase, edicao, TARGET_DPI).map(|t| (t, part)))
+            .map(|part| Self::new_svg(&part, fase, edicao, TARGET_DPI).map(|tree| (tree, part)))
             .collect();
         let mut svgs = Vec::with_capacity(results.len());
         let mut errors = Vec::new();
