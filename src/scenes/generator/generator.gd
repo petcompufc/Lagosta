@@ -1,7 +1,7 @@
 extends Panel
 
 const NUM_ARGS_CSV := 4
-const EXPORT_SCALE := 2.5
+const EXPORT_DPI: float = 96.0
 const ENTRY_BUTTON := preload("res://src/scenes/generator/entry_button.tscn")
 const ERROR_LABEL := preload("res://src/scenes/generator/error_label.tscn")
 
@@ -9,7 +9,6 @@ const ERROR_LABEL := preload("res://src/scenes/generator/error_label.tscn")
 @onready var file_pick_button: Button = %FilePickButton
 @onready var sheets_container: VBoxContainer = %SheetsContainer
 @onready var sheet_texture_rect: TextureRect = %SheetTextureRect
-@onready var save_button_container: VBoxContainer = $HSplitContainer/LeftContainer/SaveButtonContainer
 
 var csv_path := ""
 var entries: Array[EntryButton] = []
@@ -40,12 +39,12 @@ func regen_sheet() -> void:
 		return
 	var data := selected_entry.participant
 
-	var sheet := data.to_sheet(get_fase(), get_edicao(), EXPORT_SCALE)
+	var sheet := data.create_texture(get_fase(), get_edicao(), EXPORT_DPI)
 	if sheet.is_valid():
-		sheet_texture_rect.texture = sheet.create_texture()
+		sheet_texture_rect.texture = sheet.texture
 	else:
 		sheet_texture_rect.texture = null
-		notify_error("(Insc. %s) - %s" % [data.inscricao, Lago.parse_answer_sheet_error(sheet.error)])
+		notify_error("(Insc. %s) - %s" % [data.inscricao, sheet.error])
 
 
 func show_sheet(data: Participante):
@@ -53,12 +52,12 @@ func show_sheet(data: Participante):
 		sheet_texture_rect.texture = null
 		return
 
-	var sheet := data.to_sheet(get_fase(), get_edicao(), EXPORT_SCALE)
+	var sheet := data.create_texture(get_fase(), get_edicao(), EXPORT_DPI)
 	if sheet.is_valid():
-		sheet_texture_rect.texture = sheet.create_texture()
+		sheet_texture_rect.texture = sheet.texture
 	else:
 		sheet_texture_rect.texture = null
-		notify_error("(Insc. %s) - %s" % [data.inscricao, Lago.parse_answer_sheet_error(sheet.error)])
+		notify_error("(Insc. %s) - %s" % [data.inscricao, sheet.error])
 
 
 func load_csv() -> void:
@@ -68,9 +67,9 @@ func load_csv() -> void:
 	entries.clear()
 
 	if csv_path.is_empty():
-		save_button_container.hide()
+		toggle_save_button(false)
 		return
-	save_button_container.show()
+	toggle_save_button(true)
 
 	var csv_file := FileAccess.open(csv_path, FileAccess.READ)
 
@@ -86,7 +85,7 @@ func load_csv() -> void:
 		var inscricao := Lago.parse_inscricao(line[0])
 		if inscricao == "":
 			notify_error("(%d) - Número de inscrição inválido: %s" % [l, line[0]])
-			continue # TODO: signal error
+			continue
 		var modalidade := Lago.parse_modalidade(line[3])
 		if modalidade == -1:
 			notify_error("(%d) - Modalidade inválida: %s" % [l, line[3]])
@@ -137,8 +136,9 @@ func _on_dir_selected(dir: String) -> void:
 
 	var fase := get_fase()
 	var edicao := get_edicao()
-	var png: bool = %PNGCheckbox.button_pressed
-	var pdf: bool = %PDFCheckbox.button_pressed
+	var bundle: bool = %BundleCheckbox.button_pressed
+	var single: bool = %SingleCheckbox.button_pressed
+	var sort_schools: bool = %SchoolCheckbox.button_pressed
 
 	var f := func() -> void: # this is nasty lol
 		AnswerSheet.save_many(
@@ -146,13 +146,14 @@ func _on_dir_selected(dir: String) -> void:
 			participants,
 			fase,
 			edicao,
-			EXPORT_SCALE,
-			png,
-			pdf,
+			bundle,
+			single,
+			sort_schools,
 			func(errors: Array[String]):
 				%LoadingPanel.hide()
 				if len(errors) > 0:
-					notify_error("Geração de gabaritos encerrada com erros.")
+					for error in errors:
+						notify_error(error)
 					%FloatingErrorLabel.text = "A geração dos gabaritos encerrou com erros! :("
 					%ErrorPanel.show()
 				else:
@@ -175,6 +176,10 @@ func _on_save_all_button_pressed() -> void:
 	%FileDialog.popup_file_dialog()
 
 
+func toggle_save_button(toggle: bool) -> void:
+	%ExportContainer.visible = toggle
+
+
 func hide_mouse_blocker() -> void:
 	%MouseBlocker.hide()
 
@@ -182,3 +187,7 @@ func hide_mouse_blocker() -> void:
 func _on_close_error_button_pressed() -> void:
 	%ErrorPanel.hide()
 	hide_mouse_blocker()
+
+
+func _on_options_button_toggled(toggled_on: bool) -> void:
+	%OptionsContainer.visible = toggled_on

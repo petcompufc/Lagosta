@@ -94,16 +94,8 @@ impl Participante {
     }
 
     #[func]
-    pub fn to_sheet(&self, fase: OCIFase, edicao: GString, image_scale: f32) -> Gd<AnswerSheet> {
-        AnswerSheet::create(
-            self.inscricao.to_owned(),
-            self.nome.to_owned(),
-            self.escola.to_owned(),
-            self.modalidade,
-            fase,
-            edicao,
-            image_scale,
-        )
+    pub fn create_texture(&self, fase: OCIFase, edicao: GString, dpi: f32) -> Gd<AnswerSheet> {
+        AnswerSheet::create_texture(Gd::from_object(self.clone()), fase, edicao, dpi)
     }
 }
 

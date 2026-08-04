@@ -13,9 +13,11 @@ godot = {
   features = ["api-4-7", "experimental-threads", "register-docs"]
 }
 imageproc = "0.27.0"
+krilla = "0.8.2"
+krilla-svg = "0.8.1"
 rayon = "1.12.0"
 resvg = {
-  version = "0.48.1",
+  version = "0.47.0",
   default-features = false,
   features = ["memmap-fonts", "text", "raster-images"]
 }

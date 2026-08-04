@@ -4,7 +4,9 @@
 [ext_resource type="Theme" uid="uid://dlbj0n1hn66w3" path="res://assets/resources/ui/ui_theme.tres" id="2_d7x7f"]
 [ext_resource type="Texture2D" uid="uid://dfgei3yc0n60x" path="res://assets/icons/file-dots.svg" id="3_k4cuf"]
 [ext_resource type="Texture2D" uid="uid://bf2v08powrg4y" path="res://assets/lagosta.png" id="4_gjccp"]
+[ext_resource type="Texture2D" uid="uid://dbljj514e5cnx" path="res://assets/icons/settings.svg" id="4_ikpo3"]
 [ext_resource type="FontFile" uid="uid://cd2jyrsxl2d2w" path="res://assets/fonts/mono/MapleMono-Bold.ttf" id="4_k4cuf"]
+[ext_resource type="Theme" uid="uid://dp5uhom4k4ewr" path="res://assets/resources/ui/ui_themeSQR.tres" id="5_e3piy"]
 [ext_resource type="StyleBox" uid="uid://cr2qqj4i42f74" path="res://assets/resources/ui/bgpanel.tres" id="5_k4cuf"]
 [ext_resource type="Texture2D" uid="uid://cdamnqeka6mtt" path="res://assets/lagosta_triste.png" id="7_gjccp"]
 
@@ -30,6 +32,38 @@ content_margin_top = 4.0
 content_margin_right = 4.0
 content_margin_bottom = 4.0
 bg_color = Color(0.28235295, 0.26666668, 0.24705882, 1)
+corner_detail = 5
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_e3piy"]
+content_margin_left = 4.0
+content_margin_top = 4.0
+content_margin_right = 4.0
+content_margin_bottom = 4.0
+bg_color = Color(0.15686275, 0.14509805, 0.14117648, 1)
+corner_detail = 5
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_tsorv"]
+content_margin_left = 4.0
+content_margin_top = 4.0
+content_margin_right = 4.0
+content_margin_bottom = 4.0
+bg_color = Color(0.18039216, 0.16862746, 0.16078432, 1)
+corner_detail = 5
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_qthkh"]
+content_margin_left = 4.0
+content_margin_top = 4.0
+content_margin_right = 4.0
+content_margin_bottom = 4.0
+bg_color = Color(0.28235295, 0.26666668, 0.24705882, 1)
+corner_detail = 5
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_45r1v"]
+content_margin_left = 4.0
+content_margin_top = 4.0
+content_margin_right = 4.0
+content_margin_bottom = 4.0
+bg_color = Color(0.1, 0.1, 0.1, 0.3)
 corner_detail = 5
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_lmikw"]
@@ -105,67 +139,100 @@ size_flags_horizontal = 3
 size_flags_vertical = 3
 theme_override_constants/separation = 0
 
-[node name="SaveButtonContainer" type="VBoxContainer" parent="HSplitContainer/LeftContainer" unique_id=902448354]
+[node name="ExportContainer" type="VBoxContainer" parent="HSplitContainer/LeftContainer" unique_id=228608825]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="ExportSeparator" type="HSeparator" parent="HSplitContainer/LeftContainer/ExportContainer" unique_id=1078129367]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="OptionsButton" type="Button" parent="HSplitContainer/LeftContainer/ExportContainer" unique_id=1958619809]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_styles/normal = SubResource("StyleBoxFlat_e3piy")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_tsorv")
+theme_override_styles/hover = SubResource("StyleBoxFlat_qthkh")
+theme_override_styles/disabled = SubResource("StyleBoxFlat_45r1v")
+toggle_mode = true
+text = "Opções"
+icon = ExtResource("4_ikpo3")
+
+[node name="OptionsContainer" type="VBoxContainer" parent="HSplitContainer/LeftContainer/ExportContainer" unique_id=412987473]
+unique_name_in_owner = true
+visible = false
+layout_mode = 2
+theme = ExtResource("5_e3piy")
+theme_override_constants/separation = 0
+alignment = 1
+
+[node name="SchoolCheckbox" type="CheckBox" parent="HSplitContainer/LeftContainer/ExportContainer/OptionsContainer" unique_id=393239443]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+tooltip_text = "Separar escolas em pastas individuais."
+button_pressed = true
+text = "Separar escolas"
+text_overrun_behavior = 5
+
+[node name="BundleCheckbox" type="CheckBox" parent="HSplitContainer/LeftContainer/ExportContainer/OptionsContainer" unique_id=166760888]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+tooltip_text = "Exportar gabaritos num PDF unificado."
+button_pressed = true
+text = "PDF único"
+
+[node name="SingleCheckbox" type="CheckBox" parent="HSplitContainer/LeftContainer/ExportContainer/OptionsContainer" unique_id=1087866796]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+tooltip_text = "Exportar gabaritos como PDFs individuais."
+text = "PDFs individuais"
+text_overrun_behavior = 5
+
+[node name="OptionsSeparator" type="HSeparator" parent="HSplitContainer/LeftContainer/ExportContainer/OptionsContainer" unique_id=785295125]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="SaveContainer" type="MarginContainer" parent="HSplitContainer/LeftContainer/ExportContainer" unique_id=592695059]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_constants/margin_left = 8
+theme_override_constants/margin_top = 5
+theme_override_constants/margin_right = 8
+theme_override_constants/margin_bottom = 8
+
+[node name="ExportList" type="VBoxContainer" parent="HSplitContainer/LeftContainer/ExportContainer/SaveContainer" unique_id=902448354]
 layout_mode = 2
 theme_override_constants/separation = 4
 
-[node name="HSeparator" type="HSeparator" parent="HSplitContainer/LeftContainer/SaveButtonContainer" unique_id=1078129367]
+[node name="VBoxContainer" type="VBoxContainer" parent="HSplitContainer/LeftContainer/ExportContainer/SaveContainer/ExportList" unique_id=953654310]
 layout_mode = 2
 
-[node name="HBoxContainer" type="HBoxContainer" parent="HSplitContainer/LeftContainer/SaveButtonContainer" unique_id=1140712471]
-visible = false
-layout_mode = 2
-theme_override_constants/separation = 32
-alignment = 1
-
-[node name="PNGCheckbox" type="CheckBox" parent="HSplitContainer/LeftContainer/SaveButtonContainer/HBoxContainer" unique_id=833750175]
-unique_name_in_owner = true
-layout_mode = 2
-tooltip_text = "Salva todos os gabaritos como arquivos PNG separados."
-button_pressed = true
-text = "PNG"
-alignment = 1
-
-[node name="PDFCheckbox" type="CheckBox" parent="HSplitContainer/LeftContainer/SaveButtonContainer/HBoxContainer" unique_id=380218796]
-unique_name_in_owner = true
-layout_mode = 2
-tooltip_text = "(W.I.P) Exporta um único PDF com todos os gabaritos, cada folha A4 contendo 2 gabaritos."
-disabled = true
-text = "PDF"
-
-[node name="MarginContainer2" type="MarginContainer" parent="HSplitContainer/LeftContainer/SaveButtonContainer" unique_id=592695059]
-layout_mode = 2
-theme_override_constants/margin_left = 8
-theme_override_constants/margin_top = 4
-theme_override_constants/margin_right = 8
-theme_override_constants/margin_bottom = 4
-
-[node name="VBoxContainer" type="VBoxContainer" parent="HSplitContainer/LeftContainer/SaveButtonContainer/MarginContainer2" unique_id=953654310]
-layout_mode = 2
-
-[node name="DataTitles" type="HBoxContainer" parent="HSplitContainer/LeftContainer/SaveButtonContainer/MarginContainer2/VBoxContainer" unique_id=1880741237]
+[node name="DataTitles" type="HBoxContainer" parent="HSplitContainer/LeftContainer/ExportContainer/SaveContainer/ExportList/VBoxContainer" unique_id=1880741237]
 layout_mode = 2
 theme_override_constants/separation = 8
 alignment = 1
 
-[node name="FaseTitle" type="Label" parent="HSplitContainer/LeftContainer/SaveButtonContainer/MarginContainer2/VBoxContainer/DataTitles" unique_id=1708054420]
+[node name="FaseTitle" type="Label" parent="HSplitContainer/LeftContainer/ExportContainer/SaveContainer/ExportList/VBoxContainer/DataTitles" unique_id=1708054420]
 layout_mode = 2
 size_flags_horizontal = 3
 theme_override_fonts/font = ExtResource("4_k4cuf")
 text = "Fase"
 
-[node name="EditionTitle" type="Label" parent="HSplitContainer/LeftContainer/SaveButtonContainer/MarginContainer2/VBoxContainer/DataTitles" unique_id=2058621700]
+[node name="EditionTitle" type="Label" parent="HSplitContainer/LeftContainer/ExportContainer/SaveContainer/ExportList/VBoxContainer/DataTitles" unique_id=2058621700]
 layout_mode = 2
 size_flags_horizontal = 3
 theme_override_fonts/font = ExtResource("4_k4cuf")
 text = "Edição"
 
-[node name="DataContainer" type="HBoxContainer" parent="HSplitContainer/LeftContainer/SaveButtonContainer/MarginContainer2/VBoxContainer" unique_id=1849399780]
+[node name="DataContainer" type="HBoxContainer" parent="HSplitContainer/LeftContainer/ExportContainer/SaveContainer/ExportList/VBoxContainer" unique_id=1849399780]
 layout_mode = 2
 theme_override_constants/separation = 8
 alignment = 1
 
-[node name="FaseOptionButton" type="OptionButton" parent="HSplitContainer/LeftContainer/SaveButtonContainer/MarginContainer2/VBoxContainer/DataContainer" unique_id=836015851]
+[node name="FaseOptionButton" type="OptionButton" parent="HSplitContainer/LeftContainer/ExportContainer/SaveContainer/ExportList/VBoxContainer/DataContainer" unique_id=836015851]
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 3
@@ -180,7 +247,7 @@ popup/item_1/id = 1
 popup/item_2/text = "Fase 3"
 popup/item_2/id = 2
 
-[node name="EditionLineEdit" type="LineEdit" parent="HSplitContainer/LeftContainer/SaveButtonContainer/MarginContainer2/VBoxContainer/DataContainer" unique_id=1147052945]
+[node name="EditionLineEdit" type="LineEdit" parent="HSplitContainer/LeftContainer/ExportContainer/SaveContainer/ExportList/VBoxContainer/DataContainer" unique_id=1147052945]
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 3
@@ -191,14 +258,7 @@ drag_and_drop_selection_enabled = false
 select_all_on_focus = true
 caret_blink = true
 
-[node name="MarginContainer" type="MarginContainer" parent="HSplitContainer/LeftContainer/SaveButtonContainer" unique_id=922038330]
-layout_mode = 2
-theme_override_constants/margin_left = 8
-theme_override_constants/margin_top = 0
-theme_override_constants/margin_right = 8
-theme_override_constants/margin_bottom = 8
-
-[node name="SaveAllButton" type="Button" parent="HSplitContainer/LeftContainer/SaveButtonContainer/MarginContainer" unique_id=1377453866]
+[node name="SaveAllButton" type="Button" parent="HSplitContainer/LeftContainer/ExportContainer/SaveContainer/ExportList" unique_id=1377453866]
 custom_minimum_size = Vector2(0, 32)
 layout_mode = 2
 tooltip_text = "Salva todos os gabaritos em uma pasta escolhida.
@@ -225,6 +285,9 @@ theme_override_styles/normal = SubResource("StyleBoxFlat_lmikw")
 text = "Avisos"
 horizontal_alignment = 1
 vertical_alignment = 1
+
+[node name="ExportSeparator" type="HSeparator" parent="HSplitContainer/RightContainer/ErrorPanel" unique_id=23757032]
+layout_mode = 2
 
 [node name="ScrollContainer" type="ScrollContainer" parent="HSplitContainer/RightContainer/ErrorPanel" unique_id=1636198030]
 layout_mode = 2
@@ -403,9 +466,10 @@ file_filter_toggle_enabled = false
 [connection signal="editing_toggled" from="HSplitContainer/LeftContainer/FileSelectContainer/FileLineEdit" to="." method="_on_file_line_edit_editing_toggled"]
 [connection signal="text_submitted" from="HSplitContainer/LeftContainer/FileSelectContainer/FileLineEdit" to="." method="_on_file_selected"]
 [connection signal="pressed" from="HSplitContainer/LeftContainer/FileSelectContainer/FilePickButton" to="." method="_on_file_pick_button_pressed"]
-[connection signal="item_selected" from="HSplitContainer/LeftContainer/SaveButtonContainer/MarginContainer2/VBoxContainer/DataContainer/FaseOptionButton" to="." method="regen_sheet" unbinds=1]
-[connection signal="text_submitted" from="HSplitContainer/LeftContainer/SaveButtonContainer/MarginContainer2/VBoxContainer/DataContainer/EditionLineEdit" to="." method="regen_sheet" unbinds=1]
-[connection signal="pressed" from="HSplitContainer/LeftContainer/SaveButtonContainer/MarginContainer/SaveAllButton" to="." method="_on_save_all_button_pressed"]
+[connection signal="toggled" from="HSplitContainer/LeftContainer/ExportContainer/OptionsButton" to="." method="_on_options_button_toggled"]
+[connection signal="item_selected" from="HSplitContainer/LeftContainer/ExportContainer/SaveContainer/ExportList/VBoxContainer/DataContainer/FaseOptionButton" to="." method="regen_sheet" unbinds=1]
+[connection signal="text_submitted" from="HSplitContainer/LeftContainer/ExportContainer/SaveContainer/ExportList/VBoxContainer/DataContainer/EditionLineEdit" to="." method="regen_sheet" unbinds=1]
+[connection signal="pressed" from="HSplitContainer/LeftContainer/ExportContainer/SaveContainer/ExportList/SaveAllButton" to="." method="_on_save_all_button_pressed"]
 [connection signal="pressed" from="MouseBlocker/ErrorPanel/VBoxContainer/CloseErrorButton" to="." method="_on_close_error_button_pressed"]
 [connection signal="canceled" from="FileDialog" to="." method="hide_mouse_blocker"]
 [connection signal="dir_selected" from="FileDialog" to="." method="_on_dir_selected"]
