@@ -20,7 +20,7 @@ Ele detecta se o sistema tem o docker instalado e usa ele pra compilar uma vers�
 
 Se o sistema não tem docker instalado, ele builda nativamente mesmo.
 
-#### ⚠️ Por favor, se buildar _nativamente_ (sem o docker), não dê push da versão `release` da biblioteca pro github.
+#### ⚠️ Por favor, não builde uma release final do aplicativo _nativamente_ (sem o docker)
 
 Para compilar a biblioteca basta rodar `rust/task_build.sh`
 ```bash

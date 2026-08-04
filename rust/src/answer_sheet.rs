@@ -12,9 +12,7 @@ use resvg::{
 use std::{
     fmt::Display,
     path::Path,
-    sync::{
-        Arc, LazyLock,
-    },
+    sync::{Arc, LazyLock},
 };
 
 use rayon::prelude::*;
