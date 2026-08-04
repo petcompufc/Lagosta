@@ -39,16 +39,26 @@ func regen_sheet() -> void:
 		sheet_texture_rect.texture = null
 		return
 	var data := selected_entry.participant
+
 	var sheet := data.to_sheet(get_fase(), get_edicao(), EXPORT_SCALE)
-	sheet_texture_rect.texture = sheet.create_texture()
+	if sheet.is_valid():
+		sheet_texture_rect.texture = sheet.create_texture()
+	else:
+		sheet_texture_rect.texture = null
+		notify_error("(Insc. %s) - %s" % [data.inscricao, Lago.parse_answer_sheet_error(sheet.error)])
 
 
 func show_sheet(data: Participante):
 	if data == null:
 		sheet_texture_rect.texture = null
 		return
+
 	var sheet := data.to_sheet(get_fase(), get_edicao(), EXPORT_SCALE)
-	sheet_texture_rect.texture = sheet.create_texture()
+	if sheet.is_valid():
+		sheet_texture_rect.texture = sheet.create_texture()
+	else:
+		sheet_texture_rect.texture = null
+		notify_error("(Insc. %s) - %s" % [data.inscricao, Lago.parse_answer_sheet_error(sheet.error)])
 
 
 func load_csv() -> void:

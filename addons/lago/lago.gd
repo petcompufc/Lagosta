@@ -23,6 +23,15 @@ enum AnswerSheetError {
 }
 
 
+static func parse_answer_sheet_error(input: AnswerSheetError) -> String:
+	match input:
+		AnswerSheetError.NO_ERROR: return "Nenhum erro."
+		AnswerSheetError.BARCODE_CREATE: return "Erro criando código de barras."
+		AnswerSheetError.BARCODE_ENCODE: return "Erro codificando código de barras para Base64."
+		AnswerSheetError.SVG_PARSE: return "Erro decodificando o SVG gerado."
+		_: return "Erro desconhecido."
+
+
 static func parse_modalidade(input: String) -> Modalidade:
 	match input.to_lower():
 		"a": return Modalidade.INI_A
