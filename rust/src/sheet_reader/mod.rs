@@ -70,7 +70,7 @@ impl SheetReader {
     fn read_barcode(&mut self) -> GString {
         if let Some(imgdata) = self.imgdata.as_ref() {
             let reader = zxingcpp::read()
-                .formats(&[BarcodeFormat::Aztec])
+                .formats([BarcodeFormat::Aztec])
                 .try_invert(false);
             let barcodes = reader.from(imgdata).expect("eita porra");
             return barcodes.first().unwrap().text().as_str().into();
@@ -98,7 +98,6 @@ impl SheetReader {
             Format::L8,
             &imgdata.as_ref().into(),
         )?;
-        let i = ImageTexture::create_from_image(&godot_image);
-        i
+        ImageTexture::create_from_image(&godot_image)
     }
 }

@@ -133,6 +133,7 @@ impl AnswerSheet {
 
     #[func]
     #[inline]
+    #[allow(clippy::too_many_arguments)]
     pub fn save_many(
         base_dir: GString,
         data: Array<Gd<Participante>>,
@@ -174,7 +175,7 @@ impl AnswerSheet {
                     Self::handle_saving(&school_path, chunk, &mut errors, save_bundle, save_single)
                 });
         } else {
-            Self::handle_saving(&base_path, &svgs, &mut errors, save_bundle, save_single)
+            Self::handle_saving(base_path, &svgs, &mut errors, save_bundle, save_single)
         }
 
         on_done.call_deferred(&[Array::from_iter(errors).to_variant()]);
@@ -200,7 +201,7 @@ impl AnswerSheet {
                 }));
             }
             if save_single {
-                handles.push(scope.spawn(|| Self::save_svg_pdfs(&path, svgs)));
+                handles.push(scope.spawn(|| Self::save_svg_pdfs(path, svgs)));
             }
 
             for handle in handles {
@@ -212,7 +213,6 @@ impl AnswerSheet {
         });
     }
 
-    #[must_use]
     fn save_svg_bundle(base_path: &Path, svgs: &[(Tree, Participante)]) -> Result<(), GString> {
         // Creates the full pdf document
         let mut document = Document::new();
@@ -233,9 +233,9 @@ impl AnswerSheet {
         });
 
         // Wraps the document
-        let pdf = document.finish().map_err(|e| {
-            format!("[Unificado] - {}", AnswerSheetError::from(e).to_string()).to_gstring()
-        })?;
+        let pdf = document
+            .finish()
+            .map_err(|e| format!("[Unificado] - {}", AnswerSheetError::from(e)).to_gstring())?;
 
         // Writes it to disk
         std::fs::create_dir_all(base_path)
@@ -250,8 +250,8 @@ impl AnswerSheet {
     #[must_use]
     fn save_svg_pdfs(base_path: &Path, svgs: &[(Tree, Participante)]) -> Vec<GString> {
         let err = std::fs::create_dir_all(base_path);
-        if err.is_err() {
-            return vec![format!("Erro criando diretório: {:?}", err.unwrap_err()).to_gstring()];
+        if let Err(e) = err {
+            return vec![format!("Erro criando diretório: {:?}", e).to_gstring()];
         };
 
         svgs.par_iter()
@@ -281,11 +281,10 @@ impl AnswerSheet {
                 Ok(())
             })
             .filter_map(Result::err)
-            .map(|(e, part)| format!("[Insc. {}] - {}", part.inscricao, e.to_string()).to_gstring())
+            .map(|(e, part)| format!("[Insc. {}] - {}", part.inscricao, e).to_gstring())
             .collect()
     }
 
-    #[must_use]
     fn new_svg(
         participante: &Participante,
         fase: OCIFase,
@@ -299,7 +298,7 @@ impl AnswerSheet {
             "{}{}{}",
             participante.modalidade.char(),
             fase.char(),
-            participante.inscricao.to_string()
+            participante.inscricao
         );
 
         // Cria a imagem do código de barras e encoda como um png em base64 pra colocar no svg
@@ -316,15 +315,16 @@ impl AnswerSheet {
             .replace("{EDICAO}", edicao)
             .replace("{INSCRICAO}", &participante.inscricao.to_string());
 
-        let mut svg_options = Options::default();
-        svg_options.fontdb = FONT_DB.clone();
-        svg_options.dpi = dpi;
+        let svg_options = Options {
+            dpi,
+            fontdb: FONT_DB.clone(),
+            ..Default::default()
+        };
 
         Tree::from_str(&svg_str, &svg_options).map_err(AnswerSheetError::from)
     }
 
     /// Encoda uma string em um buffer LumaA8 (grayscale + alpha)
-    #[must_use]
     fn create_barcode(text: String) -> Result<GrayAlphaImage, AnswerSheetError> {
         let aztec = zxingcpp::create(zxingcpp::BarcodeFormat::Aztec)
             .from_str(text)?
@@ -353,7 +353,6 @@ impl AnswerSheet {
 
     /// Decoda uma string svg em uma buffer RGBA. \
     /// Usa RGBA pq é o padrão do `Pixmap` que o `resvg` usa.
-    #[must_use]
     fn decode_svg(svg_tree: &Tree, scale: f32) -> Result<RgbaImage, AnswerSheetError> {
         let (width, height) = (
             (TEMPLATE_WIDTH_PX as f32 * scale).floor() as u32,
@@ -362,7 +361,7 @@ impl AnswerSheet {
         let mut pix = Pixmap::new(width, height).unwrap();
 
         resvg::render(
-            &svg_tree,
+            svg_tree,
             resvg::usvg::Transform::default(),
             &mut pix.as_mut(),
         );
@@ -371,7 +370,6 @@ impl AnswerSheet {
     }
 
     /// Encoda um buffer de pixels LumaA8 em um PNG Base64
-    #[must_use]
     fn grayalpha_to_base64(img: GrayAlphaImage) -> Result<String, AnswerSheetError> {
         let mut pngvec = Vec::new();
         let encoder = image::codecs::png::PngEncoder::new(&mut pngvec);

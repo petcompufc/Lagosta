@@ -15,7 +15,7 @@ where
 
 pub trait AsNormal {
     fn to_normal(self) -> f32;
-    fn as_normal<F>(self, action: F) -> Self
+    fn as_normal<F>(&self, action: F) -> Self
     where
         F: FnOnce(f32) -> f32;
     fn as_normal_mut<F>(&mut self, action: F)
@@ -30,7 +30,7 @@ impl AsNormal for u8 {
     }
 
     #[inline]
-    fn as_normal<F>(self, action: F) -> Self
+    fn as_normal<F>(&self, action: F) -> Self
     where
         F: FnOnce(f32) -> f32,
     {
@@ -48,7 +48,7 @@ impl AsNormal for u8 {
 
 pub trait AsRgb {
     fn to_rgb(self) -> u8;
-    fn as_rgb<F>(self, action: F) -> Self
+    fn as_rgb<F>(&self, action: F) -> Self
     where
         F: FnOnce(u8) -> u8;
     fn as_rgb_mut<F>(&mut self, action: F)
@@ -63,11 +63,11 @@ impl AsRgb for f32 {
     }
 
     #[inline]
-    fn as_rgb<F>(self, action: F) -> Self
+    fn as_rgb<F>(&self, action: F) -> Self
     where
         F: FnOnce(u8) -> u8,
     {
-        action(self.to_rgb()).to_normal() as f32
+        action(self.to_rgb()).to_normal()
     }
 
     #[inline]
