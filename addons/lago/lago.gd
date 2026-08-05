@@ -18,9 +18,9 @@ enum Fase {
 
 static func parse_modalidade(input: String) -> Modalidade:
 	match input.to_lower():
-		"a": return Modalidade.INI_A
-		"b": return Modalidade.INI_B
-		"p": return Modalidade.PROG
+		"a", "1": return Modalidade.INI_A
+		"b", "2": return Modalidade.INI_B
+		"p", "3": return Modalidade.PROG
 		_: return -1
 
 

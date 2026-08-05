@@ -3,6 +3,9 @@ use std::fmt::Display;
 
 use crate::answer_sheet::AnswerSheet;
 
+const MAX_CHARS_SCHOOL: usize = 60;
+const MAX_CHARS_NAME: usize = 54;
+
 #[derive(GodotConvert, Var, Export, Default, Clone, Debug, Copy)]
 #[godot(via=u8)]
 #[repr(u8)]
@@ -87,8 +90,8 @@ impl Participante {
     ) -> Gd<Self> {
         Gd::from_object(Self {
             inscricao,
-            nome,
-            escola,
+            nome: cramp(nome.to_string(), MAX_CHARS_NAME).to_gstring(),
+            escola: cramp(escola.to_string(), MAX_CHARS_SCHOOL).to_gstring(),
             modalidade,
         })
     }
@@ -102,3 +105,8 @@ impl Participante {
 unsafe impl Send for Participante {}
 
 unsafe impl Sync for Participante {}
+
+#[inline]
+fn cramp(str: String, limit: usize) -> String {
+    str.chars().take(limit).collect()
+}
