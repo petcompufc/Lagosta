@@ -31,7 +31,7 @@ impl OCIModalidade {
         match self {
             Self::IniA => "a",
             Self::IniB => "b",
-            Self::Prog => "b",
+            Self::Prog => "p",
         }
     }
 }
@@ -90,8 +90,8 @@ impl Participante {
     ) -> Gd<Self> {
         Gd::from_object(Self {
             inscricao,
-            nome: cramp(nome.to_string(), MAX_CHARS_NAME).to_gstring(),
-            escola: cramp(escola.to_string(), MAX_CHARS_SCHOOL).to_gstring(),
+            nome: cramp(&nome.to_string(), MAX_CHARS_NAME).to_gstring(),
+            escola: cramp(&escola.to_string(), MAX_CHARS_SCHOOL).to_gstring(),
             modalidade,
         })
     }
@@ -107,6 +107,6 @@ unsafe impl Send for Participante {}
 unsafe impl Sync for Participante {}
 
 #[inline]
-fn cramp(str: String, limit: usize) -> String {
+fn cramp(str: &str, limit: usize) -> String {
     str.chars().take(limit).collect()
 }

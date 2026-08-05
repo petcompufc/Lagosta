@@ -10,7 +10,9 @@ where
     });
 
     // Applies the filter for every pixel
-    pixels.iter_mut().for_each(|p| *p = lut[*p as usize]);
+    for p in pixels {
+        *p = lut[*p as usize];
+    }
 }
 
 pub trait AsNormal {
@@ -26,7 +28,7 @@ pub trait AsNormal {
 impl AsNormal for u8 {
     #[inline]
     fn to_normal(self) -> f32 {
-        self as f32 / 255.0
+        f32::from(self) / 255.0
     }
 
     #[inline]
@@ -42,7 +44,7 @@ impl AsNormal for u8 {
     where
         F: FnOnce(f32) -> f32,
     {
-        *self = self.as_normal(action)
+        *self = self.as_normal(action);
     }
 }
 
@@ -75,6 +77,6 @@ impl AsRgb for f32 {
     where
         F: FnOnce(u8) -> u8,
     {
-        *self = self.as_rgb(action)
+        *self = self.as_rgb(action);
     }
 }

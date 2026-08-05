@@ -6,10 +6,7 @@ use godot::{
     prelude::*,
 };
 use imageproc::{
-    contrast::{self, ThresholdType},
-    distance_transform::Norm,
-    image::{self, GrayImage},
-    morphology,
+    contrast::{self, ThresholdType}, distance_transform::Norm, image::{self, DynamicImage, GrayImage}, morphology,
 };
 use zxingcpp::BarcodeFormat;
 
@@ -42,7 +39,7 @@ impl SheetReader {
     fn load_image(&mut self, image_path: GString) {
         self.imgdata = image::open(image_path.to_string())
             .ok()
-            .map(|img| img.into_luma8());
+            .map(DynamicImage::into_luma8);
 
         if self.imgdata.is_none() && !image_path.is_empty() {
             godot_error!("Couldn't open image {image_path}.");

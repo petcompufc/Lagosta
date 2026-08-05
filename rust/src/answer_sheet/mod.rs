@@ -94,16 +94,7 @@ impl AnswerSheet {
                 });
             }
         };
-
-        let imgdata = match Self::decode_svg(&svg_tree, dpi / TEMPLATE_DEFAULT_DPI) {
-            Ok(tree) => tree,
-            Err(err) => {
-                return Gd::from_object(Self {
-                    texture: None,
-                    error: err.to_string().to_gstring(),
-                });
-            }
-        };
+        let imgdata = Self::decode_svg(&svg_tree, dpi / TEMPLATE_DEFAULT_DPI);
 
         Gd::from_object(Self {
             texture: Some(
@@ -172,10 +163,10 @@ impl AnswerSheet {
                 .for_each(|chunk| {
                     let school = chunk[0].1.escola.to_string();
                     let school_path = base_path.join(sanitize_dir_name(&school));
-                    Self::handle_saving(&school_path, chunk, &mut errors, save_bundle, save_single)
+                    Self::handle_saving(&school_path, chunk, &mut errors, save_bundle, save_single);
                 });
         } else {
-            Self::handle_saving(base_path, &svgs, &mut errors, save_bundle, save_single)
+            Self::handle_saving(base_path, &svgs, &mut errors, save_bundle, save_single);
         }
 
         on_done.call_deferred(&[Array::from_iter(errors).to_variant()]);
@@ -241,7 +232,7 @@ impl AnswerSheet {
         std::fs::create_dir_all(base_path)
             .map_err(|e| format!("[Unificado] - {}", err_str(e)).to_gstring())?;
         let escola_sanitized = sanitize_dir_name(&svgs[0].1.escola.to_string());
-        let file_path = base_path.join(format!("{}.pdf", escola_sanitized));
+        let file_path = base_path.join(format!("{escola_sanitized}.pdf"));
         std::fs::write(file_path, &pdf)
             .map_err(|e| format!("[Unificado] - {}", err_str(e)).to_gstring())?;
         Ok(())
@@ -251,7 +242,7 @@ impl AnswerSheet {
     fn save_svg_pdfs(base_path: &Path, svgs: &[(Tree, Participante)]) -> Vec<GString> {
         let err = std::fs::create_dir_all(base_path);
         if let Err(e) = err {
-            return vec![format!("Erro criando diretório: {:?}", e).to_gstring()];
+            return vec![format!("Erro criando diretório: {e:?}").to_gstring()];
         };
 
         svgs.par_iter()
@@ -303,7 +294,7 @@ impl AnswerSheet {
 
         // Cria a imagem do código de barras e encoda como um png em base64 pra colocar no svg
         let barcode_img = Self::create_barcode(barcode_str)?;
-        let barcode_base64 = Self::grayalpha_to_base64(barcode_img)?;
+        let barcode_base64 = Self::grayalpha_to_base64(&barcode_img)?;
 
         // Insere as informações numa cópia do template SVG
         let svg_str = SVG_TEMPLATE
@@ -324,7 +315,7 @@ impl AnswerSheet {
         Tree::from_str(&svg_str, &svg_options).map_err(AnswerSheetError::from)
     }
 
-    /// Encoda uma string em um buffer LumaA8 (grayscale + alpha)
+    /// Encoda uma string em um buffer `LumaA8` (grayscale + alpha)
     fn create_barcode(text: String) -> Result<GrayAlphaImage, AnswerSheetError> {
         let aztec = zxingcpp::create(zxingcpp::BarcodeFormat::Aztec)
             .from_str(text)?
@@ -340,20 +331,21 @@ impl AnswerSheet {
                 // Makes white pixels transparent: pixels will be read as two bytes: alpha|luma.
                 // we invert it so black becomes 1|0 and white becomes 0|0.
                 // (the bitshift is due to little-endianness)
-                !(pixel as u16) << 8
+                !(u16::from(pixel)) << 8
             })
             .collect();
 
         // Reinterpret the Vec<u16> as Vec<u8> with double the size.
-        let imgdata_ptr = imgdata.into_raw_parts().0 as *mut u8;
-        let imgdata_u8 = unsafe { Vec::from_raw_parts(imgdata_ptr, data_size * 2, data_size * 2) };
+        let (imgdata_ptr, _, cap) = imgdata.into_raw_parts();
+        let imgdata_ptr = imgdata_ptr.cast::<u8>();
+        let imgdata_u8 = unsafe { Vec::from_raw_parts(imgdata_ptr, data_size * 2, cap * 2) };
 
         Ok(GrayAlphaImage::from_raw(width, height, imgdata_u8).unwrap())
     }
 
     /// Decoda uma string svg em uma buffer RGBA. \
     /// Usa RGBA pq é o padrão do `Pixmap` que o `resvg` usa.
-    fn decode_svg(svg_tree: &Tree, scale: f32) -> Result<RgbaImage, AnswerSheetError> {
+    fn decode_svg(svg_tree: &Tree, scale: f32) -> RgbaImage {
         let (width, height) = (
             (TEMPLATE_WIDTH_PX as f32 * scale).floor() as u32,
             (TEMPLATE_HEIGHT_PX as f32 * scale).floor() as u32,
@@ -366,11 +358,11 @@ impl AnswerSheet {
             &mut pix.as_mut(),
         );
 
-        Ok(RgbaImage::from_raw(width, height, pix.take()).unwrap())
+        RgbaImage::from_raw(width, height, pix.take()).unwrap()
     }
 
-    /// Encoda um buffer de pixels LumaA8 em um PNG Base64
-    fn grayalpha_to_base64(img: GrayAlphaImage) -> Result<String, AnswerSheetError> {
+    /// Encoda um buffer de pixels `LumaA8` em um PNG Base64
+    fn grayalpha_to_base64(img: &GrayAlphaImage) -> Result<String, AnswerSheetError> {
         let mut pngvec = Vec::new();
         let encoder = image::codecs::png::PngEncoder::new(&mut pngvec);
         encoder.write_image(
@@ -401,7 +393,7 @@ pub fn sanitize_dir_name(input: &str) -> String {
     if trimmed.is_empty() {
         "escola_sem_nome".to_string()
     } else {
-        trimmed.to_string()
+        trimmed
     }
 }
 

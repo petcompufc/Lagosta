@@ -28,6 +28,6 @@ impl ScopeTimer {
 
 impl Drop for ScopeTimer {
     fn drop(&mut self) {
-        godot_print!("{}: {:?}", self.name, self.start.elapsed())
+        godot_print!("{}: {:?}", self.name, self.start.elapsed());
     }
 }
