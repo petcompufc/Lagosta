@@ -90,8 +90,8 @@ impl Participante {
     ) -> Gd<Self> {
         Gd::from_object(Self {
             inscricao,
-            nome: cramp(&nome.to_string(), MAX_CHARS_NAME).to_gstring(),
-            escola: cramp(&escola.to_string(), MAX_CHARS_SCHOOL).to_gstring(),
+            nome: cramp(&nome.to_string(), MAX_CHARS_NAME).to_gstring().to_upper(),
+            escola: cramp(&escola.to_string(), MAX_CHARS_SCHOOL).to_gstring().to_upper(),
             modalidade,
         })
     }

@@ -192,7 +192,7 @@ impl AnswerSheet {
                 }));
             }
             if save_single {
-                handles.push(scope.spawn(|| Self::save_svg_pdfs(path, svgs)));
+                handles.push(scope.spawn(|| Self::save_svg_pdfs(&path.join("Individuais"), svgs)));
             }
 
             for handle in handles {
