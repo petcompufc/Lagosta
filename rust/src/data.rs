@@ -6,7 +6,7 @@ use crate::answer_sheet::AnswerSheet;
 const MAX_CHARS_SCHOOL: usize = 60;
 const MAX_CHARS_NAME: usize = 54;
 
-#[derive(GodotConvert, Var, Export, Default, Clone, Debug, Copy)]
+#[derive(GodotConvert, Var, Export, Default, Clone, Debug, Copy, PartialEq, Eq, PartialOrd, Ord)]
 #[godot(via=u8)]
 #[repr(u8)]
 pub enum OCIModalidade {
@@ -90,8 +90,12 @@ impl Participante {
     ) -> Gd<Self> {
         Gd::from_object(Self {
             inscricao,
-            nome: cramp(&nome.to_string(), MAX_CHARS_NAME).to_gstring().to_upper(),
-            escola: cramp(&escola.to_string(), MAX_CHARS_SCHOOL).to_gstring().to_upper(),
+            nome: cramp(&nome.to_string(), MAX_CHARS_NAME)
+                .to_gstring()
+                .to_upper(),
+            escola: cramp(&escola.to_string(), MAX_CHARS_SCHOOL)
+                .to_gstring()
+                .to_upper(),
             modalidade,
         })
     }

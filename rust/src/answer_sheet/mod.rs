@@ -1,7 +1,7 @@
 mod error;
 use error::AnswerSheetError;
 
-use crate::data::{OCIFase, Participante};
+use crate::data::{OCIFase, OCIModalidade, Participante};
 use base64::{Engine as _, engine::general_purpose as b64};
 use godot::{
     classes::{FileAccess, Image as GDImage, ImageTexture, file_access::ModeFlags, image::Format},
@@ -159,14 +159,14 @@ impl AnswerSheet {
         if sort_schools {
             // Agrupar por escolas
             svgs.sort_by(|(_, p1), (_, p2)| p1.escola.cmp(&p2.escola));
-            svgs.chunk_by(|(_, p1), (_, p2)| p1.escola == p2.escola)
+            svgs.chunk_by_mut(|(_, p1), (_, p2)| p1.escola == p2.escola)
                 .for_each(|chunk| {
                     let school = chunk[0].1.escola.to_string();
                     let school_path = base_path.join(sanitize_dir_name(&school));
                     Self::handle_saving(&school_path, chunk, &mut errors, save_bundle, save_single);
                 });
         } else {
-            Self::handle_saving(base_path, &svgs, &mut errors, save_bundle, save_single);
+            Self::handle_saving(base_path, &mut svgs, &mut errors, save_bundle, save_single);
         }
 
         on_done.call_deferred(&[Array::from_iter(errors).to_variant()]);
@@ -176,7 +176,7 @@ impl AnswerSheet {
 impl AnswerSheet {
     fn handle_saving(
         path: &Path,
-        svgs: &[(Tree, Participante)],
+        svgs: &mut [(Tree, Participante)],
         error_buf: &mut Vec<GString>,
         save_bundle: bool,
         save_single: bool,
@@ -184,15 +184,24 @@ impl AnswerSheet {
         thread::scope(|scope| {
             let mut handles = Vec::new();
             if save_bundle {
+                // Ordenar o PDF unificado por modalidade e nome
+                svgs.sort_by(|a, b| {
+                    a.1.modalidade
+                        .cmp(&b.1.modalidade)
+                        .then(a.1.nome.cmp(&b.1.nome))
+                });
+
                 handles.push(scope.spawn(|| {
-                    Self::save_svg_bundle(path, svgs)
+                    Self::save_pdf_bundle(path, svgs)
                         .err()
                         .into_iter() // converts to vec to easily treat later
                         .collect()
                 }));
             }
             if save_single {
-                handles.push(scope.spawn(|| Self::save_svg_pdfs(&path.join("Individuais"), svgs)));
+                handles.push(
+                    scope.spawn(|| Self::save_pdfs_individual(&path.join("Individuais"), svgs)),
+                );
             }
 
             for handle in handles {
@@ -204,43 +213,72 @@ impl AnswerSheet {
         });
     }
 
-    fn save_svg_bundle(base_path: &Path, svgs: &[(Tree, Participante)]) -> Result<(), GString> {
-        // Creates the full pdf document
+    fn save_pdf_bundle(base_path: &Path, svgs: &[(Tree, Participante)]) -> Result<(), GString> {
+        // Creates the full pdf documents
         let mut document = Document::new();
-        let svg_size = Size::from_wh(A5_WIDTH, A5_HEIGHT).unwrap();
+        let mut a5_document = Document::new();
+        let a5_size = Size::from_wh(A5_WIDTH, A5_HEIGHT).unwrap();
         let a4_size = Size::from_wh(A5_WIDTH, A5_HEIGHT * 2.0).unwrap();
+
 
         // Draws the SVGs on the PDF, two per page.
         svgs.chunks(2).for_each(|chunk| {
             let mut page = document.start_page_with(PageSettings::new(a4_size));
+
             let mut surface = page.surface();
+
             for (i, (svg_tree, _part)) in chunk.iter().enumerate() {
+                let mut a5_page = a5_document.start_page_with(PageSettings::new(a5_size));
+                let mut a5_surface = a5_page.surface();
+
                 surface.push_transform(&Transform::from_translate(0.0, i as f32 * A5_HEIGHT));
-                surface.draw_svg(svg_tree, svg_size, SvgSettings::default());
+                surface.draw_svg(svg_tree, a5_size, SvgSettings::default());
                 surface.pop();
+                a5_surface.draw_svg(svg_tree, a5_size, SvgSettings::default());
+
+                a5_surface.finish();
+                a5_page.finish();
             }
+
             surface.finish();
             page.finish();
         });
 
-        // Wraps the document
+        // Wraps the documents
         let pdf = document
+            .finish()
+            .map_err(|e| format!("[Unificado] - {}", AnswerSheetError::from(e)).to_gstring())?;
+        let a5_pdf = a5_document
             .finish()
             .map_err(|e| format!("[Unificado] - {}", AnswerSheetError::from(e)).to_gstring())?;
 
         // Writes it to disk
         std::fs::create_dir_all(base_path)
             .map_err(|e| format!("[Unificado] - {}", err_str(e)).to_gstring())?;
+
         let escola_sanitized = sanitize_dir_name(&svgs[0].1.escola.to_string());
         let file_path = base_path.join(format!("{escola_sanitized}.pdf"));
+        let a5_file_path = base_path.join(format!("A5_{escola_sanitized}.pdf"));
+
         std::fs::write(file_path, &pdf)
+            .map_err(|e| format!("[Unificado] - {}", err_str(e)).to_gstring())?;
+        std::fs::write(a5_file_path, &a5_pdf)
             .map_err(|e| format!("[Unificado] - {}", err_str(e)).to_gstring())?;
         Ok(())
     }
 
     #[must_use]
-    fn save_svg_pdfs(base_path: &Path, svgs: &[(Tree, Participante)]) -> Vec<GString> {
-        let err = std::fs::create_dir_all(base_path);
+    fn save_pdfs_individual(base_path: &Path, svgs: &[(Tree, Participante)]) -> Vec<GString> {
+        // this is ugly but, meh. it works. and i'm tired.
+        let err = std::fs::create_dir_all(base_path.join(OCIModalidade::IniA.to_string()));
+        if let Err(e) = err {
+            return vec![format!("Erro criando diretório: {e:?}").to_gstring()];
+        };
+        let err = std::fs::create_dir_all(base_path.join(OCIModalidade::IniB.to_string()));
+        if let Err(e) = err {
+            return vec![format!("Erro criando diretório: {e:?}").to_gstring()];
+        };
+        let err = std::fs::create_dir_all(base_path.join(OCIModalidade::Prog.to_string()));
         if let Err(e) = err {
             return vec![format!("Erro criando diretório: {e:?}").to_gstring()];
         };
@@ -261,13 +299,10 @@ impl AnswerSheet {
                     .finish()
                     .map_err(|e| (AnswerSheetError::from(e), part))?;
 
-                let file_name = format!(
-                    "{}_{}_{}",
-                    part.modalidade.char().to_uppercase(),
-                    part.nome,
-                    part.inscricao
-                );
-                let file_path = base_path.join(format!("{}.pdf", sanitize_dir_name(&file_name)));
+                let file_name = format!("{}_{}", part.nome, part.inscricao);
+                let file_path = base_path
+                    .join(part.modalidade.to_string())
+                    .join(format!("{}.pdf", sanitize_dir_name(&file_name)));
                 std::fs::write(file_path, &pdf).map_err(|e| (AnswerSheetError::from(e), part))?;
                 Ok(())
             })
