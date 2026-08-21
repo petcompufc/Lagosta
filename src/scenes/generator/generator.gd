@@ -5,17 +5,22 @@ const EXPORT_DPI: float = 96.0
 const ENTRY_BUTTON := preload("res://src/scenes/generator/entry_button.tscn")
 const ERROR_LABEL := preload("res://src/scenes/generator/error_label.tscn")
 
+var csv_path := ""
+var entries: Array[EntryButton] = []
+var selected_entry: EntryButton
+
 @onready var file_line_edit: LineEdit = %FileLineEdit
 @onready var file_pick_button: Button = %FilePickButton
 @onready var sheets_container: VBoxContainer = %SheetsContainer
 @onready var sheet_texture_rect: TextureRect = %SheetTextureRect
 
-var csv_path := ""
-var entries: Array[EntryButton] = []
-var selected_entry: EntryButton
-
 
 func _process(delta: float) -> void:
+	# yes this is ugly but i'm too lazy to refactor this.
+	if %ErrorList.get_child_count() == 0:
+		%ClearButton.hide()
+	else:
+		%ClearButton.show()
 	%LagostaLoading.offset_transform_rotation += 2.0 * delta
 
 
@@ -60,6 +65,14 @@ func show_sheet(data: Participante):
 		notify_error("(Insc. %s) - %s" % [data.inscricao, sheet.error])
 
 
+func is_header(line: PackedStringArray) -> bool:
+	var inscricao := line[0].to_lower() == "inscricao" or line[0].to_lower() == "inscricão" or line[0].to_lower() == "inscrição"
+	var nome := line[1].to_lower() == "participante" or line[1].to_lower() == "nome"
+	var escola := line[2].to_lower() == "escola"
+	var modalidade := line[3].to_lower() == "modalidade" or line[3].to_lower() == "nivel"
+	return inscricao and nome and escola and modalidade
+
+
 func load_csv() -> void:
 	show_sheet(null)
 	for entry in entries:
@@ -73,7 +86,6 @@ func load_csv() -> void:
 
 	var csv_file := FileAccess.open(csv_path, FileAccess.READ)
 
-	csv_file.get_csv_line() # ignore header line
 	var l := 0
 	while csv_file.get_position() < csv_file.get_length():
 		l += 1
@@ -82,6 +94,10 @@ func load_csv() -> void:
 		if len(line) != NUM_ARGS_CSV:
 			notify_error("(%d) - Linha inválida: %s" % [l, ",".join(line)])
 			continue
+
+		if is_header(line):
+			continue
+
 		var inscricao := Lago.parse_inscricao(line[0])
 		if inscricao == "":
 			notify_error("(%d) - Número de inscrição inválido: %s" % [l, line[0]])
@@ -94,12 +110,20 @@ func load_csv() -> void:
 		var participant := Participante.create(inscricao, line[1], line[2], modalidade)
 		var entry: EntryButton = ENTRY_BUTTON.instantiate()
 		entry.participant = participant
-		entry.entry_number = l
+		entry.entry_number = inscricao.to_int()
 		entry.toggled.connect(_on_entry_toggled.bind(entry))
 		sheets_container.add_child(entry)
 		entries.push_back(entry)
 
 	csv_file.close()
+
+
+func toggle_save_button(toggle: bool) -> void:
+	%ExportContainer.visible = toggle
+
+
+func hide_mouse_blocker() -> void:
+	%MouseBlocker.hide()
 
 
 func _on_file_pick_button_pressed() -> void:
@@ -131,7 +155,8 @@ func _on_file_selected(new_file_path: String) -> void:
 func _on_dir_selected(dir: String) -> void:
 	var thread := Thread.new()
 	var participants: Array[Participante] = []
-	for e in entries: participants.push_back(e.participant)
+	for e in entries:
+		participants.push_back(e.participant)
 	%LoadingPanel.show()
 
 	var fase := get_fase()
@@ -176,14 +201,6 @@ func _on_save_all_button_pressed() -> void:
 	%FileDialog.popup_file_dialog()
 
 
-func toggle_save_button(toggle: bool) -> void:
-	%ExportContainer.visible = toggle
-
-
-func hide_mouse_blocker() -> void:
-	%MouseBlocker.hide()
-
-
 func _on_close_error_button_pressed() -> void:
 	%ErrorPanel.hide()
 	hide_mouse_blocker()
@@ -191,3 +208,8 @@ func _on_close_error_button_pressed() -> void:
 
 func _on_options_button_toggled(toggled_on: bool) -> void:
 	%OptionsContainer.visible = toggled_on
+
+
+func _on_clear_button_pressed() -> void:
+	for child in %ErrorList.get_children():
+		child.queue_free()
