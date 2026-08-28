@@ -1,0 +1,28 @@
+[gd_scene format=3 uid="uid://b6g0wouxabsp7"]
+
+[ext_resource type="Theme" uid="uid://dp5uhom4k4ewr" path="res://assets/resources/ui/ui_themeSQR.tres" id="1_1gy7i"]
+[ext_resource type="Script" uid="uid://fhuwxwpsy7t6" path="res://src/scenes/reader/participant_button.gd" id="2_0potq"]
+
+[node name="ParticipantButton" type="HBoxContainer" unique_id=2003497465]
+custom_minimum_size = Vector2(0, 24)
+offset_right = 40.0
+offset_bottom = 40.0
+theme = ExtResource("1_1gy7i")
+script = ExtResource("2_0potq")
+
+[node name="CheckBox" type="CheckBox" parent="." unique_id=1552085137]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="Button" type="Button" parent="." unique_id=366950940]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 12
+toggle_mode = true
+text = "Placeholder"
+alignment = 0
+text_overrun_behavior = 5
+
+[connection signal="toggled" from="CheckBox" to="." method="_on_check_box_toggled"]
+[connection signal="toggled" from="Button" to="." method="_on_button_toggled"]

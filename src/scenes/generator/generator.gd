@@ -15,7 +15,7 @@ var selected_entry: EntryButton
 @onready var sheet_texture_rect: TextureRect = %SheetTextureRect
 
 
-func _process(delta: float) -> void:
+func _process(_delta: float) -> void:
 	# yes this is ugly but i'm too lazy to refactor this.
 	if %ErrorList.get_child_count() == 0:
 		%ClearButton.hide()

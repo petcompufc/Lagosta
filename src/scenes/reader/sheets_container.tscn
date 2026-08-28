@@ -1,0 +1,68 @@
+[gd_scene format=3 uid="uid://coy7h6wmu8q4s"]
+
+[ext_resource type="Script" uid="uid://ddbldko0bbuyb" path="res://src/scenes/reader/sheets_container.gd" id="1_q04sk"]
+[ext_resource type="Theme" uid="uid://dp5uhom4k4ewr" path="res://assets/resources/ui/ui_themeSQR.tres" id="1_qn6wv"]
+[ext_resource type="Texture2D" uid="uid://pc5jw2oiq718" path="res://assets/icons/ui/arrow-badge-up.svg" id="2_q04sk"]
+
+[node name="SheetsContainer" type="VBoxContainer" unique_id=497516512]
+offset_right = 282.0
+offset_bottom = 600.0
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme = ExtResource("1_qn6wv")
+theme_override_constants/separation = 0
+script = ExtResource("1_q04sk")
+
+[node name="HBoxContainer" type="HBoxContainer" parent="." unique_id=383592467]
+layout_mode = 2
+
+[node name="CheckAllButton" type="CheckBox" parent="HBoxContainer" unique_id=1669196812]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(24, 24)
+layout_mode = 2
+
+[node name="VSeparator2" type="VSeparator" parent="HBoxContainer" unique_id=2048078163]
+layout_mode = 2
+
+[node name="SortOptionButton" type="OptionButton" parent="HBoxContainer" unique_id=691003166]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 24)
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 12
+selected = 0
+item_count = 3
+popup/item_0/text = "Arquivo"
+popup/item_0/id = 0
+popup/item_1/text = "Participante"
+popup/item_1/id = 1
+popup/item_2/text = "Inscrição"
+popup/item_2/id = 2
+
+[node name="VSeparator" type="VSeparator" parent="HBoxContainer" unique_id=876659810]
+layout_mode = 2
+
+[node name="SortButton" type="Button" parent="HBoxContainer" unique_id=661362760]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(24, 24)
+layout_mode = 2
+icon = ExtResource("2_q04sk")
+expand_icon = true
+
+[node name="HSeparator" type="HSeparator" parent="." unique_id=274624669]
+layout_mode = 2
+
+[node name="SheetsScroll" type="ScrollContainer" parent="." unique_id=201001680]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="SheetsContainer" type="VBoxContainer" parent="SheetsScroll" unique_id=723134034]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme_override_constants/separation = 0
+
+[connection signal="toggled" from="HBoxContainer/CheckAllButton" to="." method="_on_check_all_button_toggled"]
+[connection signal="item_selected" from="HBoxContainer/SortOptionButton" to="." method="_on_sort_option_button_item_selected"]
+[connection signal="pressed" from="HBoxContainer/SortButton" to="." method="set_order_crescent"]

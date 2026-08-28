@@ -17,6 +17,7 @@ size_flags_vertical = 3
 script = ExtResource("1_yihxd")
 
 [node name="ScrollContainer" type="ScrollContainer" parent="." unique_id=528154042]
+unique_name_in_owner = true
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -41,7 +42,6 @@ layout_mode = 2
 theme_override_constants/separation = 4
 
 [node name="NameLabel" type="Label" parent="ScrollContainer/OuterVBox/MarginContainer/InfoVBox" unique_id=1712007903]
-unique_name_in_owner = true
 layout_mode = 2
 tooltip_text = "Nome do participante"
 mouse_filter = 1
@@ -51,11 +51,10 @@ text = "Nome"
 unique_name_in_owner = true
 layout_mode = 2
 tooltip_text = "Nome do participante"
-placeholder_text = "insira o nome do participante..."
+placeholder_text = "Insira o nome do participante..."
 caret_blink = true
 
 [node name="SchoolLabel" type="Label" parent="ScrollContainer/OuterVBox/MarginContainer/InfoVBox" unique_id=1121517028]
-unique_name_in_owner = true
 layout_mode = 2
 tooltip_text = "Nome da escola"
 mouse_filter = 1
@@ -65,48 +64,52 @@ text = "Escola"
 unique_name_in_owner = true
 layout_mode = 2
 tooltip_text = "Nome da escola"
-placeholder_text = "insira o nome da escola..."
+placeholder_text = "Insira o nome da escola..."
 caret_blink = true
 
 [node name="ModalityLabel" type="Label" parent="ScrollContainer/OuterVBox/MarginContainer/InfoVBox" unique_id=1207121985]
-unique_name_in_owner = true
 layout_mode = 2
 tooltip_text = "A modalidade em que o aluno está participando"
 mouse_filter = 1
 text = "Modalidade"
 
 [node name="ModalityInput" type="OptionButton" parent="ScrollContainer/OuterVBox/MarginContainer/InfoVBox" unique_id=517153177]
+unique_name_in_owner = true
 layout_mode = 2
 tooltip_text = "A modalidade em que o aluno está participando"
 theme_override_font_sizes/font_size = 12
 selected = 0
-item_count = 3
-popup/item_0/text = "Iniciação A"
-popup/item_0/id = 0
-popup/item_1/text = "Iniciação B"
-popup/item_1/id = 1
-popup/item_2/text = "Programação"
-popup/item_2/id = 2
+item_count = 4
+popup/item_0/text = "-"
+popup/item_0/id = 3
+popup/item_1/text = "Iniciação A"
+popup/item_1/id = 0
+popup/item_2/text = "Iniciação B"
+popup/item_2/id = 1
+popup/item_3/text = "Programação"
+popup/item_3/id = 2
 
 [node name="PhaseLabel" type="Label" parent="ScrollContainer/OuterVBox/MarginContainer/InfoVBox" unique_id=1173299999]
-unique_name_in_owner = true
 layout_mode = 2
 tooltip_text = "A fase da olimpíada à qual o gabarito corresponde"
 mouse_filter = 1
 text = "Fase"
 
 [node name="PhaseInput" type="OptionButton" parent="ScrollContainer/OuterVBox/MarginContainer/InfoVBox" unique_id=885914309]
+unique_name_in_owner = true
 layout_mode = 2
 tooltip_text = "A fase da olimpíada à qual o gabarito corresponde"
 theme_override_font_sizes/font_size = 12
 selected = 0
-item_count = 3
-popup/item_0/text = "Fase 1"
-popup/item_0/id = 0
-popup/item_1/text = "Fase 2"
-popup/item_1/id = 1
-popup/item_2/text = "Fase 3"
-popup/item_2/id = 2
+item_count = 4
+popup/item_0/text = "-"
+popup/item_0/id = 3
+popup/item_1/text = "Fase 1"
+popup/item_1/id = 0
+popup/item_2/text = "Fase 2"
+popup/item_2/id = 1
+popup/item_3/text = "Fase 3"
+popup/item_3/id = 2
 
 [node name="ItemsLabel" type="Label" parent="ScrollContainer/OuterVBox/MarginContainer/InfoVBox" unique_id=1569338539]
 layout_mode = 2
@@ -115,6 +118,7 @@ mouse_filter = 1
 text = "Questões"
 
 [node name="ItemsContainer" type="HFlowContainer" parent="ScrollContainer/OuterVBox/MarginContainer/InfoVBox" unique_id=1625503331]
+unique_name_in_owner = true
 layout_mode = 2
 
 [node name="ItemButton" parent="ScrollContainer/OuterVBox/MarginContainer/InfoVBox/ItemsContainer" unique_id=780280065 instance=ExtResource("1_5msfc")]
@@ -199,16 +203,16 @@ item_number = 20
 [node name="IDLabel" type="Label" parent="ScrollContainer/OuterVBox/MarginContainer/InfoVBox" unique_id=783002349]
 unique_name_in_owner = true
 layout_mode = 2
-tooltip_text = "O número de inscrição do participante. Só mude se souber o que está fazendo!"
+tooltip_text = "O número de inscrição do participante."
 mouse_filter = 1
 text = "Número de inscrição"
 
 [node name="IDInput" type="SpinBox" parent="ScrollContainer/OuterVBox/MarginContainer/InfoVBox" unique_id=1172246989]
 unique_name_in_owner = true
 layout_mode = 2
-tooltip_text = "O número de inscrição do participante. Só mude se souber o que está fazendo!"
-max_value = 99999999.0
+tooltip_text = "O número de inscrição do participante."
 rounded = true
+allow_greater = true
 select_all_on_focus = true
 
 [node name="OuterWarningsVBox" type="VBoxContainer" parent="ScrollContainer/OuterVBox" unique_id=1932504875]
