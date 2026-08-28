@@ -1,0 +1,240 @@
+[gd_scene format=3 uid="uid://co6bjglat3mnq"]
+
+[ext_resource type="PackedScene" uid="uid://b3b50v11h26w1" path="res://src/scenes/reader/ItemButton.tscn" id="1_5msfc"]
+[ext_resource type="Script" uid="uid://lpskokk68sb3" path="res://src/scenes/reader/info_panel.gd" id="1_yihxd"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_yihxd"]
+bg_color = Color(0.75686276, 0.07058824, 0.12156863, 1)
+
+[node name="InfoPanel" type="Panel" unique_id=422871639]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+script = ExtResource("1_yihxd")
+
+[node name="ScrollContainer" type="ScrollContainer" parent="." unique_id=528154042]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="OuterVBox" type="VBoxContainer" parent="ScrollContainer" unique_id=655088819]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="MarginContainer" type="MarginContainer" parent="ScrollContainer/OuterVBox" unique_id=492067424]
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_constants/margin_left = 8
+theme_override_constants/margin_top = 8
+theme_override_constants/margin_right = 8
+
+[node name="InfoVBox" type="VBoxContainer" parent="ScrollContainer/OuterVBox/MarginContainer" unique_id=243479115]
+layout_mode = 2
+theme_override_constants/separation = 4
+
+[node name="NameLabel" type="Label" parent="ScrollContainer/OuterVBox/MarginContainer/InfoVBox" unique_id=1712007903]
+unique_name_in_owner = true
+layout_mode = 2
+tooltip_text = "Nome do participante"
+mouse_filter = 1
+text = "Nome"
+
+[node name="NameInput" type="LineEdit" parent="ScrollContainer/OuterVBox/MarginContainer/InfoVBox" unique_id=1913218812]
+unique_name_in_owner = true
+layout_mode = 2
+tooltip_text = "Nome do participante"
+placeholder_text = "insira o nome do participante..."
+caret_blink = true
+
+[node name="SchoolLabel" type="Label" parent="ScrollContainer/OuterVBox/MarginContainer/InfoVBox" unique_id=1121517028]
+unique_name_in_owner = true
+layout_mode = 2
+tooltip_text = "Nome da escola"
+mouse_filter = 1
+text = "Escola"
+
+[node name="SchoolInput" type="LineEdit" parent="ScrollContainer/OuterVBox/MarginContainer/InfoVBox" unique_id=1457364733]
+unique_name_in_owner = true
+layout_mode = 2
+tooltip_text = "Nome da escola"
+placeholder_text = "insira o nome da escola..."
+caret_blink = true
+
+[node name="ModalityLabel" type="Label" parent="ScrollContainer/OuterVBox/MarginContainer/InfoVBox" unique_id=1207121985]
+unique_name_in_owner = true
+layout_mode = 2
+tooltip_text = "A modalidade em que o aluno está participando"
+mouse_filter = 1
+text = "Modalidade"
+
+[node name="ModalityInput" type="OptionButton" parent="ScrollContainer/OuterVBox/MarginContainer/InfoVBox" unique_id=517153177]
+layout_mode = 2
+tooltip_text = "A modalidade em que o aluno está participando"
+theme_override_font_sizes/font_size = 12
+selected = 0
+item_count = 3
+popup/item_0/text = "Iniciação A"
+popup/item_0/id = 0
+popup/item_1/text = "Iniciação B"
+popup/item_1/id = 1
+popup/item_2/text = "Programação"
+popup/item_2/id = 2
+
+[node name="PhaseLabel" type="Label" parent="ScrollContainer/OuterVBox/MarginContainer/InfoVBox" unique_id=1173299999]
+unique_name_in_owner = true
+layout_mode = 2
+tooltip_text = "A fase da olimpíada à qual o gabarito corresponde"
+mouse_filter = 1
+text = "Fase"
+
+[node name="PhaseInput" type="OptionButton" parent="ScrollContainer/OuterVBox/MarginContainer/InfoVBox" unique_id=885914309]
+layout_mode = 2
+tooltip_text = "A fase da olimpíada à qual o gabarito corresponde"
+theme_override_font_sizes/font_size = 12
+selected = 0
+item_count = 3
+popup/item_0/text = "Fase 1"
+popup/item_0/id = 0
+popup/item_1/text = "Fase 2"
+popup/item_1/id = 1
+popup/item_2/text = "Fase 3"
+popup/item_2/id = 2
+
+[node name="ItemsLabel" type="Label" parent="ScrollContainer/OuterVBox/MarginContainer/InfoVBox" unique_id=1569338539]
+layout_mode = 2
+tooltip_text = "Resposta de cada questão"
+mouse_filter = 1
+text = "Questões"
+
+[node name="ItemsContainer" type="HFlowContainer" parent="ScrollContainer/OuterVBox/MarginContainer/InfoVBox" unique_id=1625503331]
+layout_mode = 2
+
+[node name="ItemButton" parent="ScrollContainer/OuterVBox/MarginContainer/InfoVBox/ItemsContainer" unique_id=780280065 instance=ExtResource("1_5msfc")]
+layout_mode = 2
+
+[node name="ItemButton2" parent="ScrollContainer/OuterVBox/MarginContainer/InfoVBox/ItemsContainer" unique_id=58613906 instance=ExtResource("1_5msfc")]
+layout_mode = 2
+item_number = 2
+
+[node name="ItemButton3" parent="ScrollContainer/OuterVBox/MarginContainer/InfoVBox/ItemsContainer" unique_id=2133614727 instance=ExtResource("1_5msfc")]
+layout_mode = 2
+item_number = 3
+
+[node name="ItemButton4" parent="ScrollContainer/OuterVBox/MarginContainer/InfoVBox/ItemsContainer" unique_id=1497512304 instance=ExtResource("1_5msfc")]
+layout_mode = 2
+item_number = 4
+
+[node name="ItemButton5" parent="ScrollContainer/OuterVBox/MarginContainer/InfoVBox/ItemsContainer" unique_id=876678516 instance=ExtResource("1_5msfc")]
+layout_mode = 2
+item_number = 5
+
+[node name="ItemButton6" parent="ScrollContainer/OuterVBox/MarginContainer/InfoVBox/ItemsContainer" unique_id=1275003401 instance=ExtResource("1_5msfc")]
+layout_mode = 2
+item_number = 6
+
+[node name="ItemButton7" parent="ScrollContainer/OuterVBox/MarginContainer/InfoVBox/ItemsContainer" unique_id=1460701895 instance=ExtResource("1_5msfc")]
+layout_mode = 2
+item_number = 7
+
+[node name="ItemButton8" parent="ScrollContainer/OuterVBox/MarginContainer/InfoVBox/ItemsContainer" unique_id=185080721 instance=ExtResource("1_5msfc")]
+layout_mode = 2
+item_number = 8
+
+[node name="ItemButton9" parent="ScrollContainer/OuterVBox/MarginContainer/InfoVBox/ItemsContainer" unique_id=1334500333 instance=ExtResource("1_5msfc")]
+layout_mode = 2
+item_number = 9
+
+[node name="ItemButton10" parent="ScrollContainer/OuterVBox/MarginContainer/InfoVBox/ItemsContainer" unique_id=752108199 instance=ExtResource("1_5msfc")]
+layout_mode = 2
+item_number = 10
+
+[node name="ItemButton11" parent="ScrollContainer/OuterVBox/MarginContainer/InfoVBox/ItemsContainer" unique_id=742043725 instance=ExtResource("1_5msfc")]
+layout_mode = 2
+item_number = 11
+
+[node name="ItemButton12" parent="ScrollContainer/OuterVBox/MarginContainer/InfoVBox/ItemsContainer" unique_id=278224411 instance=ExtResource("1_5msfc")]
+layout_mode = 2
+item_number = 12
+
+[node name="ItemButton13" parent="ScrollContainer/OuterVBox/MarginContainer/InfoVBox/ItemsContainer" unique_id=1632523689 instance=ExtResource("1_5msfc")]
+layout_mode = 2
+item_number = 13
+
+[node name="ItemButton14" parent="ScrollContainer/OuterVBox/MarginContainer/InfoVBox/ItemsContainer" unique_id=1498065305 instance=ExtResource("1_5msfc")]
+layout_mode = 2
+item_number = 14
+
+[node name="ItemButton15" parent="ScrollContainer/OuterVBox/MarginContainer/InfoVBox/ItemsContainer" unique_id=1184435357 instance=ExtResource("1_5msfc")]
+layout_mode = 2
+item_number = 15
+
+[node name="ItemButton16" parent="ScrollContainer/OuterVBox/MarginContainer/InfoVBox/ItemsContainer" unique_id=1063887091 instance=ExtResource("1_5msfc")]
+layout_mode = 2
+item_number = 16
+
+[node name="ItemButton17" parent="ScrollContainer/OuterVBox/MarginContainer/InfoVBox/ItemsContainer" unique_id=860435045 instance=ExtResource("1_5msfc")]
+layout_mode = 2
+item_number = 17
+
+[node name="ItemButton18" parent="ScrollContainer/OuterVBox/MarginContainer/InfoVBox/ItemsContainer" unique_id=1793119606 instance=ExtResource("1_5msfc")]
+layout_mode = 2
+item_number = 18
+
+[node name="ItemButton19" parent="ScrollContainer/OuterVBox/MarginContainer/InfoVBox/ItemsContainer" unique_id=276686233 instance=ExtResource("1_5msfc")]
+layout_mode = 2
+item_number = 19
+
+[node name="ItemButton20" parent="ScrollContainer/OuterVBox/MarginContainer/InfoVBox/ItemsContainer" unique_id=827599207 instance=ExtResource("1_5msfc")]
+layout_mode = 2
+item_number = 20
+
+[node name="IDLabel" type="Label" parent="ScrollContainer/OuterVBox/MarginContainer/InfoVBox" unique_id=783002349]
+unique_name_in_owner = true
+layout_mode = 2
+tooltip_text = "O número de inscrição do participante. Só mude se souber o que está fazendo!"
+mouse_filter = 1
+text = "Número de inscrição"
+
+[node name="IDInput" type="SpinBox" parent="ScrollContainer/OuterVBox/MarginContainer/InfoVBox" unique_id=1172246989]
+unique_name_in_owner = true
+layout_mode = 2
+tooltip_text = "O número de inscrição do participante. Só mude se souber o que está fazendo!"
+max_value = 99999999.0
+rounded = true
+select_all_on_focus = true
+
+[node name="OuterWarningsVBox" type="VBoxContainer" parent="ScrollContainer/OuterVBox" unique_id=1932504875]
+visible = false
+layout_mode = 2
+
+[node name="WarningsSeparator" type="HSeparator" parent="ScrollContainer/OuterVBox/OuterWarningsVBox" unique_id=2052904545]
+layout_mode = 2
+
+[node name="WarningsLabel" type="Label" parent="ScrollContainer/OuterVBox/OuterWarningsVBox" unique_id=1045016183]
+custom_minimum_size = Vector2(0, 32)
+layout_mode = 2
+tooltip_text = "Avisos e erros sobre a leitura do gabarito irão aparecer aqui."
+mouse_filter = 1
+theme_override_font_sizes/font_size = 16
+theme_override_styles/normal = SubResource("StyleBoxFlat_yihxd")
+text = "Avisos"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="WarningsContainer" type="MarginContainer" parent="ScrollContainer/OuterVBox/OuterWarningsVBox" unique_id=125168988]
+layout_mode = 2
+theme_override_constants/margin_left = 8
+theme_override_constants/margin_top = 8
+theme_override_constants/margin_right = 8
+theme_override_constants/margin_bottom = 8
+
+[node name="WarningsVBox" type="VBoxContainer" parent="ScrollContainer/OuterVBox/OuterWarningsVBox/WarningsContainer" unique_id=1957499634]
+layout_mode = 2

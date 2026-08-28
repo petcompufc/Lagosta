@@ -1,7 +1,7 @@
 [gd_scene format=3 uid="uid://dvnqqwme5psml"]
 
 [ext_resource type="Script" uid="uid://bqfv11abb1eh0" path="res://src/scenes/generator/error_label.gd" id="1_lghq8"]
-[ext_resource type="Texture2D" uid="uid://csvackctkna8a" path="res://assets/icons/x.svg" id="1_mdlm5"]
+[ext_resource type="Texture2D" uid="uid://csvackctkna8a" path="res://assets/icons/ui/x.svg" id="1_mdlm5"]
 
 [node name="ErrorLabel" type="HBoxContainer" unique_id=314684385]
 custom_minimum_size = Vector2(0, 48)

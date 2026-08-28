@@ -1,0 +1,32 @@
+[gd_scene format=3 uid="uid://b7vitc7nqtljt"]
+
+[ext_resource type="Script" uid="uid://beeii1f1pwuma" path="res://src/scenes/main.gd" id="1_32aa5"]
+[ext_resource type="PackedScene" uid="uid://dg1gcbbuo0bd5" path="res://src/scenes/generator/generator.tscn" id="1_kkvs4"]
+[ext_resource type="PackedScene" uid="uid://cc0jfriuvkgrb" path="res://src/scenes/reader/reader.tscn" id="1_rr2wm"]
+
+[node name="Control" type="Control" unique_id=366898937]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_32aa5")
+
+[node name="Tabs" type="TabContainer" parent="." unique_id=54166813]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+current_tab = 0
+
+[node name="Leitor" parent="Tabs" unique_id=501030196 instance=ExtResource("1_rr2wm")]
+layout_mode = 2
+metadata/_tab_index = 0
+
+[node name="Gerador" parent="Tabs" unique_id=793912655 instance=ExtResource("1_kkvs4")]
+visible = false
+layout_mode = 2
+metadata/_tab_index = 1

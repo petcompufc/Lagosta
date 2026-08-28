@@ -1,0 +1,313 @@
+[gd_scene format=3 uid="uid://cc0jfriuvkgrb"]
+
+[ext_resource type="Script" uid="uid://bsu7uqc4a1h8g" path="res://src/scenes/reader/reader.gd" id="1_12e1f"]
+[ext_resource type="Texture2D" uid="uid://dbr5525sjatyc" path="res://assets/icons/ui/folder.svg" id="2_m8450"]
+[ext_resource type="Theme" uid="uid://dlbj0n1hn66w3" path="res://assets/resources/ui/ui_theme.tres" id="2_x0da4"]
+[ext_resource type="Texture2D" uid="uid://dfgei3yc0n60x" path="res://assets/icons/ui/file-dots.svg" id="4_yms4k"]
+[ext_resource type="Theme" uid="uid://dp5uhom4k4ewr" path="res://assets/resources/ui/ui_themeSQR.tres" id="5_j4xan"]
+[ext_resource type="PackedScene" uid="uid://co6bjglat3mnq" path="res://src/scenes/reader/info_panel.tscn" id="6_1fn11"]
+[ext_resource type="Script" uid="uid://dhkgr8e51rby" path="res://src/better_menu_button.gd" id="6_c1np2"]
+[ext_resource type="PackedScene" uid="uid://rl4ek47ru8e3" path="res://src/scenes/drag/drag_rect.tscn" id="7_i43hm"]
+[ext_resource type="StyleBox" uid="uid://cr2qqj4i42f74" path="res://assets/resources/ui/bgpanel.tres" id="7_iunjt"]
+[ext_resource type="Texture2D" uid="uid://bf2v08powrg4y" path="res://assets/icons/lagosta/lagosta_lapis.png" id="8_b7d1h"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_d7x7f"]
+content_margin_left = 4.0
+content_margin_top = 4.0
+content_margin_right = 4.0
+content_margin_bottom = 4.0
+bg_color = Color(0.15686275, 0.14509805, 0.14117648, 1)
+corner_detail = 5
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_k4cuf"]
+content_margin_left = 4.0
+content_margin_top = 4.0
+content_margin_right = 4.0
+content_margin_bottom = 4.0
+bg_color = Color(0.18039216, 0.16862746, 0.16078432, 1)
+corner_detail = 5
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_gjccp"]
+content_margin_left = 4.0
+content_margin_top = 4.0
+content_margin_right = 4.0
+content_margin_bottom = 4.0
+bg_color = Color(0.28235295, 0.26666668, 0.24705882, 1)
+corner_detail = 5
+
+[node name="ReaderPanel" type="Panel" unique_id=501030196]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_12e1f")
+
+[node name="HSplitContainer" type="HSplitContainer" parent="." unique_id=455106221]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme = ExtResource("2_x0da4")
+
+[node name="LeftContainer" type="VBoxContainer" parent="HSplitContainer" unique_id=197022153]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_stretch_ratio = 0.25
+theme_override_constants/separation = 0
+
+[node name="FolderSelectContainer" type="HBoxContainer" parent="HSplitContainer/LeftContainer" unique_id=685766879]
+layout_mode = 2
+theme_override_constants/separation = 0
+
+[node name="FolderLineEdit" type="LineEdit" parent="HSplitContainer/LeftContainer/FolderSelectContainer" unique_id=1961603939]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+tooltip_text = "Pasta contendo os scans dos gabaritos."
+placeholder_text = "Pasta com scans"
+emoji_menu_enabled = false
+clear_button_enabled = true
+drag_and_drop_selection_enabled = false
+select_all_on_focus = true
+caret_blink = true
+
+[node name="FolderPickButton" type="Button" parent="HSplitContainer/LeftContainer/FolderSelectContainer" unique_id=362404557]
+custom_minimum_size = Vector2(32, 32)
+layout_mode = 2
+tooltip_text = "Abra o navegador de arquivos e selecione uma pasta contendo os scans dos gabaritos."
+theme_override_styles/normal = SubResource("StyleBoxFlat_d7x7f")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_k4cuf")
+theme_override_styles/hover = SubResource("StyleBoxFlat_gjccp")
+icon = ExtResource("2_m8450")
+expand_icon = true
+
+[node name="FileSeparator" type="HSeparator" parent="HSplitContainer/LeftContainer" unique_id=660072939]
+layout_mode = 2
+
+[node name="ScrollContainer" type="ScrollContainer" parent="HSplitContainer/LeftContainer" unique_id=170185793]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="SheetsContainer" type="VBoxContainer" parent="HSplitContainer/LeftContainer/ScrollContainer" unique_id=40302204]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme_override_constants/separation = 0
+
+[node name="ReadingPanel" type="Panel" parent="HSplitContainer" unique_id=915049989]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_styles/panel = ExtResource("7_iunjt")
+
+[node name="LagostaBG" type="TextureRect" parent="HSplitContainer/ReadingPanel" unique_id=1481167894]
+modulate = Color(1, 1, 1, 0.23529412)
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+scale = Vector2(0.3, 0.3)
+pivot_offset_ratio = Vector2(0.5, 0.5)
+texture = ExtResource("8_b7d1h")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="ReadingHSplit" type="HSplitContainer" parent="HSplitContainer/ReadingPanel" unique_id=816004888]
+unique_name_in_owner = true
+visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="InfoPanel2" parent="HSplitContainer/ReadingPanel/ReadingHSplit" unique_id=422871639 instance=ExtResource("6_1fn11")]
+custom_minimum_size = Vector2(150, 0)
+layout_mode = 2
+size_flags_stretch_ratio = 0.8
+
+[node name="VSplitContainer" type="VBoxContainer" parent="HSplitContainer/ReadingPanel/ReadingHSplit" unique_id=928074061]
+layout_mode = 2
+size_flags_horizontal = 3
+theme = ExtResource("2_x0da4")
+
+[node name="SheetImagePanel" type="Panel" parent="HSplitContainer/ReadingPanel/ReadingHSplit/VSplitContainer" unique_id=1249562143]
+clip_contents = true
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme_override_styles/panel = ExtResource("7_iunjt")
+
+[node name="LagostaBG" type="TextureRect" parent="HSplitContainer/ReadingPanel/ReadingHSplit/VSplitContainer/SheetImagePanel" unique_id=1711187977]
+modulate = Color(1, 1, 1, 0.23529412)
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+scale = Vector2(0.3, 0.3)
+pivot_offset_ratio = Vector2(0.5, 0.5)
+texture = ExtResource("8_b7d1h")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="SheetTextureRect" type="TextureRect" parent="HSplitContainer/ReadingPanel/ReadingHSplit/VSplitContainer/SheetImagePanel" unique_id=167593899]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="DragRect" parent="HSplitContainer/ReadingPanel/ReadingHSplit/VSplitContainer/SheetImagePanel/SheetTextureRect" unique_id=690383394 instance=ExtResource("7_i43hm")]
+unique_name_in_owner = true
+layout_mode = 1
+offset_right = 0.0
+offset_bottom = 0.0
+
+[node name="HSeparator2" type="HSeparator" parent="HSplitContainer/ReadingPanel/ReadingHSplit/VSplitContainer" unique_id=916256345]
+layout_mode = 2
+
+[node name="SavingContainer" type="VBoxContainer" parent="HSplitContainer/ReadingPanel/ReadingHSplit/VSplitContainer" unique_id=136785124]
+layout_mode = 2
+size_flags_vertical = 4
+
+[node name="DBFileSelectContainer2" type="HBoxContainer" parent="HSplitContainer/ReadingPanel/ReadingHSplit/VSplitContainer/SavingContainer" unique_id=1616461804]
+layout_mode = 2
+theme_override_constants/separation = 0
+
+[node name="DBLineEdit" type="LineEdit" parent="HSplitContainer/ReadingPanel/ReadingHSplit/VSplitContainer/SavingContainer/DBFileSelectContainer2" unique_id=107326494]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+tooltip_text = "Arquivo .csv contendo database de participantes."
+placeholder_text = "Database de participantes (.csv)"
+emoji_menu_enabled = false
+clear_button_enabled = true
+drag_and_drop_selection_enabled = false
+select_all_on_focus = true
+caret_blink = true
+
+[node name="DBFilePickButton" type="Button" parent="HSplitContainer/ReadingPanel/ReadingHSplit/VSplitContainer/SavingContainer/DBFileSelectContainer2" unique_id=1502959156]
+custom_minimum_size = Vector2(32, 32)
+layout_mode = 2
+tooltip_text = "Abra o navegador de arquivos e selecione um arquivo .csv contendo a database de participantes."
+theme_override_styles/normal = SubResource("StyleBoxFlat_d7x7f")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_k4cuf")
+theme_override_styles/hover = SubResource("StyleBoxFlat_gjccp")
+icon = ExtResource("4_yms4k")
+expand_icon = true
+
+[node name="AnswersFileSelectContainer" type="HBoxContainer" parent="HSplitContainer/ReadingPanel/ReadingHSplit/VSplitContainer/SavingContainer" unique_id=923190824]
+layout_mode = 2
+theme_override_constants/separation = 0
+
+[node name="AnswersLineEdit" type="LineEdit" parent="HSplitContainer/ReadingPanel/ReadingHSplit/VSplitContainer/SavingContainer/AnswersFileSelectContainer" unique_id=1265758452]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+tooltip_text = "Arquivo .csv contendo o gabarito oficial das provas."
+placeholder_text = "Gabarito oficial (.csv)"
+emoji_menu_enabled = false
+clear_button_enabled = true
+drag_and_drop_selection_enabled = false
+select_all_on_focus = true
+caret_blink = true
+
+[node name="AnswersFilePickButton" type="Button" parent="HSplitContainer/ReadingPanel/ReadingHSplit/VSplitContainer/SavingContainer/AnswersFileSelectContainer" unique_id=1113403595]
+custom_minimum_size = Vector2(32, 32)
+layout_mode = 2
+tooltip_text = "Abra o navegador de arquivos e selecione um arquivo .csv contendo o gabarito das provas."
+theme_override_styles/normal = SubResource("StyleBoxFlat_d7x7f")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_k4cuf")
+theme_override_styles/hover = SubResource("StyleBoxFlat_gjccp")
+icon = ExtResource("4_yms4k")
+expand_icon = true
+
+[node name="HSeparator2" type="HSeparator" parent="HSplitContainer/ReadingPanel/ReadingHSplit/VSplitContainer/SavingContainer" unique_id=1765108496]
+layout_mode = 2
+
+[node name="ReadButton" type="MenuButton" parent="HSplitContainer/ReadingPanel/ReadingHSplit/VSplitContainer/SavingContainer" unique_id=2039643897]
+custom_minimum_size = Vector2(0, 32)
+layout_mode = 2
+tooltip_text = "Relê todos os gabaritos.
+CUIDADO! Isso vai resetar TODAS as leituras."
+theme = ExtResource("5_j4xan")
+text = "Reler..."
+flat = false
+item_count = 3
+popup/item_0/text = "Reler atual"
+popup/item_0/id = 0
+popup/item_1/text = "Reler selecionados"
+popup/item_1/id = 1
+popup/item_2/text = "Reler tudo"
+popup/item_2/id = 2
+script = ExtResource("6_c1np2")
+metadata/_custom_type_script = "uid://dhkgr8e51rby"
+
+[node name="HSeparator" type="HSeparator" parent="HSplitContainer/ReadingPanel/ReadingHSplit/VSplitContainer/SavingContainer" unique_id=1326673154]
+layout_mode = 2
+
+[node name="SaveButton" type="MenuButton" parent="HSplitContainer/ReadingPanel/ReadingHSplit/VSplitContainer/SavingContainer" unique_id=463067847]
+custom_minimum_size = Vector2(0, 32)
+layout_mode = 2
+text = "Salvar..."
+flat = false
+item_count = 3
+popup/item_0/text = "Salvar atual"
+popup/item_0/id = 0
+popup/item_1/text = "Salvar selecionados"
+popup/item_1/id = 1
+popup/item_2/text = "Salvar tudo"
+popup/item_2/id = 2
+script = ExtResource("6_c1np2")
+metadata/_custom_type_script = "uid://dhkgr8e51rby"
+
+[node name="FolderDialog" type="FileDialog" parent="." unique_id=585034300]
+unique_name_in_owner = true
+oversampling_override = 1.0
+title = "Open a Directory"
+file_mode = 2
+access = 2
+filters = PackedStringArray("*.png", "*.jpg", "*.jpeg", "*.webp", "*.bmp", "*.pdf")
+use_native_dialog = true
+file_filter_toggle_enabled = false
+
+[node name="DBFileDialog" type="FileDialog" parent="." unique_id=2052272299]
+unique_name_in_owner = true
+oversampling_override = 1.0
+title = "Open a File"
+file_mode = 0
+access = 2
+filters = PackedStringArray("*.csv")
+use_native_dialog = true
+file_filter_toggle_enabled = false
+
+[node name="AnswersFileDialog" type="FileDialog" parent="." unique_id=165863815]
+unique_name_in_owner = true
+oversampling_override = 1.0
+title = "Open a File"
+file_mode = 0
+access = 2
+filters = PackedStringArray("*.csv")
+use_native_dialog = true
+file_filter_toggle_enabled = false
+
+[connection signal="text_submitted" from="HSplitContainer/LeftContainer/FolderSelectContainer/FolderLineEdit" to="." method="_on_directory_selected"]
+[connection signal="pressed" from="HSplitContainer/LeftContainer/FolderSelectContainer/FolderPickButton" to="." method="_on_folder_pick_button_pressed"]
+[connection signal="pressed" from="HSplitContainer/ReadingPanel/ReadingHSplit/VSplitContainer/SavingContainer/DBFileSelectContainer2/DBFilePickButton" to="." method="_on_db_file_pick_button_pressed"]
+[connection signal="pressed" from="HSplitContainer/ReadingPanel/ReadingHSplit/VSplitContainer/SavingContainer/AnswersFileSelectContainer/AnswersFilePickButton" to="." method="_on_answers_file_pick_button_pressed"]
+[connection signal="id_pressed" from="HSplitContainer/ReadingPanel/ReadingHSplit/VSplitContainer/SavingContainer/ReadButton" to="." method="_on_read_button_id_pressed" flags=3]
+[connection signal="canceled" from="FolderDialog" to="." method="_on_dialog_canceled"]
+[connection signal="dir_selected" from="FolderDialog" to="." method="_on_directory_selected"]
+[connection signal="canceled" from="DBFileDialog" to="." method="_on_dialog_canceled"]
+[connection signal="file_selected" from="DBFileDialog" to="." method="_on_db_file_selected"]
+[connection signal="canceled" from="AnswersFileDialog" to="." method="_on_dialog_canceled"]
+[connection signal="file_selected" from="AnswersFileDialog" to="." method="_on_answers_file_selected"]

@@ -1,0 +1,38 @@
+[gd_scene format=3 uid="uid://b3b50v11h26w1"]
+
+[ext_resource type="Script" uid="uid://jpms1odwgr15" path="res://src/scenes/reader/item_button.gd" id="1_jtndc"]
+
+[node name="ItemButton" type="HBoxContainer" unique_id=780280065]
+theme_override_constants/separation = 4
+alignment = 1
+script = ExtResource("1_jtndc")
+
+[node name="Label" type="Label" parent="." unique_id=1684427733]
+unique_name_in_owner = true
+layout_mode = 2
+mouse_filter = 1
+text = "01:"
+horizontal_alignment = 1
+
+[node name="OptionButton" type="OptionButton" parent="." unique_id=1454100537]
+unique_name_in_owner = true
+custom_maximum_size = Vector2(32, -1)
+layout_mode = 2
+tooltip_text = "Resposta do item 1"
+theme_override_font_sizes/font_size = 12
+selected = 0
+item_count = 6
+popup/item_0/text = "-"
+popup/item_0/id = 0
+popup/item_1/text = "A"
+popup/item_1/id = 1
+popup/item_2/text = "B"
+popup/item_2/id = 2
+popup/item_3/text = "C"
+popup/item_3/id = 3
+popup/item_4/text = "D"
+popup/item_4/id = 4
+popup/item_5/text = "E"
+popup/item_5/id = 5
+
+[connection signal="item_selected" from="OptionButton" to="." method="_on_option_button_item_selected"]

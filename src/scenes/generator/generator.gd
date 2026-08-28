@@ -21,7 +21,6 @@ func _process(delta: float) -> void:
 		%ClearButton.hide()
 	else:
 		%ClearButton.show()
-	%LagostaLoading.offset_transform_rotation += 2.0 * delta
 
 
 func get_fase() -> Lago.Fase:
@@ -122,12 +121,8 @@ func toggle_save_button(toggle: bool) -> void:
 	%ExportContainer.visible = toggle
 
 
-func hide_mouse_blocker() -> void:
-	%MouseBlocker.hide()
-
-
 func _on_file_pick_button_pressed() -> void:
-	%MouseBlocker.show()
+	MouseBlocker.show_empty()
 	%FileDialog.filters = ["*.csv"]
 	%FileDialog.file_mode = FileDialog.FILE_MODE_OPEN_FILE
 	%FileDialog.popup_file_dialog()
@@ -145,7 +140,7 @@ func _on_entry_toggled(toggle: bool, entry: EntryButton) -> void:
 
 
 func _on_file_selected(new_file_path: String) -> void:
-	hide_mouse_blocker()
+	MouseBlocker.hide()
 	if new_file_path.is_empty() or new_file_path.ends_with(".csv") and FileAccess.file_exists(new_file_path):
 		csv_path = new_file_path
 	file_line_edit.text = csv_path # resets to old path if invalid file
@@ -157,7 +152,7 @@ func _on_dir_selected(dir: String) -> void:
 	var participants: Array[Participante] = []
 	for e in entries:
 		participants.push_back(e.participant)
-	%LoadingPanel.show()
+	MouseBlocker.show_loading("Gerando gabaritos...\n(Isso pode demorar um pouco.)")
 
 	var fase := get_fase()
 	var edicao := get_edicao()
@@ -175,14 +170,17 @@ func _on_dir_selected(dir: String) -> void:
 			single,
 			sort_schools,
 			func(errors: Array[String]):
-				%LoadingPanel.hide()
 				if len(errors) > 0:
 					for error in errors:
 						notify_error(error)
-					%FloatingErrorLabel.text = "A geração dos gabaritos encerrou com erros! :("
-					%ErrorPanel.show()
+					MouseBlocker.show_dialog(
+						"A geração dos gabaritos encerrou com erros! :(",
+						"Ok :(",
+						"",
+						MouseBlocker.LagostaIcon.SAD
+					)
 				else:
-					hide_mouse_blocker()
+					MouseBlocker.hide()
 				thread.wait_to_finish() # this is nastier lol
 		)
 
@@ -195,15 +193,14 @@ func _on_file_line_edit_editing_toggled(toggled_on: bool) -> void:
 
 
 func _on_save_all_button_pressed() -> void:
-	%MouseBlocker.show()
+	MouseBlocker.show_empty()
 	%FileDialog.filters = []
 	%FileDialog.file_mode = FileDialog.FILE_MODE_OPEN_DIR
 	%FileDialog.popup_file_dialog()
 
 
 func _on_close_error_button_pressed() -> void:
-	%ErrorPanel.hide()
-	hide_mouse_blocker()
+	MouseBlocker.hide()
 
 
 func _on_options_button_toggled(toggled_on: bool) -> void:
@@ -213,3 +210,7 @@ func _on_options_button_toggled(toggled_on: bool) -> void:
 func _on_clear_button_pressed() -> void:
 	for child in %ErrorList.get_children():
 		child.queue_free()
+
+
+func _on_file_dialog_canceled() -> void:
+	MouseBlocker.hide()

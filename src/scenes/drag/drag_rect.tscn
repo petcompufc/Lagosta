@@ -1,0 +1,20 @@
+[gd_scene format=3 uid="uid://rl4ek47ru8e3"]
+
+[ext_resource type="Script" uid="uid://bw58pv0h6vgnc" path="res://src/scenes/drag/drag_rect.gd" id="1_vk6xm"]
+
+[node name="DragRect" type="Control" unique_id=690383394]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_right = -1152.0
+offset_bottom = -648.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_vk6xm")
+
+[node name="Polygon2D" type="Polygon2D" parent="." unique_id=981151831]
+color = Color(0, 0.6871381, 0.71584105, 0.039215688)
+antialiased = true
+
+[connection signal="resized" from="." to="." method="_on_resized"]

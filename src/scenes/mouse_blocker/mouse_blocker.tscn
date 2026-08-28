@@ -1,0 +1,157 @@
+[gd_scene format=3 uid="uid://bxe554jaxsq63"]
+
+[ext_resource type="Script" uid="uid://yju46eufx74k" path="res://src/scenes/mouse_blocker/mouse_blocker.gd" id="1_64x4q"]
+[ext_resource type="Texture2D" uid="uid://bf2v08powrg4y" path="res://assets/icons/lagosta/lagosta_lapis.png" id="1_itxbe"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_ikpo3"]
+bg_color = Color(0.09803922, 0.09411765, 0.09411765, 1)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.99215686, 0.9411765, 0.8352941, 1)
+
+[node name="MouseBlocker" type="CanvasLayer" unique_id=1723885785]
+layer = 999
+script = ExtResource("1_64x4q")
+
+[node name="Background" type="Panel" parent="." unique_id=1631301075]
+self_modulate = Color(1, 1, 1, 0.5019608)
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="LoadingPanel" type="Panel" parent="Background" unique_id=1750734002]
+unique_name_in_owner = true
+visible = false
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -150.0
+offset_top = -75.0
+offset_right = 150.0
+offset_bottom = 75.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_ikpo3")
+
+[node name="HBoxContainer" type="HBoxContainer" parent="Background/LoadingPanel" unique_id=1209600780]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+alignment = 1
+
+[node name="LoadingImage" type="TextureRect" parent="Background/LoadingPanel/HBoxContainer" unique_id=1287254507]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(64, 64)
+custom_maximum_size = Vector2(64, 64)
+layout_mode = 2
+size_flags_horizontal = 6
+size_flags_vertical = 4
+offset_transform_enabled = true
+texture = ExtResource("1_itxbe")
+expand_mode = 3
+stretch_mode = 5
+
+[node name="LoadingLabel" type="Label" parent="Background/LoadingPanel/HBoxContainer" unique_id=1028366546]
+unique_name_in_owner = true
+process_thread_group = 2
+process_thread_group_order = 0
+process_thread_messages = 0
+custom_minimum_size = Vector2(180, 0)
+custom_maximum_size = Vector2(180, -1)
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Salvando gabaritos...
+(Isso pode demorar um pouco.)"
+horizontal_alignment = 1
+autowrap_mode = 3
+
+[node name="DialogPanel" type="Panel" parent="Background" unique_id=860534516]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -150.0
+offset_top = -75.0
+offset_right = 150.0
+offset_bottom = 75.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_ikpo3")
+
+[node name="VBoxContainer" type="VBoxContainer" parent="Background/DialogPanel" unique_id=1560285690]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -122.0
+offset_top = -48.0
+offset_right = 122.0
+offset_bottom = 48.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 8
+alignment = 1
+
+[node name="InfoContainer" type="HBoxContainer" parent="Background/DialogPanel/VBoxContainer" unique_id=843210518]
+custom_minimum_size = Vector2(0, 64)
+layout_mode = 2
+alignment = 1
+
+[node name="DialogImage" type="TextureRect" parent="Background/DialogPanel/VBoxContainer/InfoContainer" unique_id=2128645282]
+unique_name_in_owner = true
+layout_mode = 2
+offset_transform_enabled = true
+texture = ExtResource("1_itxbe")
+expand_mode = 3
+stretch_mode = 5
+
+[node name="DialogLabel" type="Label" parent="Background/DialogPanel/VBoxContainer/InfoContainer" unique_id=615080660]
+unique_name_in_owner = true
+process_thread_group = 2
+process_thread_group_order = 0
+process_thread_messages = 0
+custom_minimum_size = Vector2(180, 0)
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Aviso!"
+horizontal_alignment = 1
+autowrap_mode = 3
+
+[node name="ButtonsContainer" type="HBoxContainer" parent="Background/DialogPanel/VBoxContainer" unique_id=907740527]
+layout_mode = 2
+theme_override_constants/separation = 32
+alignment = 1
+
+[node name="CancelButton" type="Button" parent="Background/DialogPanel/VBoxContainer/ButtonsContainer" unique_id=1806854074]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 32)
+layout_mode = 2
+size_flags_horizontal = 4
+size_flags_vertical = 4
+text = "Cancelar"
+
+[node name="OkButton" type="Button" parent="Background/DialogPanel/VBoxContainer/ButtonsContainer" unique_id=192103745]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 32)
+layout_mode = 2
+size_flags_horizontal = 4
+size_flags_vertical = 4
+text = "Ok"
+
+[connection signal="pressed" from="Background/DialogPanel/VBoxContainer/ButtonsContainer/CancelButton" to="." method="_on_cancel_button_pressed"]
+[connection signal="pressed" from="Background/DialogPanel/VBoxContainer/ButtonsContainer/OkButton" to="." method="_on_ok_button_pressed"]

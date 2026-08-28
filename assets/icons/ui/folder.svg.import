@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://cdamnqeka6mtt"
-path="res://.godot/imported/lagosta_triste.png-ac3553b1d5a10e149c22cea69a89712a.ctex"
+uid="uid://dbr5525sjatyc"
+path="res://.godot/imported/folder.svg-d2d1274779943da4e6f28f5c2ba14e87.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/lagosta_triste.png"
-dest_files=["res://.godot/imported/lagosta_triste.png-ac3553b1d5a10e149c22cea69a89712a.ctex"]
+source_file="res://assets/icons/ui/folder.svg"
+dest_files=["res://.godot/imported/folder.svg-d2d1274779943da4e6f28f5c2ba14e87.ctex"]
 
 [params]
 
@@ -38,3 +38,6 @@ process/hdr_as_srgb=false
 process/hdr_clamp_exposure=false
 process/size_limit=0
 detect_3d/compress_to=1
+svg/scale=1.0
+editor/scale_with_editor_scale=false
+editor/convert_colors_with_editor_theme=false

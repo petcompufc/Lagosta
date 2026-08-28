@@ -11,12 +11,16 @@ config_version=5
 [application]
 
 config/name="Lagosta"
-run/main_scene="uid://dg1gcbbuo0bd5"
+run/main_scene="uid://b7vitc7nqtljt"
 config/features=PackedStringArray("4.7", "Forward Plus")
 boot_splash/bg_color=Color(0.0627451, 0.0627451, 0.0627451, 1)
 boot_splash/show_image=false
 boot_splash/image="uid://bf2v08powrg4y"
 config/icon="uid://bf2v08powrg4y"
+
+[autoload]
+
+MouseBlocker="*uid://bxe554jaxsq63"
 
 [display]
 

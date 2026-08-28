@@ -100,6 +100,13 @@ border_color = Color(0.18039216, 0.16862746, 0.16078432, 1)
 bg_color = Color(0.09803922, 0.09411765, 0.09411765, 1)
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_lmikw"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_7o5st"]
+bg_color = Color(0.0627451, 0.0627451, 0.0627451, 1)
+border_width_bottom = 2
+border_color = Color(0.54509807, 0.5176471, 0.46666667, 1)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_giflr"]
 content_margin_left = 8.0
 content_margin_top = 2.0
 content_margin_right = 8.0
@@ -108,6 +115,8 @@ bg_color = Color(0, 0, 0, 1)
 corner_radius_top_left = 3
 corner_radius_top_right = 3
 corner_detail = 5
+
+[sub_resource type="ImageTexture" id="ImageTexture_12e1f"]
 
 [resource]
 default_font = ExtResource("2_7o5st")
@@ -150,6 +159,13 @@ LineEdit/font_sizes/font_size = 12
 LineEdit/styles/focus = SubResource("StyleBoxEmpty_7o5st")
 LineEdit/styles/normal = SubResource("StyleBoxFlat_41ran")
 Panel/styles/panel = SubResource("StyleBoxFlat_s3qd0")
-TooltipPanel/styles/panel = SubResource("StyleBoxFlat_lmikw")
+TabContainer/constants/side_margin = 0
+TabContainer/styles/panel = SubResource("StyleBoxFlat_lmikw")
+TabContainer/styles/tabbar_background = SubResource("StyleBoxFlat_7o5st")
+TooltipPanel/styles/panel = SubResource("StyleBoxFlat_giflr")
 VBoxContainer/constants/separation = 0
 VSeparator/constants/separation = 2
+VSplitContainer/constants/autohide = 0
+VSplitContainer/constants/separation = 2
+VSplitContainer/icons/grabber = SubResource("ImageTexture_12e1f")
+VSplitContainer/styles/split_bar_background = SubResource("StyleBoxFlat_p124y")
