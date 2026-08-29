@@ -13,6 +13,7 @@ godot = {
   features = ["api-4-7", "experimental-threads", "register-docs"]
 }
 image = "0.25.10"
+itertools = "0.15.0"
 krilla = "0.8.2"
 krilla-svg = "0.8.1"
 rayon = "1.12.0"

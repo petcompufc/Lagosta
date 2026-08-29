@@ -1,8 +1,73 @@
-use godot::global::godot_print;
+use std::ops::Deref;
+
 use image::GrayImage;
+use itertools::Itertools;
 use rayon::prelude::*;
 
 use crate::tools::imgtools::{AsNormal, AsRgb};
+
+pub struct HoughParameterSpace {
+    width: u32,
+    height: u32,
+    space: Vec<HoughPoint>,
+}
+
+pub struct HoughPoint {
+    pub value: u32,
+    pub rho: f32,
+    pub theta: f32,
+}
+
+impl HoughParameterSpace {
+    pub fn new(width: u32, height: u32, space: Vec<HoughPoint>) -> Self {
+        Self {
+            width,
+            height,
+            space,
+        }
+    }
+
+    pub fn image(&self) -> GrayImage {
+        let max = self.max();
+        GrayImage::from_vec(
+            self.width,
+            self.height,
+            self.space
+                .par_iter()
+                .map(|v| ((v.value as f32 / max.value as f32) * 255.0) as u8)
+                .collect(),
+        )
+        .unwrap()
+    }
+
+    pub fn max(&self) -> &HoughPoint {
+        self.space
+            .iter()
+            .max_by(|a, b| a.value.cmp(&b.value))
+            .unwrap()
+    }
+
+    pub fn at_theta(&self, _theta: f32) -> HoughPoint {
+        todo!()
+    }
+
+    pub fn at_rho(&self, _rho: f32) -> HoughPoint {
+        todo!()
+    }
+}
+
+impl Deref for HoughParameterSpace {
+    type Target = [HoughPoint];
+    fn deref(&self) -> &Self::Target {
+        self.space.deref()
+    }
+}
+
+impl HoughPoint {
+    pub fn new(value: u32, rho: f32, theta: f32) -> Self {
+        Self { value, rho, theta }
+    }
+}
 
 pub trait ImageFilter {
     fn apply<OP>(&mut self, op: OP) -> &mut Self
@@ -20,6 +85,16 @@ pub trait ImageFilter {
     fn erode(&mut self, radius: u32) -> &mut Self;
 
     fn dilate(&mut self, radius: u32) -> &mut Self;
+
+    fn histogram(&self) -> [u32; 256];
+
+    fn histogram_normalization(&mut self) -> &mut Self;
+
+    fn edge(&mut self) -> &mut Self;
+
+    fn hough_analysis(&self, threshold: f32) -> HoughParameterSpace;
+
+    fn pixels_in_line(&self, theta: f32, rho: f32, threshold: f32) -> u32;
 }
 
 impl ImageFilter for GrayImage {
@@ -76,12 +151,12 @@ impl ImageFilter for GrayImage {
                     for nx in x_start..=x_end {
                         let neighbour = self.as_raw()[offset + nx];
                         if neighbour > max_neighbour {
-                            max_neighbour = neighbour
+                            max_neighbour = neighbour;
                         }
                     }
                 }
 
-                *p = max_neighbour
+                *p = max_neighbour;
             }
         });
         *self = copy;
@@ -108,15 +183,84 @@ impl ImageFilter for GrayImage {
                     for nx in x_start..=x_end {
                         let neighbour = self.as_raw()[offset + nx];
                         if neighbour < min_neighbour {
-                            min_neighbour = neighbour
+                            min_neighbour = neighbour;
                         }
                     }
                 }
 
-                *p = min_neighbour
+                *p = min_neighbour;
             }
         });
         *self = copy;
         self
+    }
+
+    fn histogram(&self) -> [u32; 256] {
+        let pixel_count = self.width() * self.height();
+        self.par_chunks(pixel_count as usize / rayon::max_num_threads())
+            .map(|chunk| {
+                let mut counter: [u32; 256] = [0; 256];
+                chunk.iter().for_each(|p| counter[*p as usize] += 1);
+                counter
+            })
+            .reduce(|| [0; 256], |a, b| std::array::from_fn(|i| a[i] + b[i]))
+    }
+
+    fn histogram_normalization(&mut self) -> &mut Self {
+        let counter = self.histogram();
+        let pixel_count = (self.width() * self.height()) as f32;
+        let probabilities: [f32; 256] = std::array::from_fn(|i| counter[i] as f32 / pixel_count);
+        let cdf: [f32; 256] = std::array::from_fn(|i| probabilities[0..=i].iter().sum());
+        self.apply(|p| *p = (cdf[*p as usize] * 255.0).round() as u8)
+    }
+
+    fn edge(&mut self) -> &mut Self {
+        todo!()
+    }
+
+    fn hough_analysis(&self, threshold: f32) -> HoughParameterSpace {
+        // We can use the max() between width and height (or something like that) for ranges close to 90°.
+        let d = (self.width() * self.width() + self.height() * self.height()).isqrt() as i32;
+
+        let width = (-d..=d).try_len().unwrap();
+        let height = (-180..=180).try_len().unwrap();
+
+        let space: Vec<HoughPoint> = (-180..=180)
+            .into_par_iter()
+            .map(|deg| {
+                let theta = (deg as f32 / 2.0).to_radians();
+                (-d..=d)
+                    .map(|rho| {
+                        HoughPoint::new(
+                            self.pixels_in_line(theta, rho as f32, threshold),
+                            rho as f32,
+                            theta,
+                        )
+                    })
+                    .collect::<Vec<HoughPoint>>()
+            })
+            .flatten()
+            .collect();
+
+        HoughParameterSpace::new(width as u32, height as u32, space)
+    }
+
+    fn pixels_in_line(&self, theta: f32, rho: f32, threshold: f32) -> u32 {
+        let sint = theta.sin();
+        let cost = theta.cos();
+
+        let mut count = 0;
+        let buf = self.as_raw();
+        for y in 0..self.height() {
+            for x in 0..self.width() {
+                let idx = (y * self.width() + x) as usize;
+                let distance_from_line = (x as f32 * cost + y as f32 * sint - rho).abs();
+                if buf[idx] == 255 && distance_from_line < threshold {
+                    count += 1;
+                }
+            }
+        }
+
+        count
     }
 }

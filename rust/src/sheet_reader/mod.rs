@@ -15,6 +15,14 @@ struct SheetReader {
 #[godot_api]
 impl SheetReader {
     #[func]
+    fn image_hough(path: GString) -> Option<Gd<ImageTexture>> {
+        let imgdata = image::open(path.to_string())
+            .ok()
+            .map(DynamicImage::into_luma8)?;
+        Self::create_godot_texture(&imgdata.hough_analysis(0.5).image())
+    }
+
+    #[func]
     fn process_image(path: GString, gamma: f32, threshold: u8) -> Option<Gd<ImageTexture>> {
         let mut imgdata = image::open(path.to_string())
             .ok()
