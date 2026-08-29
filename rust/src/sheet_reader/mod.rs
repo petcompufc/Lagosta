@@ -1,98 +1,50 @@
 mod reading;
 
-use crate::tools::imgtools::*;
-use godot::{
-    classes::{Image as GDImage, ImageTexture, image::Format},
-    prelude::*,
-};
-use imageproc::{
-    contrast::{self, ThresholdType}, distance_transform::Norm, image::{self, DynamicImage, GrayImage}, morphology,
-};
-use zxingcpp::BarcodeFormat;
+use godot::classes::{Image as GDImage, ImageTexture, image::Format as GDImageFormat};
+use godot::prelude::*;
+use image::{DynamicImage, GrayImage};
+
+use crate::tools::imgproc::*;
 
 #[derive(GodotClass)]
-#[class(base=Node, init, tool)]
+#[class(init, singleton)]
 struct SheetReader {
-    #[export(global_file = "*.png,*.jpg,*.jpeg,*.bmp,*.webp")]
-    #[var(set = load_image)]
-    image_path: GString,
-
-    #[export]
-    #[init(val = true)]
-    barcode: bool,
-
-    imgdata: Option<GrayImage>,
-    processed_imgdata: Option<GrayImage>,
-
-    base: Base<Node>,
+    base: Base<Object>,
 }
 
 #[godot_api]
 impl SheetReader {
-    #[signal]
-    fn image_loaded();
-    #[signal]
-    fn image_processed();
-
-    /// Loads a new image into the reader.
     #[func]
-    fn load_image(&mut self, image_path: GString) {
-        self.imgdata = image::open(image_path.to_string())
+    fn process_image(path: GString, gamma: f32, threshold: u8) -> Option<Gd<ImageTexture>> {
+        let mut imgdata = image::open(path.to_string())
             .ok()
-            .map(DynamicImage::into_luma8);
+            .map(DynamicImage::into_luma8)?;
 
-        if self.imgdata.is_none() && !image_path.is_empty() {
-            godot_error!("Couldn't open image {image_path}.");
-        }
+        imgdata
+            .neg()
+            .gamma(gamma)
+            .threshold(threshold)
+            .erode(1)
+            .dilate(1);
 
-        self.image_path = image_path;
-        self.signals().image_loaded().emit();
-    }
-
-    /// Clones image data and applies filters to it
-    #[func]
-    fn process_image(&mut self) {
-        if let Some(mut imgdata) = self.imgdata.clone() {
-            apply_filter(imgdata.as_mut(), |p| 1.0 - p.powf(1.5));
-            contrast::threshold_mut(&mut imgdata, 60, ThresholdType::Binary);
-            morphology::erode_mut(&mut imgdata, Norm::LInf, 2);
-            morphology::dilate_mut(&mut imgdata, Norm::LInf, 2);
-
-            self.processed_imgdata = Some(imgdata);
-            self.signals().image_processed().emit();
-        };
+        Self::create_godot_texture(&imgdata)
     }
 
     #[func]
-    fn read_barcode(&mut self) -> GString {
-        if let Some(imgdata) = self.imgdata.as_ref() {
-            let reader = zxingcpp::read()
-                .formats([BarcodeFormat::Aztec])
-                .try_invert(false);
-            let barcodes = reader.from(imgdata).expect("eita porra");
-            return barcodes.first().unwrap().text().as_str().into();
-        }
-        "".into()
+    fn load_image(path: GString) -> Option<Gd<ImageTexture>> {
+        let imgdata = image::open(path.to_string())
+            .ok()
+            .map(DynamicImage::into_luma8)?;
+        Self::create_godot_texture(&imgdata)
     }
 
-    #[func]
-    #[inline]
-    fn create_texture_original(&self) -> Option<Gd<ImageTexture>> {
-        Self::create_godot_texture(self.imgdata.as_ref()?)
-    }
-
-    #[func]
-    #[inline]
-    fn create_texture_processed(&self) -> Option<Gd<ImageTexture>> {
-        Self::create_godot_texture(self.processed_imgdata.as_ref()?)
-    }
-
+    #[allow(dead_code)]
     fn create_godot_texture(imgdata: &GrayImage) -> Option<Gd<ImageTexture>> {
         let godot_image = GDImage::create_from_data(
             imgdata.width() as i32,
             imgdata.height() as i32,
             false,
-            Format::L8,
+            GDImageFormat::L8,
             &imgdata.as_ref().into(),
         )?;
         ImageTexture::create_from_image(&godot_image)

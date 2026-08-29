@@ -12,6 +12,7 @@
 [ext_resource type="StyleBox" uid="uid://cr2qqj4i42f74" path="res://assets/resources/ui/bgpanel.tres" id="7_iunjt"]
 [ext_resource type="Texture2D" uid="uid://bf2v08powrg4y" path="res://assets/icons/lagosta/lagosta_lapis.png" id="8_b7d1h"]
 [ext_resource type="Texture2D" uid="uid://dxq3n2l5d6ax3" path="res://assets/icons/ui/alert-triangle.svg" id="8_l4k60"]
+[ext_resource type="Texture2D" uid="uid://dajrg3qf3hjta" path="res://assets/test_scans/out0009.png" id="12_1vicx"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_d7x7f"]
 content_margin_left = 4.0
@@ -237,7 +238,6 @@ stretch_mode = 5
 
 [node name="ReadingHSplit" type="HSplitContainer" parent="HSplitContainer/ReadingPanel" unique_id=816004888]
 unique_name_in_owner = true
-visible = false
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -284,6 +284,9 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+texture = ExtResource("12_1vicx")
+expand_mode = 4
+stretch_mode = 5
 metadata/_edit_group_ = true
 
 [node name="DragRect" parent="HSplitContainer/ReadingPanel/ReadingHSplit/VSplitContainer/SheetImagePanel/SheetTextureRect" unique_id=690383394 instance=ExtResource("7_i43hm")]

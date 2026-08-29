@@ -1,6 +1,6 @@
 use std::fmt::Display;
 
-use imageproc::image::ImageError;
+use image::ImageError;
 use krilla::error::KrillaError;
 use resvg::usvg::Error as USVGError;
 use std::io::Error as IoError;

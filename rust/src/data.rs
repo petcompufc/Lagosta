@@ -14,6 +14,7 @@ pub enum OCIModalidade {
     IniA = 0,
     IniB = 1,
     Prog = 2,
+    None = 3,
 }
 
 #[derive(GodotConvert, Var, Export, Default, Clone, Debug, Copy)]
@@ -24,6 +25,7 @@ pub enum OCIFase {
     Fase1 = 0,
     Fase2 = 1,
     Fase3 = 2,
+    None = 3,
 }
 
 impl OCIModalidade {
@@ -32,6 +34,7 @@ impl OCIModalidade {
             Self::IniA => "a",
             Self::IniB => "b",
             Self::Prog => "p",
+            Self::None => "-",
         }
     }
 }
@@ -42,6 +45,7 @@ impl OCIFase {
             Self::Fase1 => "1",
             Self::Fase2 => "2",
             Self::Fase3 => "3",
+            Self::None => "-",
         }
     }
 }
@@ -52,6 +56,7 @@ impl Display for OCIModalidade {
             Self::IniA => write!(f, "Iniciação A"),
             Self::IniB => write!(f, "Iniciação B"),
             Self::Prog => write!(f, "Programação"),
+            Self::None => write!(f, "-"),
         }
     }
 }
@@ -62,6 +67,7 @@ impl Display for OCIFase {
             Self::Fase1 => write!(f, "1"),
             Self::Fase2 => write!(f, "2"),
             Self::Fase3 => write!(f, "3"),
+            Self::None => write!(f, "-"),
         }
     }
 }
@@ -110,6 +116,7 @@ unsafe impl Send for Participante {}
 
 unsafe impl Sync for Participante {}
 
+/// why the fuck did i name this "cramp"?
 #[inline]
 fn cramp(str: &str, limit: usize) -> String {
     str.chars().take(limit).collect()

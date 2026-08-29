@@ -7,7 +7,7 @@ use godot::{
     classes::{FileAccess, Image as GDImage, ImageTexture, file_access::ModeFlags, image::Format},
     prelude::*,
 };
-use imageproc::image::{self, ExtendedColorType, GrayAlphaImage, ImageEncoder, RgbaImage};
+use image::{self, ExtendedColorType, GrayAlphaImage, ImageEncoder, RgbaImage};
 use krilla::{
     Document,
     geom::{Size, Transform},

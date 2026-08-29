@@ -1,5 +1,7 @@
 [gd_scene format=3 uid="uid://dbnk37sbg6o5m"]
 
+[ext_resource type="Script" uid="uid://ywtm3m44rdad" path="res://debug.gd" id="1_1uwqr"]
+
 [node name="Control" type="Control" unique_id=516567]
 layout_mode = 3
 anchors_preset = 15
@@ -7,3 +9,61 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+script = ExtResource("1_1uwqr")
+
+[node name="TextureRect" type="TextureRect" parent="." unique_id=766684464]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 10
+anchor_right = 1.0
+offset_top = 2.0
+offset_bottom = 1394.405
+grow_horizontal = 2
+expand_mode = 5
+stretch_mode = 4
+
+[node name="Panel" type="Panel" parent="." unique_id=1768580871]
+modulate = Color(1, 1, 1, 0.8627451)
+layout_mode = 1
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -65.0
+offset_right = 65.0
+offset_bottom = 77.333336
+grow_horizontal = 2
+scale = Vector2(0.75, 0.75)
+pivot_offset_ratio = Vector2(0.5, 0)
+metadata/_edit_group_ = true
+
+[node name="VBoxContainer" type="VBoxContainer" parent="Panel" unique_id=1198417433]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="GammaSB" type="SpinBox" parent="Panel/VBoxContainer" unique_id=139570298]
+unique_name_in_owner = true
+layout_mode = 2
+step = 0.01
+value = 2.5
+
+[node name="ThresholdSB" type="SpinBox" parent="Panel/VBoxContainer" unique_id=1480271179]
+unique_name_in_owner = true
+layout_mode = 2
+max_value = 255.0
+value = 35.0
+rounded = true
+
+[node name="OptionButton" type="OptionButton" parent="Panel/VBoxContainer" unique_id=1277646504]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_font_sizes/font_size = 12
+text_overrun_behavior = 6
+fit_to_longest_item = false
+
+[connection signal="value_changed" from="Panel/VBoxContainer/GammaSB" to="." method="update_texture" unbinds=1]
+[connection signal="value_changed" from="Panel/VBoxContainer/ThresholdSB" to="." method="update_texture" unbinds=1]
+[connection signal="item_selected" from="Panel/VBoxContainer/OptionButton" to="." method="update_texture" unbinds=1]

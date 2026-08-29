@@ -1,7 +1,7 @@
-mod sheet_reader;
-mod answer_sheet;
-mod data;
-mod tools;
+pub mod sheet_reader;
+pub mod answer_sheet;
+pub mod data;
+pub mod tools;
 // mod threader;
 
 use godot::prelude::*;
