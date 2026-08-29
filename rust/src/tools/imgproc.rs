@@ -1,3 +1,4 @@
+use godot::global::godot_print;
 use image::GrayImage;
 use rayon::prelude::*;
 
@@ -57,7 +58,7 @@ impl ImageFilter for GrayImage {
 
     fn dilate(&mut self, radius: u32) -> &mut Self {
         let width = self.width() as usize;
-        let height = self.width() as usize;
+        let height = self.height() as usize;
         let mut copy = self.clone();
         let radius = radius as i32;
 
@@ -89,7 +90,7 @@ impl ImageFilter for GrayImage {
 
     fn erode(&mut self, radius: u32) -> &mut Self {
         let width = self.width() as usize;
-        let height = self.width() as usize;
+        let height = self.height() as usize;
         let mut copy = self.clone();
         let radius = radius as i32;
 

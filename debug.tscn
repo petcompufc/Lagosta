@@ -1,6 +1,7 @@
 [gd_scene format=3 uid="uid://dbnk37sbg6o5m"]
 
 [ext_resource type="Script" uid="uid://ywtm3m44rdad" path="res://debug.gd" id="1_1uwqr"]
+[ext_resource type="Texture2D" uid="uid://dbr5525sjatyc" path="res://assets/icons/ui/folder.svg" id="2_lvjdj"]
 
 [node name="Control" type="Control" unique_id=516567]
 layout_mode = 3
@@ -48,22 +49,41 @@ grow_vertical = 2
 unique_name_in_owner = true
 layout_mode = 2
 step = 0.01
-value = 2.5
+value = 3.0
 
 [node name="ThresholdSB" type="SpinBox" parent="Panel/VBoxContainer" unique_id=1480271179]
 unique_name_in_owner = true
 layout_mode = 2
 max_value = 255.0
-value = 35.0
+value = 30.0
 rounded = true
 
-[node name="OptionButton" type="OptionButton" parent="Panel/VBoxContainer" unique_id=1277646504]
+[node name="HBoxContainer" type="HBoxContainer" parent="Panel/VBoxContainer" unique_id=1661432342]
+layout_mode = 2
+
+[node name="FolderButton" type="Button" parent="Panel/VBoxContainer/HBoxContainer" unique_id=1809809132]
+custom_minimum_size = Vector2(20, 0)
+layout_mode = 2
+icon = ExtResource("2_lvjdj")
+expand_icon = true
+
+[node name="OptionButton" type="OptionButton" parent="Panel/VBoxContainer/HBoxContainer" unique_id=1277646504]
 unique_name_in_owner = true
 layout_mode = 2
+size_flags_horizontal = 3
 theme_override_font_sizes/font_size = 12
 text_overrun_behavior = 6
 fit_to_longest_item = false
 
+[node name="FileDialog" type="FileDialog" parent="." unique_id=630430600]
+unique_name_in_owner = true
+title = "Open a Directory"
+file_mode = 2
+show_hidden_files = true
+use_native_dialog = true
+
 [connection signal="value_changed" from="Panel/VBoxContainer/GammaSB" to="." method="update_texture" unbinds=1]
 [connection signal="value_changed" from="Panel/VBoxContainer/ThresholdSB" to="." method="update_texture" unbinds=1]
-[connection signal="item_selected" from="Panel/VBoxContainer/OptionButton" to="." method="update_texture" unbinds=1]
+[connection signal="pressed" from="Panel/VBoxContainer/HBoxContainer/FolderButton" to="." method="_on_folder_button_pressed"]
+[connection signal="item_selected" from="Panel/VBoxContainer/HBoxContainer/OptionButton" to="." method="update_texture" unbinds=1]
+[connection signal="dir_selected" from="FileDialog" to="." method="_on_file_dialog_dir_selected"]

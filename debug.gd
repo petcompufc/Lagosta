@@ -4,20 +4,17 @@ extends Control
 @onready var threshold_sb: SpinBox = %ThresholdSB
 @onready var option_button: OptionButton = %OptionButton
 
+var dir := "/home/julia/tmp/lagteste"
+
 func _ready() -> void:
-	for file in DirAccess.get_files_at("./assets/test_scans/"):
-		if file.ends_with(".png"):
-			option_button.add_item(file)
-	option_button.select(12)
-	update_texture()
+	_on_file_dialog_dir_selected(dir)
 
 
 func update_texture() -> void:
-	var file := "./assets/test_scans/%s" % option_button.get_item_text(option_button.selected)
+	var file := "%s/%s" % [dir, option_button.get_item_text(option_button.selected)]
 	var gamma := gamma_sb.value
 	var threshold: int = floori(threshold_sb.value)
 	
-	print(option_button.get_item_text(option_button.selected))
 	var tex := SheetReader.process_image(
 		file,
 		gamma,
@@ -35,5 +32,17 @@ func _input(event: InputEvent) -> void:
 		update_texture()
 
 
-func _on_erode_sb_value_changed() -> void:
-	pass # Replace with function body.
+func _on_folder_button_pressed() -> void:
+	%FileDialog.show()
+
+
+func _on_file_dialog_dir_selected(new_dir: String) -> void:
+	dir = new_dir
+	option_button.clear()
+	var files := DirAccess.get_files_at(dir)
+	files.sort()
+	for file in files:
+		if file.ends_with(".png") or file.ends_with(".jpg") or file.ends_with(".jpeg"):
+			option_button.add_item(file)
+	option_button.select(0)
+	update_texture()
