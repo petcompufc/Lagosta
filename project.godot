@@ -11,7 +11,7 @@ config_version=5
 [application]
 
 config/name="Lagosta"
-run/main_scene="uid://b7vitc7nqtljt"
+run/main_scene="uid://dbnk37sbg6o5m"
 config/features=PackedStringArray("4.7", "Forward Plus")
 boot_splash/bg_color=Color(0.0627451, 0.0627451, 0.0627451, 1)
 boot_splash/show_image=false

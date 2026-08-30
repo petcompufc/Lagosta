@@ -12,10 +12,17 @@ func _ready() -> void:
 
 func update_texture() -> void:
 	var file := "%s/%s" % [dir, option_button.get_item_text(option_button.selected)]
-	#var gamma := gamma_sb.value
-	#var threshold: int = floori(threshold_sb.value)
+	var gamma := gamma_sb.value
+	var threshold: int = floori(threshold_sb.value)
 	
-	var tex := SheetReader.image_hough(file)
+	var time := Time.get_ticks_usec()
+	var tex := SheetReader.process_image(file, gamma, threshold)
+	print("%.2fs" % ((Time.get_ticks_usec() - time) / 1e6))
+	
+	time = Time.get_ticks_usec()
+	SheetReader.image_hough(file)
+	print("Hough: %.2fs" % ((Time.get_ticks_usec() - time) / 1e6))
+	
 	%TextureRect.texture = tex
 
 

@@ -34,7 +34,7 @@ impl HoughParameterSpace {
             self.height,
             self.space
                 .par_iter()
-                .map(|v| ((v.value as f32 / max.value as f32) * 255.0) as u8)
+                .map(|v| (v.value as f32 / max.value as f32).to_rgb())
                 .collect(),
         )
         .unwrap()
@@ -47,11 +47,7 @@ impl HoughParameterSpace {
             .unwrap()
     }
 
-    pub fn at_theta(&self, _theta: f32) -> HoughPoint {
-        todo!()
-    }
-
-    pub fn at_rho(&self, _rho: f32) -> HoughPoint {
+    pub fn at_tr(&self, _theta: f32, _rho: f32) -> HoughPoint {
         todo!()
     }
 }
@@ -70,6 +66,10 @@ impl HoughPoint {
 }
 
 pub trait ImageFilter {
+    fn pixelf(&self, x: u32, y: u32) -> f32;
+
+    fn pixel(&self, x: u32, y: u32) -> u8;
+
     fn apply<OP>(&mut self, op: OP) -> &mut Self
     where
         OP: Fn(&mut u8) + Sync + Send;
@@ -90,7 +90,11 @@ pub trait ImageFilter {
 
     fn histogram_normalization(&mut self) -> &mut Self;
 
-    fn edge(&mut self) -> &mut Self;
+    fn normalized_gradient(&mut self) -> &mut Self;
+
+    fn derivative_x(&self, x: u32, y: u32) -> f32;
+
+    fn derivative_y(&self, x: u32, y: u32) -> f32;
 
     fn hough_analysis(&self, threshold: f32) -> HoughParameterSpace;
 
@@ -98,6 +102,16 @@ pub trait ImageFilter {
 }
 
 impl ImageFilter for GrayImage {
+    #[inline]
+    fn pixel(&self, x: u32, y: u32) -> u8 {
+        self.as_raw()[(y * self.width() + x) as usize]
+    }
+
+    #[inline]
+    fn pixelf(&self, x: u32, y: u32) -> f32 {
+        self.as_raw()[(y * self.width() + x) as usize].to_normal()
+    }
+
     #[inline]
     fn apply<OP>(&mut self, op: OP) -> &mut Self
     where
@@ -211,11 +225,42 @@ impl ImageFilter for GrayImage {
         let pixel_count = (self.width() * self.height()) as f32;
         let probabilities: [f32; 256] = std::array::from_fn(|i| counter[i] as f32 / pixel_count);
         let cdf: [f32; 256] = std::array::from_fn(|i| probabilities[0..=i].iter().sum());
-        self.apply(|p| *p = (cdf[*p as usize] * 255.0).round() as u8)
+        self.apply(|p| *p = cdf[*p as usize].to_rgb())
     }
 
-    fn edge(&mut self) -> &mut Self {
-        todo!()
+    fn derivative_x(&self, x: u32, y: u32) -> f32 {
+        let forwards = x == 0;
+        let backwards = x == self.width() - 1;
+        let off1 = (forwards | !backwards) as u32;
+        let off2 = (backwards | !forwards) as u32;
+        let d = (off1 + off2) as f32;
+
+        (self.pixelf(x + off1, y) - self.pixelf(x - off2, y)) / d
+    }
+
+    fn derivative_y(&self, x: u32, y: u32) -> f32 {
+        let forwards = y == 0;
+        let backwards = y == self.height() - 1;
+        let off1 = (forwards | !backwards) as u32;
+        let off2 = (backwards | !forwards) as u32;
+        let d = (off1 + off2) as f32;
+
+        (self.pixelf(x, y + off1) - self.pixelf(x, y - off2)) / d
+    }
+
+    fn normalized_gradient(&mut self) -> &mut Self {
+        let mut copy = self.clone();
+
+        copy.par_iter_mut().enumerate().for_each(|(i, p)| {
+            let x = i as u32 % self.width();
+            let y = i as u32 / self.width();
+            let dx = self.derivative_x(x, y);
+            let dy = self.derivative_y(x, y);
+            *p = ((dx * dx) + (dy * dy)).sqrt().to_rgb()
+        });
+
+        *self = copy;
+        self
     }
 
     fn hough_analysis(&self, threshold: f32) -> HoughParameterSpace {
