@@ -1,17 +1,18 @@
-use std::ops::Deref;
+use std::ops::{Deref, Range};
 
 use image::GrayImage;
-use itertools::Itertools;
 use rayon::prelude::*;
 
 use crate::tools::imgtools::{AsNormal, AsRgb};
 
+#[derive(Clone, Debug)]
 pub struct HoughParameterSpace {
     width: u32,
     height: u32,
     space: Vec<HoughPoint>,
 }
 
+#[derive(Clone, Copy, Debug)]
 pub struct HoughPoint {
     pub value: u32,
     pub rho: f32,
@@ -63,6 +64,18 @@ impl HoughPoint {
     pub fn new(value: u32, rho: f32, theta: f32) -> Self {
         Self { value, rho, theta }
     }
+
+    pub fn intersection_point(&self, other: &HoughPoint) -> (f32, f32) {
+        let p1 = self.rho;
+        let p2 = other.rho;
+        let t1 = self.theta;
+        let t2 = other.theta;
+
+        let x = (p2 * t1.sin() - p1 * t2.sin()) / (t1 - t2).sin();
+        let y = (p2 * t1.cos() - p1 * t2.cos()) / (t2 - t1).sin();
+
+        (x, y)
+    }
 }
 
 pub trait ImageFilter {
@@ -96,7 +109,12 @@ pub trait ImageFilter {
 
     fn derivative_y(&self, x: u32, y: u32) -> f32;
 
-    fn hough_analysis(&self, threshold: f32) -> HoughParameterSpace;
+    fn hough_analysis(
+        &self,
+        theta_range: Range<f32>,
+        theta_step: f32,
+        threshold: f32,
+    ) -> HoughParameterSpace;
 
     fn pixels_in_line(&self, theta: f32, rho: f32, threshold: f32) -> u32;
 }
@@ -229,23 +247,23 @@ impl ImageFilter for GrayImage {
     }
 
     fn derivative_x(&self, x: u32, y: u32) -> f32 {
-        let forwards = x == 0;
-        let backwards = x == self.width() - 1;
-        let off1 = (forwards | !backwards) as u32;
-        let off2 = (backwards | !forwards) as u32;
-        let d = (off1 + off2) as f32;
-
-        (self.pixelf(x + off1, y) - self.pixelf(x - off2, y)) / d
+        if x == 0 {
+            self.pixelf(1, y) - self.pixelf(0, y)
+        } else if x == self.width() - 1 {
+            self.pixelf(x, y) - self.pixelf(x - 1, y)
+        } else {
+            (self.pixelf(x + 1, y) - self.pixelf(x - 1, y)) * 0.5
+        }
     }
 
     fn derivative_y(&self, x: u32, y: u32) -> f32 {
-        let forwards = y == 0;
-        let backwards = y == self.height() - 1;
-        let off1 = (forwards | !backwards) as u32;
-        let off2 = (backwards | !forwards) as u32;
-        let d = (off1 + off2) as f32;
-
-        (self.pixelf(x, y + off1) - self.pixelf(x, y - off2)) / d
+        if y == 0 {
+            self.pixelf(x, 1) - self.pixelf(x, 0)
+        } else if y == self.height() - 1 {
+            self.pixelf(x, y) - self.pixelf(x, y - 1)
+        } else {
+            (self.pixelf(x, y + 1) - self.pixelf(x, y - 1)) * 0.5
+        }
     }
 
     fn normalized_gradient(&mut self) -> &mut Self {
@@ -256,28 +274,54 @@ impl ImageFilter for GrayImage {
             let y = i as u32 / self.width();
             let dx = self.derivative_x(x, y);
             let dy = self.derivative_y(x, y);
-            *p = ((dx * dx) + (dy * dy)).sqrt().to_rgb()
+            *p = dx.hypot(dy).to_rgb()
         });
 
         *self = copy;
         self
     }
 
-    fn hough_analysis(&self, threshold: f32) -> HoughParameterSpace {
-        // We can use the max() between width and height (or something like that) for ranges close to 90°.
+    fn hough_analysis(
+        &self,
+        theta_range: Range<f32>,
+        theta_step: f32,
+        threshold: f32,
+    ) -> HoughParameterSpace {
         let d = (self.width() * self.width() + self.height() * self.height()).isqrt() as i32;
+        let thetas = (0..)
+            .map(|i| theta_range.start + (i as f32 * theta_step))
+            .take_while(|&theta| theta <= theta_range.end)
+            .collect::<Vec<f32>>();
 
-        let width = (-d..=d).try_len().unwrap();
-        let height = (-180..=180).try_len().unwrap();
+        let width = (d * 2 + 1) as u32;
+        let height = thetas.len() as u32;
 
-        let space: Vec<HoughPoint> = (-180..=180)
+        let white_pixels: Vec<(u32, u32)> = (0..self.height())
+            .into_par_iter()
+            .map(|y| {
+                let yoffset = y * self.width();
+                let buf = self.as_raw();
+                (0..self.width())
+                    .filter_map(|x| {
+                        if buf[(x + yoffset) as usize] == 255 {
+                            Some((x, y))
+                        } else {
+                            None
+                        }
+                    })
+                    .collect::<Vec<(u32, u32)>>()
+            })
+            .flatten()
+            .collect();
+
+        let space: Vec<HoughPoint> = thetas
             .into_par_iter()
             .map(|deg| {
-                let theta = (deg as f32 / 2.0).to_radians();
+                let theta = deg.to_radians();
                 (-d..=d)
                     .map(|rho| {
                         HoughPoint::new(
-                            self.pixels_in_line(theta, rho as f32, threshold),
+                            pixels_in_line_buffer(&white_pixels, theta, rho as f32, threshold),
                             rho as f32,
                             theta,
                         )
@@ -287,7 +331,7 @@ impl ImageFilter for GrayImage {
             .flatten()
             .collect();
 
-        HoughParameterSpace::new(width as u32, height as u32, space)
+        HoughParameterSpace::new(width, height, space)
     }
 
     fn pixels_in_line(&self, theta: f32, rho: f32, threshold: f32) -> u32 {
@@ -296,11 +340,15 @@ impl ImageFilter for GrayImage {
 
         let mut count = 0;
         let buf = self.as_raw();
-        for y in 0..self.height() {
-            for x in 0..self.width() {
-                let idx = (y * self.width() + x) as usize;
-                let distance_from_line = (x as f32 * cost + y as f32 * sint - rho).abs();
-                if buf[idx] == 255 && distance_from_line < threshold {
+
+        let width = self.width() as usize;
+        for y in 0..self.height() as usize {
+            let y_sint = y as f32 * sint - rho;
+            let y_offset = y * width;
+
+            for x in 0..width {
+                let distance_from_line = (x as f32 * cost + y_sint).abs();
+                if buf[y_offset + x] == 255 && distance_from_line < threshold {
                     count += 1;
                 }
             }
@@ -308,4 +356,22 @@ impl ImageFilter for GrayImage {
 
         count
     }
+}
+
+fn pixels_in_line_buffer(buffer: &Vec<(u32, u32)>, theta: f32, rho: f32, threshold: f32) -> u32 {
+    let sint = theta.sin();
+    let cost = theta.cos();
+
+    let mut count = 0;
+    for pixel in buffer {
+        let x = pixel.0;
+        let y = pixel.1;
+
+        let y_sint = y as f32 * sint - rho;
+        let distance_from_line = (x as f32 * cost + y_sint).abs();
+        if distance_from_line < threshold {
+            count += 1;
+        }
+    }
+    count
 }

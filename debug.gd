@@ -4,7 +4,7 @@ extends Control
 @onready var threshold_sb: SpinBox = %ThresholdSB
 @onready var option_button: OptionButton = %OptionButton
 
-var dir := "/home/julia/tmp/lagteste/edges"
+var dir := "/home/julia/tmp/lagteste/gabaritos"
 
 func _ready() -> void:
 	_on_file_dialog_dir_selected(dir)
@@ -19,9 +19,9 @@ func update_texture() -> void:
 	var tex := SheetReader.process_image(file, gamma, threshold)
 	print("%.2fs" % ((Time.get_ticks_usec() - time) / 1e6))
 	
-	time = Time.get_ticks_usec()
-	SheetReader.image_hough(file)
-	print("Hough: %.2fs" % ((Time.get_ticks_usec() - time) / 1e6))
+	#var time = Time.get_ticks_usec()
+	#var tex := SheetReader.image_hough(file)
+	#print("Hough: %.2fs" % ((Time.get_ticks_usec() - time) / 1e6))
 	
 	%TextureRect.texture = tex
 
