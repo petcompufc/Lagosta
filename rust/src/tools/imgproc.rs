@@ -41,6 +41,13 @@ impl HoughParameterSpace {
         .unwrap()
     }
 
+    pub fn closest_to(&self, count: u32) -> &HoughPoint {
+        self.space
+            .iter()
+            .min_by(|a, b| (a.value.abs_diff(count)).cmp(&b.value.abs_diff(count)))
+            .unwrap()
+    }
+
     pub fn max(&self) -> &HoughPoint {
         self.space
             .iter()

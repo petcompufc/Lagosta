@@ -25,6 +25,8 @@ const CORNERS: [(u32, u32); 4] = [
     (SHEET_WIDTH - CORNER_SIZE, SHEET_HEIGHT - 100),
 ];
 
+const EXPECTED_HOUGH_COUNT: u32 = 24;
+
 #[godot_api]
 impl SheetReader {
     #[func]
@@ -57,9 +59,18 @@ impl SheetReader {
 
             let h1 = hough_img.hough_analysis(80.0..100.0, 1.0, 0.5);
             let h2 = hough_img.hough_analysis(-10.0..10.0, 1.0, 0.5);
-            let r1 = h1.max();
-            let r2 = h2.max();
-            let _point = r1.intersection_point(r2);
+            let r1 = h1.closest_to(EXPECTED_HOUGH_COUNT);
+            let r2 = h2.closest_to(EXPECTED_HOUGH_COUNT);
+
+            godot_print!("r1: {}, r2: {}", r1.value, r2.value);
+
+            let point = r1.intersection_point(r2);
+            draw_sqr(
+                &mut imgdata,
+                corner.0 + point.0 as u32,
+                corner.1 + point.1 as u32,
+                5,
+            );
         }
         godot_print!("Post: {}x{}", imgdata.width(), imgdata.height());
 
@@ -113,5 +124,16 @@ fn fit_image_to(image: &GrayImage, target_width: u32, target_height: u32) -> Gra
         GrayImage::from_vec(target_width, target_height, result_vec).unwrap()
     } else {
         resized
+    }
+}
+
+fn draw_sqr(image: &mut GrayImage, x: u32, y: u32, radius: i32) {
+    let width = image.width();
+    for i in -radius..radius {
+        for j in -radius..radius {
+            let dy = (y as i32 + j).clamp(0, image.height() as i32 - 1) as usize;
+            let dx = (x as i32 + i).clamp(0, image.width() as i32 - 1) as usize;
+            image.as_mut()[dy * width as usize + dx] = 128
+        }
     }
 }
