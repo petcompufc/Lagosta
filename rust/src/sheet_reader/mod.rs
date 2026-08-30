@@ -2,7 +2,8 @@ mod reading;
 
 use godot::classes::{Image as GDImage, ImageTexture, image::Format as GDImageFormat};
 use godot::prelude::*;
-use image::{DynamicImage, GenericImageView, GrayImage};
+use image::{DynamicImage, GenericImageView, GrayImage, imageops};
+use rayon::iter::{IntoParallelIterator, ParallelExtend, ParallelIterator};
 
 use crate::tools::imgproc::*;
 
@@ -11,6 +12,18 @@ use crate::tools::imgproc::*;
 struct SheetReader {
     base: Base<Object>,
 }
+
+const SHEET_WIDTH: u32 = 1264;
+const SHEET_HEIGHT: u32 = 900;
+
+const CORNER_SIZE: u32 = 140;
+const CORNERS: [(u32, u32); 4] = [
+    (0, 0),
+    (SHEET_WIDTH - CORNER_SIZE, 0),
+    // -100 instead of -CORNER_SIZE for y allows the corner scan to reach further down
+    (0, SHEET_HEIGHT - 100),
+    (SHEET_WIDTH - CORNER_SIZE, SHEET_HEIGHT - 100),
+];
 
 #[godot_api]
 impl SheetReader {
@@ -27,7 +40,8 @@ impl SheetReader {
         let mut imgdata = image::open(path.to_string())
             .ok()
             .map(DynamicImage::into_luma8)?;
-
+        godot_print!("Pre: {}x{}", imgdata.width(), imgdata.height());
+        imgdata = fit_image_to(&imgdata, SHEET_WIDTH, CORNERS[3].1 + CORNER_SIZE);
         imgdata
             .neg()
             .gamma(gamma)
@@ -35,14 +49,19 @@ impl SheetReader {
             .erode(1)
             .dilate(1);
 
-        let mut hough_img = imgdata.view(0, 0, 100, 120).to_image();
-        hough_img.normalized_gradient().threshold(1);
+        for corner in CORNERS {
+            let mut hough_img = imgdata
+                .view(corner.0, corner.1, CORNER_SIZE, CORNER_SIZE)
+                .to_image();
+            hough_img.normalized_gradient().threshold(1);
 
-        let h1 = hough_img.hough_analysis(80.0..100.0, 1.0, 0.5);
-        let h2 = hough_img.hough_analysis(-10.0..10.0, 1.0, 0.5);
-        let r1 = h1.max();
-        let r2 = h2.max();
-        let _point = r1.intersection_point(r2);
+            let h1 = hough_img.hough_analysis(80.0..100.0, 1.0, 0.5);
+            let h2 = hough_img.hough_analysis(-10.0..10.0, 1.0, 0.5);
+            let r1 = h1.max();
+            let r2 = h2.max();
+            let _point = r1.intersection_point(r2);
+        }
+        godot_print!("Post: {}x{}", imgdata.width(), imgdata.height());
 
         Self::create_godot_texture(&imgdata)
     }
@@ -77,4 +96,22 @@ impl SheetReader {
     //     )?;
     //     ImageTexture::create_from_image(&godot_image)
     // }
+}
+
+#[must_use]
+fn fit_image_to(image: &GrayImage, target_width: u32, target_height: u32) -> GrayImage {
+    let scale = target_width as f32 / image.width() as f32;
+    let height = (image.height() as f32 * scale).ceil() as u32;
+    let resized = imageops::resize(image, target_width, height, imageops::FilterType::Nearest);
+
+    if height > target_height {
+        imageops::crop_imm(&resized, 0, 0, target_width, target_height).to_image()
+    } else if height < target_height {
+        let remainder = (target_height - height) * target_width;
+        let mut result_vec = resized.into_vec();
+        result_vec.par_extend((0..remainder).into_par_iter().map(|_| 255));
+        GrayImage::from_vec(target_width, target_height, result_vec).unwrap()
+    } else {
+        resized
+    }
 }
