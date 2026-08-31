@@ -2,8 +2,9 @@ mod reading;
 
 use godot::classes::{Image as GDImage, ImageTexture, image::Format as GDImageFormat};
 use godot::prelude::*;
-use image::{DynamicImage, GenericImageView, GrayImage, imageops};
+use image::{DynamicImage, GenericImageView, GrayAlphaImage, GrayImage, imageops};
 use rayon::iter::{IntoParallelIterator, ParallelExtend, ParallelIterator};
+use rayon::slice::{ParallelSliceMut};
 
 use crate::tools::imgproc::*;
 
@@ -13,19 +14,59 @@ struct SheetReader {
     base: Base<Object>,
 }
 
-const SHEET_WIDTH: u32 = 1264;
-const SHEET_HEIGHT: u32 = 900;
+#[allow(dead_code)]
+#[derive(Clone, Debug)]
+struct ItemGroup {
+    item01a_x: f32,
+    item01a_y: f32,
+    item_spacing_x: f32,
+    item_spacing_y: f32,
+    num_items: u32,
+    num_choices: u32,
+}
 
-const CORNER_SIZE: u32 = 140;
+// A5 proportion
+const SHEET_WIDTH: u32 = 1264;
+const SHEET_HEIGHT: u32 = 893;
+
+const CORNER_SIZE: u32 = 125;
+const CORNER_X2: u32 = SHEET_WIDTH - CORNER_SIZE;
+const CORNER_Y2: u32 = SHEET_HEIGHT - CORNER_SIZE;
+
 const CORNERS: [(u32, u32); 4] = [
     (0, 0),
-    (SHEET_WIDTH - CORNER_SIZE, 0),
-    // -100 instead of -CORNER_SIZE for y allows the corner scan to reach further down
-    (0, SHEET_HEIGHT - 100),
-    (SHEET_WIDTH - CORNER_SIZE, SHEET_HEIGHT - 100),
+    (CORNER_X2, 0),
+    (0, CORNER_Y2),
+    (CORNER_X2, CORNER_Y2),
 ];
 
 const EXPECTED_HOUGH_COUNT: u32 = 24;
+
+#[allow(dead_code)]
+#[allow(clippy::excessive_precision)]
+// Valores calculados de forma relativa usando uma imagem 1323x932 do gabarito oficial
+// como base, levando em conta que a área lida pelo leitor é a área interna demarcada
+// pelos marcadores de alinhamento.
+const ITEM_GROUPS: [ItemGroup; 2] = [
+    // Itens 01 a 10
+    ItemGroup {
+        item01a_x: 0.193147034,
+        item01a_y: 0.563997519,
+        item_spacing_x: 0.04735,
+        item_spacing_y: 0.042,
+        num_items: 10,
+        num_choices: 5,
+    },
+    // Itens 11 a 20
+    ItemGroup {
+        item01a_x: 0.475519632,
+        item01a_y: 0.563997519,
+        item_spacing_x: 0.04735,
+        item_spacing_y: 0.042,
+        num_items: 10,
+        num_choices: 5,
+    },
+];
 
 #[godot_api]
 impl SheetReader {
@@ -41,9 +82,12 @@ impl SheetReader {
     fn process_image(path: GString, gamma: f32, threshold: u8) -> Option<Gd<ImageTexture>> {
         let mut imgdata = image::open(path.to_string())
             .ok()
-            .map(DynamicImage::into_luma8)?;
-        godot_print!("Pre: {}x{}", imgdata.width(), imgdata.height());
+            .map(DynamicImage::into_luma_alpha8)?;
+        clear_transparent(&mut imgdata);
+        let mut imgdata = imageops::grayscale(&imgdata);
+
         imgdata = fit_image_to(&imgdata, SHEET_WIDTH, CORNERS[3].1 + CORNER_SIZE);
+        // TODO: apply filter only in the reading parts of the image
         imgdata
             .neg()
             .gamma(gamma)
@@ -57,6 +101,9 @@ impl SheetReader {
                 .to_image();
             hough_img.normalized_gradient().threshold(1);
 
+            // TODO: remove larger line blobs from the analysis
+            //  - IDEA: dilate(2), remove large blobs, erode(2)
+            // TODO: pick lines closest to expected position
             let h1 = hough_img.hough_analysis(80.0..100.0, 1.0, 0.5);
             let h2 = hough_img.hough_analysis(-10.0..10.0, 1.0, 0.5);
             let r1 = h1.closest_to(EXPECTED_HOUGH_COUNT);
@@ -72,7 +119,6 @@ impl SheetReader {
                 5,
             );
         }
-        godot_print!("Post: {}x{}", imgdata.width(), imgdata.height());
 
         Self::create_godot_texture(&imgdata)
     }
@@ -136,4 +182,13 @@ fn draw_sqr(image: &mut GrayImage, x: u32, y: u32, radius: i32) {
             image.as_mut()[dy * width as usize + dx] = 128
         }
     }
+}
+
+fn clear_transparent(image: &mut GrayAlphaImage) {
+    image.as_mut().par_chunks_mut(2).for_each(|p| {
+        if p[1] < 255 {
+            p[0] = 255;
+            p[1] = 255;
+        }
+    });
 }
