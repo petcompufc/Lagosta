@@ -1,3 +1,5 @@
+use std::fmt::Display;
+
 use crate::data::OCIFase;
 use crate::data::OCIModalidade;
 use godot::prelude::*;
@@ -5,14 +7,40 @@ use godot::prelude::*;
 #[derive(GodotConvert, Clone, Copy, Default, Debug, PartialEq, Eq, PartialOrd, Ord)]
 #[repr(u8)]
 #[godot(via = u8)]
-enum SheetAnswer {
+pub enum Answer {
+    A = 0,
+    B = 1,
+    C = 2,
+    D = 3,
+    E = 4,
     #[default]
-    None = 0,
-    A = 1,
-    B = 2,
-    C = 3,
-    D = 4,
-    E = 5,
+    None = 5,
+}
+
+impl Display for Answer {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Self::A => write!(f, "a"),
+            Self::B => write!(f, "b"),
+            Self::C => write!(f, "c"),
+            Self::D => write!(f, "d"),
+            Self::E => write!(f, "e"),
+            Self::None => write!(f, "-"),
+        }
+    }
+}
+
+impl Answer {
+    pub fn from_u8(value: u8) -> Self {
+        match value {
+            0 => Self::A,
+            1 => Self::B,
+            2 => Self::C,
+            3 => Self::D,
+            4 => Self::E,
+            _ => Self::None,
+        }
+    }
 }
 
 #[derive(GodotClass)]
@@ -30,7 +58,7 @@ pub struct Reading {
     fase: OCIFase,
 
     file_path: String,
-    answers: [SheetAnswer; 20],
+    answers: [Answer; 20],
 }
 
 #[godot_api]
@@ -51,7 +79,7 @@ impl Reading {
             modalidade,
             fase,
             file_path: file_path.to_string(),
-            answers: [SheetAnswer::default(); 20],
+            answers: [Answer::default(); 20],
         })
     }
 
@@ -61,17 +89,17 @@ impl Reading {
     }
 
     #[func]
-    fn get_answers(&self) -> Array<SheetAnswer> {
+    fn get_answers(&self) -> Array<Answer> {
         Array::from_iter(self.answers)
     }
 
     #[func]
-    fn set_answer(&mut self, idx: u8, answer: SheetAnswer) {
+    fn set_answer(&mut self, idx: u8, answer: Answer) {
         self.answers[idx as usize] = answer;
     }
 
     #[func]
-    fn set_answers(&mut self, answers: Array<SheetAnswer>) {
+    fn set_answers(&mut self, answers: Array<Answer>) {
         for (i, a) in answers.iter_shared().enumerate() {
             self.answers[i] = a
         }
