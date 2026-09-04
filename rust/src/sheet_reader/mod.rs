@@ -6,6 +6,7 @@ use godot::prelude::*;
 use image::{DynamicImage, GenericImageView, GrayAlphaImage, GrayImage, imageops};
 use rayon::prelude::*;
 use rayon::slice::ParallelSliceMut;
+use zxingcpp::BarcodeFormat;
 
 use crate::sheet_reader::reading::Answer;
 use crate::tools::imgproc::*;
@@ -147,6 +148,12 @@ impl SheetReader {
             }
         }
 
+        let reader = zxingcpp::read().formats([BarcodeFormat::Aztec]);
+        let barcodes = reader.from(&imgdata).ok()?;
+        for barcode in barcodes {
+            godot_print!("{}", barcode.text());
+        }
+
         Self::create_godot_texture(&imgdata)
     }
 
@@ -273,7 +280,6 @@ fn read_item_group(
                 let vx_top = rect.p1.lerp(rect.p2, x_lerp);
                 let vx_bottom = rect.p3.lerp(rect.p4, x_lerp);
                 let item_pos = vx_top.lerp(vx_bottom, y_lerp).as_uvec2();
-
 
                 let count = read_circle(image, item_pos.x, item_pos.y, radius, luma_threshold);
                 if count > count_threshold {
