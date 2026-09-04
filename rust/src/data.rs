@@ -1,12 +1,14 @@
 use godot::prelude::*;
 use std::fmt::Display;
 
-use crate::answer_sheet::AnswerSheet;
+use crate::generator::AnswerSheet;
 
 const MAX_CHARS_SCHOOL: usize = 60;
 const MAX_CHARS_NAME: usize = 54;
 
-#[derive(GodotConvert, Var, Export, Default, Clone, Debug, Copy, PartialEq, Eq, PartialOrd, Ord)]
+#[derive(
+    GodotConvert, Var, Export, Default, Clone, Debug, Copy, PartialEq, Eq, PartialOrd, Ord,
+)]
 #[godot(via=u8)]
 #[repr(u8)]
 pub enum OCIModalidade {
@@ -29,6 +31,15 @@ pub enum OCIFase {
 }
 
 impl OCIModalidade {
+    pub fn from_char(s: char) -> Self {
+        match s.to_ascii_lowercase() {
+            'a' => Self::IniA,
+            'b' => Self::IniB,
+            'p' => Self::Prog,
+            _ => Self::None,
+        }
+    }
+
     pub fn char(&self) -> &str {
         match self {
             Self::IniA => "a",
@@ -40,6 +51,15 @@ impl OCIModalidade {
 }
 
 impl OCIFase {
+    pub fn from_char(s: char) -> Self {
+        match s {
+            '1' => Self::Fase1,
+            '2' => Self::Fase2,
+            '3' => Self::Fase3,
+            _ => Self::None,
+        }
+    }
+
     pub fn char(&self) -> &str {
         match self {
             Self::Fase1 => "1",

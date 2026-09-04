@@ -493,12 +493,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "f70749695b063ecbf6b62949ccccde2e733ec3ecbbd71d467dca4e5c6c97cca0"
 
 [[package]]
-name = "glam"
-version = "0.33.6"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "21fef0953c54fd3de2f44b743fbf77e044c81a25faee03636dfccc0d35135e23"
-
-[[package]]
 name = "godot"
 version = "0.5.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -542,7 +536,7 @@ version = "0.5.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "57d22572dbf40e5cf4bf36c05da54f9d46dd1ff0944b6e6c7ee412c16386fe88"
 dependencies = [
- "glam 0.32.1",
+ "glam",
  "godot-bindings",
  "godot-cell",
  "godot-codegen",
@@ -782,7 +776,6 @@ name = "lago"
 version = "0.1.0"
 dependencies = [
  "base64 0.23.0",
- "glam 0.33.6",
  "godot",
  "image",
  "itertools 0.15.0",

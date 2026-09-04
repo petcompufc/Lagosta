@@ -1,5 +1,5 @@
-pub mod sheet_reader;
-pub mod answer_sheet;
+pub mod reader;
+pub mod generator;
 pub mod data;
 pub mod tools;
 // mod threader;

@@ -8,7 +8,6 @@ crate-type = ["cdylib"]
 
 [dependencies]
 base64 = "0.23.0"
-glam = "0.33.6"
 godot = {
   version = "0.5.4",
   features = ["api-4-7", "experimental-threads", "register-docs"]

@@ -2,6 +2,7 @@ use std::fmt::Display;
 
 use crate::data::OCIFase;
 use crate::data::OCIModalidade;
+use godot::classes::ImageTexture;
 use godot::prelude::*;
 
 #[derive(GodotConvert, Clone, Copy, Default, Debug, PartialEq, Eq, PartialOrd, Ord)]
@@ -64,7 +65,7 @@ pub struct Reading {
 #[godot_api]
 impl Reading {
     #[func]
-    fn create(
+    pub fn create(
         file_path: GString,
         inscricao: GString,
         nome: GString,
@@ -72,36 +73,61 @@ impl Reading {
         modalidade: OCIModalidade,
         fase: OCIFase,
     ) -> Gd<Self> {
-        Gd::from_object(Self {
+        Gd::from_object(Self::new(
+            file_path,
             inscricao,
             nome,
             escola,
             modalidade,
             fase,
+            [Answer::default(); 20],
+        ))
+    }
+
+    pub fn new(
+        file_path: GString,
+        inscricao: GString,
+        nome: GString,
+        escola: GString,
+        modalidade: OCIModalidade,
+        fase: OCIFase,
+        answers: [Answer; 20],
+    ) -> Self {
+        Self {
             file_path: file_path.to_string(),
-            answers: [Answer::default(); 20],
-        })
+            inscricao,
+            nome,
+            escola,
+            modalidade,
+            fase,
+            answers,
+        }
     }
 
     #[func]
-    fn get_file(&self) -> GString {
+    pub fn get_file(&self) -> GString {
         self.file_path.to_gstring().get_file()
     }
 
     #[func]
-    fn get_answers(&self) -> Array<Answer> {
+    pub fn get_answers(&self) -> Array<Answer> {
         Array::from_iter(self.answers)
     }
 
     #[func]
-    fn set_answer(&mut self, idx: u8, answer: Answer) {
+    pub fn set_answer(&mut self, idx: u8, answer: Answer) {
         self.answers[idx as usize] = answer;
     }
 
     #[func]
-    fn set_answers(&mut self, answers: Array<Answer>) {
+    pub fn set_answers(&mut self, answers: Array<Answer>) {
         for (i, a) in answers.iter_shared().enumerate() {
             self.answers[i] = a
         }
+    }
+
+    #[func]
+    pub fn get_texture(&self) -> Option<Gd<ImageTexture>> {
+        todo!()
     }
 }
