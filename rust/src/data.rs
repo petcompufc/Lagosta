@@ -92,7 +92,7 @@ impl Display for OCIFase {
     }
 }
 
-#[derive(GodotClass, Clone)]
+#[derive(GodotClass, Clone, Default)]
 #[class(init)]
 pub struct Participante {
     #[var]

@@ -26,8 +26,6 @@ MouseBlocker="*uid://bxe554jaxsq63"
 
 window/size/viewport_width=1000
 window/size/viewport_height=600
-window/size/window_width_override=800
-window/size/window_height_override=800
 window/stretch/aspect="expand"
 
 [gui]

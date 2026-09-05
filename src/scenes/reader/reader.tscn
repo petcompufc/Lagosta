@@ -13,6 +13,9 @@
 [ext_resource type="Texture2D" uid="uid://bf2v08powrg4y" path="res://assets/icons/lagosta/lagosta_lapis.png" id="8_b7d1h"]
 [ext_resource type="Texture2D" uid="uid://dxq3n2l5d6ax3" path="res://assets/icons/ui/alert-triangle.svg" id="8_l4k60"]
 [ext_resource type="Texture2D" uid="uid://dajrg3qf3hjta" path="res://assets/test_scans/out0009.png" id="12_1vicx"]
+[ext_resource type="Texture2D" uid="uid://dfoucxi8vafj3" path="res://assets/icons/ui/return.png" id="14_0ro0v"]
+[ext_resource type="Texture2D" uid="uid://f1mg7f1o0u3" path="res://assets/icons/ui/eye.svg" id="15_82gi8"]
+[ext_resource type="Script" uid="uid://ebpub5noejls" path="res://src/scenes/reader/view_mode_button.gd" id="16_dgryh"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_d7x7f"]
 content_margin_left = 4.0
@@ -37,6 +40,12 @@ content_margin_right = 4.0
 content_margin_bottom = 4.0
 bg_color = Color(0.28235295, 0.26666668, 0.24705882, 1)
 corner_detail = 5
+
+[sub_resource type="StyleBoxLine" id="StyleBoxLine_82gi8"]
+color = Color(0.99215686, 0.9411765, 0.8352941, 1)
+grow_begin = 0.0
+grow_end = 0.0
+thickness = 2
 
 [node name="ReaderPanel" type="Panel" unique_id=501030196]
 anchors_preset = 15
@@ -277,23 +286,90 @@ texture = ExtResource("8_b7d1h")
 expand_mode = 1
 stretch_mode = 5
 
-[node name="SheetTextureRect" type="TextureRect" parent="HSplitContainer/ReadingPanel/ReadingHSplit/VSplitContainer/SheetImagePanel" unique_id=167593899]
+[node name="VBoxContainer" type="VBoxContainer" parent="HSplitContainer/ReadingPanel/ReadingHSplit/VSplitContainer/SheetImagePanel" unique_id=611031868]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+
+[node name="SheetTextureRect" type="TextureRect" parent="HSplitContainer/ReadingPanel/ReadingHSplit/VSplitContainer/SheetImagePanel/VBoxContainer" unique_id=167593899]
+layout_mode = 2
+size_flags_vertical = 3
 texture = ExtResource("12_1vicx")
 expand_mode = 4
 stretch_mode = 5
 metadata/_edit_group_ = true
 
-[node name="DragRect" parent="HSplitContainer/ReadingPanel/ReadingHSplit/VSplitContainer/SheetImagePanel/SheetTextureRect" unique_id=690383394 instance=ExtResource("7_i43hm")]
+[node name="DragRect" parent="HSplitContainer/ReadingPanel/ReadingHSplit/VSplitContainer/SheetImagePanel/VBoxContainer/SheetTextureRect" unique_id=690383394 instance=ExtResource("7_i43hm")]
 unique_name_in_owner = true
 layout_mode = 1
 offset_right = 0.0
 offset_bottom = 0.0
+
+[node name="HSeparator" type="HSeparator" parent="HSplitContainer/ReadingPanel/ReadingHSplit/VSplitContainer/SheetImagePanel/VBoxContainer" unique_id=834436463]
+layout_mode = 2
+
+[node name="HBoxContainer" type="HBoxContainer" parent="HSplitContainer/ReadingPanel/ReadingHSplit/VSplitContainer/SheetImagePanel/VBoxContainer" unique_id=1806350137]
+layout_mode = 2
+theme = ExtResource("5_j4xan")
+
+[node name="ResetRectButton" type="Button" parent="HSplitContainer/ReadingPanel/ReadingHSplit/VSplitContainer/SheetImagePanel/VBoxContainer/HBoxContainer" unique_id=422887193]
+custom_minimum_size = Vector2(45, 45)
+layout_mode = 2
+tooltip_text = "Reseta o retângulo de alinhamento"
+icon = ExtResource("14_0ro0v")
+icon_alignment = 1
+expand_icon = true
+
+[node name="VSeparator" type="VSeparator" parent="HSplitContainer/ReadingPanel/ReadingHSplit/VSplitContainer/SheetImagePanel/VBoxContainer/HBoxContainer" unique_id=318416978]
+layout_mode = 2
+theme_override_styles/separator = SubResource("StyleBoxLine_82gi8")
+
+[node name="ViewModeButton" type="Button" parent="HSplitContainer/ReadingPanel/ReadingHSplit/VSplitContainer/SheetImagePanel/VBoxContainer/HBoxContainer" unique_id=105609825]
+custom_minimum_size = Vector2(45, 45)
+layout_mode = 2
+tooltip_text = "Alterna o modo de preview do gabarito"
+toggle_mode = true
+icon = ExtResource("15_82gi8")
+icon_alignment = 1
+expand_icon = true
+script = ExtResource("16_dgryh")
+
+[node name="VBoxContainer" type="VBoxContainer" parent="HSplitContainer/ReadingPanel/ReadingHSplit/VSplitContainer/SheetImagePanel/VBoxContainer/HBoxContainer" unique_id=358995269]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="GammaLabel" type="Label" parent="HSplitContainer/ReadingPanel/ReadingHSplit/VSplitContainer/SheetImagePanel/VBoxContainer/HBoxContainer/VBoxContainer" unique_id=1336011490]
+layout_mode = 2
+tooltip_text = "O gamma usado no processamento da imagem. Padrão: 3.0"
+mouse_filter = 1
+text = "Gamma:"
+
+[node name="GammaSpinBox" type="SpinBox" parent="HSplitContainer/ReadingPanel/ReadingHSplit/VSplitContainer/SheetImagePanel/VBoxContainer/HBoxContainer/VBoxContainer" unique_id=950750715]
+layout_mode = 2
+tooltip_text = "O gamma usado no processamento da imagem. Padrão: 3.0"
+min_value = 0.01
+max_value = 10.0
+step = 0.01
+value = 3.0
+
+[node name="VBoxContainer2" type="VBoxContainer" parent="HSplitContainer/ReadingPanel/ReadingHSplit/VSplitContainer/SheetImagePanel/VBoxContainer/HBoxContainer" unique_id=1510237197]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="ThresholdLabel" type="Label" parent="HSplitContainer/ReadingPanel/ReadingHSplit/VSplitContainer/SheetImagePanel/VBoxContainer/HBoxContainer/VBoxContainer2" unique_id=1406750753]
+layout_mode = 2
+tooltip_text = "Threshold para contar um pixel como branco na leitura. Padrão: 30"
+mouse_filter = 1
+text = "Threshold"
+
+[node name="ThresholdSpinBox" type="SpinBox" parent="HSplitContainer/ReadingPanel/ReadingHSplit/VSplitContainer/SheetImagePanel/VBoxContainer/HBoxContainer/VBoxContainer2" unique_id=966228090]
+layout_mode = 2
+tooltip_text = "Threshold para contar um pixel como branco na leitura. Padrão: 30"
+max_value = 255.0
+value = 30.0
 
 [node name="FolderDialog" type="FileDialog" parent="." unique_id=585034300]
 unique_name_in_owner = true
@@ -336,6 +412,7 @@ file_filter_toggle_enabled = false
 [connection signal="text_submitted" from="HSplitContainer/LeftContainer/SavingContainer/AnswersFileSelectContainer/AnswersLineEdit" to="." method="_on_answers_file_selected"]
 [connection signal="pressed" from="HSplitContainer/LeftContainer/SavingContainer/AnswersFileSelectContainer/AnswersFilePickButton" to="." method="_on_answers_file_pick_button_pressed"]
 [connection signal="id_pressed" from="HSplitContainer/LeftContainer/SavingContainer/ReadButton" to="." method="_on_read_button_id_pressed" flags=3]
+[connection signal="toggled" from="HSplitContainer/ReadingPanel/ReadingHSplit/VSplitContainer/SheetImagePanel/VBoxContainer/HBoxContainer/ViewModeButton" to="HSplitContainer/ReadingPanel/ReadingHSplit/VSplitContainer/SheetImagePanel/VBoxContainer/HBoxContainer/ViewModeButton" method="_on_toggled"]
 [connection signal="canceled" from="FolderDialog" to="." method="_on_dialog_canceled"]
 [connection signal="dir_selected" from="FolderDialog" to="." method="_on_directory_selected"]
 [connection signal="canceled" from="DBFileDialog" to="." method="_on_dialog_canceled"]

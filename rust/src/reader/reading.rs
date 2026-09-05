@@ -1,9 +1,15 @@
 use std::fmt::Display;
 
 use crate::data::OCIFase;
-use crate::data::OCIModalidade;
+use crate::data::Participante;
+use crate::reader::params::ReadingParams;
+use crate::reader::sheet_reader::SheetReader;
+use crate::tools::imgtools::create_godot_texture;
 use godot::classes::ImageTexture;
 use godot::prelude::*;
+
+const TOTAL_ITEM_COUNT: usize = 20;
+pub type Answers = [Answer; TOTAL_ITEM_COUNT];
 
 #[derive(GodotConvert, Clone, Copy, Default, Debug, PartialEq, Eq, PartialOrd, Ord)]
 #[repr(u8)]
@@ -44,63 +50,77 @@ impl Answer {
     }
 }
 
+#[derive(GodotConvert, Clone, Copy, Default, Debug, PartialEq, Eq, PartialOrd, Ord)]
+#[repr(u8)]
+#[godot(via = u8)]
+pub enum ReadingError {
+    #[default]
+    Todo,
+}
+
+impl Display for ReadingError {
+    fn fmt(&self, _f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        todo!()
+    }
+}
+
+/// Expects dict in format: `{answer: Answer, weight: float}
+#[derive(GodotClass, Clone, Debug)]
+#[class(no_init)]
+pub struct AnswerTable {
+    #[var]
+    pub ini_a: Array<AnyDictionary>,
+    #[var]
+    pub ini_b: Array<AnyDictionary>,
+    #[var]
+    pub prog: Array<AnyDictionary>,
+}
+
+#[godot_api]
+impl AnswerTable {
+    #[func]
+    fn create(
+        ini_a: Array<AnyDictionary>,
+        ini_b: Array<AnyDictionary>,
+        prog: Array<AnyDictionary>,
+    ) -> Gd<Self> {
+        Gd::from_object(Self { ini_a, ini_b, prog })
+    }
+}
+
 #[derive(GodotClass)]
 #[class(no_init)]
 pub struct Reading {
     #[var]
-    inscricao: GString,
-    #[var]
-    nome: GString,
-    #[var]
-    escola: GString,
-    #[var]
-    modalidade: OCIModalidade,
+    participante: Gd<Participante>,
     #[var]
     fase: OCIFase,
+    #[var]
+    errors: Array<ReadingError>,
+    #[var]
+    score: f32,
 
     file_path: String,
-    answers: [Answer; 20],
+    answers: Answers,
 }
 
 #[godot_api]
 impl Reading {
-    #[func]
-    pub fn create(
-        file_path: GString,
-        inscricao: GString,
-        nome: GString,
-        escola: GString,
-        modalidade: OCIModalidade,
-        fase: OCIFase,
-    ) -> Gd<Self> {
-        Gd::from_object(Self::new(
-            file_path,
-            inscricao,
-            nome,
-            escola,
-            modalidade,
-            fase,
-            [Answer::default(); 20],
-        ))
-    }
-
     pub fn new(
+        participante: Participante,
         file_path: GString,
-        inscricao: GString,
-        nome: GString,
-        escola: GString,
-        modalidade: OCIModalidade,
         fase: OCIFase,
-        answers: [Answer; 20],
+        answers: Answers,
+        score: f32,
+        errors: Array<ReadingError>,
     ) -> Self {
         Self {
+            participante: Gd::from_object(participante),
             file_path: file_path.to_string(),
-            inscricao,
-            nome,
-            escola,
-            modalidade,
             fase,
             answers,
+            score,
+            errors,
         }
     }
 
@@ -127,7 +147,25 @@ impl Reading {
     }
 
     #[func]
-    pub fn get_texture(&self) -> Option<Gd<ImageTexture>> {
-        todo!()
+    pub fn get_neg_texture(
+        &self,
+        reading_parameters: Gd<ReadingParams>,
+    ) -> Option<Gd<ImageTexture>> {
+        create_godot_texture(&SheetReader::neg_image(
+            self.file_path.to_string(),
+            reading_parameters.bind().gamma,
+        )?)
+    }
+
+    #[func]
+    pub fn get_processed_texture(
+        &self,
+        reading_parameters: Gd<ReadingParams>,
+    ) -> Option<Gd<ImageTexture>> {
+        create_godot_texture(&SheetReader::processed_image(
+            self.file_path.to_string(),
+            reading_parameters.bind().gamma,
+            reading_parameters.bind().threshold,
+        )?)
     }
 }
