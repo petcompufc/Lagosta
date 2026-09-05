@@ -58,41 +58,46 @@ pub struct SheetReader {
 
 #[godot_api]
 impl SheetReader {
-    // TODO: apply filters only in the reading parts of the image
-    pub fn neg_image(path: String, gamma: f32) -> Option<GrayImage> {
+    // clear_transparent(imgdata);
+    pub fn load_image(path: String) -> Option<GrayImage> {
         let mut imgdata = image::open(path).ok().map(DynamicImage::into_luma_alpha8)?;
         clear_transparent(&mut imgdata);
-        let mut imgdata = imageops::grayscale(&imgdata);
-
-        imgdata = fit_image_to(&imgdata, SHEET_WIDTH, CORNERS[3].1 + CORNER_SIZE);
-        imgdata.neg().gamma(gamma);
-
-        Some(imgdata)
+        Some(imageops::grayscale(&imgdata))
     }
 
-    pub fn processed_image(path: String, gamma: f32, threshold: u8) -> Option<GrayImage> {
-        let mut imgdata = Self::neg_image(path, gamma)?;
+    // TODO: apply filters only in the reading parts of the image
+    pub fn neg_image(imgdata: &mut GrayImage, gamma: f32) -> &mut GrayImage {
+        *imgdata = imageops::grayscale(imgdata);
+        *imgdata = fit_image_to(imgdata, SHEET_WIDTH, SHEET_HEIGHT);
+        imgdata.neg().gamma(gamma);
+        imgdata
+    }
+
+    pub fn process_image(imgdata: &mut GrayImage, gamma: f32, threshold: u8) -> &mut GrayImage {
+        Self::neg_image(imgdata, gamma);
         imgdata.threshold(threshold).erode(1).dilate(1);
-        Some(imgdata)
+        imgdata
     }
 
     #[func]
-    fn read_all(
+    fn read(
         path: GString,
         reading_params: Gd<ReadingParams>,
         participants_db: Dictionary<i32, Gd<Participante>>,
         answer_table: Option<Gd<AnswerTable>>,
     ) -> Option<Gd<Reading>> {
-        let imgdata = Self::processed_image(path.to_string(), 3.0, 30)?;
+        let mut imgdata = Self::load_image(path.to_string())?;
+
+        // Lê o código QR na imagem >original<
+        let (participante, fase) = Self::read_barcode(&imgdata, participants_db);
+
+        Self::process_image(&mut imgdata, 3.0, 30);
 
         // Lê as respostas do gabarito
         let answers = Self::read_answers(
             &imgdata,
             reading_params.bind().rect.clone().map(|r| *r.bind()),
         );
-
-        // Lê o código QR
-        let (participante, fase) = Self::read_barcode(&imgdata, participants_db);
 
         // Calcula pontuação
         let score = if let Some(at) = answer_table {
@@ -103,8 +108,9 @@ impl SheetReader {
 
         // TODO: errors and warnings
         Some(Gd::from_object(Reading::new(
-            participante,
             path,
+            -1,
+            participante,
             fase,
             *answers.as_array().unwrap(),
             score,

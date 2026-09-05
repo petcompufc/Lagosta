@@ -88,7 +88,7 @@ impl AnswerTable {
     }
 }
 
-#[derive(GodotClass)]
+#[derive(GodotClass, Default)]
 #[class(no_init)]
 pub struct Reading {
     #[var]
@@ -99,16 +99,19 @@ pub struct Reading {
     errors: Array<ReadingError>,
     #[var]
     score: f32,
-
-    file_path: String,
+    #[var]
+    pdf_page: i32,
+    #[var]
+    file_path: GString,
     answers: Answers,
 }
 
 #[godot_api]
 impl Reading {
     pub fn new(
-        participante: Participante,
         file_path: GString,
+        pdf_page: i32,
+        participante: Participante,
         fase: OCIFase,
         answers: Answers,
         score: f32,
@@ -116,10 +119,11 @@ impl Reading {
     ) -> Self {
         Self {
             participante: Gd::from_object(participante),
-            file_path: file_path.to_string(),
+            file_path,
             fase,
             answers,
             score,
+            pdf_page,
             errors,
         }
     }
@@ -151,10 +155,9 @@ impl Reading {
         &self,
         reading_parameters: Gd<ReadingParams>,
     ) -> Option<Gd<ImageTexture>> {
-        create_godot_texture(&SheetReader::neg_image(
-            self.file_path.to_string(),
-            reading_parameters.bind().gamma,
-        )?)
+        let mut imgdata = SheetReader::load_image(self.file_path.to_string())?;
+        SheetReader::neg_image(&mut imgdata, reading_parameters.bind().gamma);
+        create_godot_texture(&imgdata)
     }
 
     #[func]
@@ -162,10 +165,12 @@ impl Reading {
         &self,
         reading_parameters: Gd<ReadingParams>,
     ) -> Option<Gd<ImageTexture>> {
-        create_godot_texture(&SheetReader::processed_image(
-            self.file_path.to_string(),
+        let mut imgdata = SheetReader::load_image(self.file_path.to_string())?;
+        SheetReader::process_image(
+            &mut imgdata,
             reading_parameters.bind().gamma,
             reading_parameters.bind().threshold,
-        )?)
+        );
+        create_godot_texture(&imgdata)
     }
 }

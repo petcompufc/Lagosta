@@ -24,6 +24,10 @@ func _ready() -> void:
 		but.button_up.connect(_on_button_released)
 
 
+#func _draw() -> void:
+	#draw_rect(get_rect(), Color.RED, true)
+
+
 func _process(_delta: float) -> void:
 	var bsize := buttons[0].size / 2.0
 	polygon2d.polygon = [
@@ -32,7 +36,8 @@ func _process(_delta: float) -> void:
 		buttons[3].position + bsize,
 		buttons[2].position + bsize,
 	]
-
+	
+	queue_redraw()
 
 func set_coords(coords: PackedVector2Array) -> void:
 	for i in range(4):
