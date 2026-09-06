@@ -48,7 +48,7 @@ func _draw() -> void:
 				var p2 := arr[2].lerp(arr[3], x_lerp)
 				var center := p1.lerp(p2, y_lerp)
 				if answers[item] == j:
-					draw_circle(center, 10.0, ACTIVE_COLOR)
+					draw_circle(center, ITEM_RADIUS, ACTIVE_COLOR)
 				else:
-					draw_circle(center, 10.0, INACTIVE_COLOR)
+					draw_circle(center, ITEM_RADIUS, INACTIVE_COLOR)
 			item += 1
