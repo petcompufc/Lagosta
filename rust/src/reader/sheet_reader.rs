@@ -154,6 +154,7 @@ impl SheetReader {
         create_godot_texture(&imgdata)
     }
 
+    /// Do not believe his lies. This definetly mutates self.
     #[func]
     pub fn read_many(
         &self,
