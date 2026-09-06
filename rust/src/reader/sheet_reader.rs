@@ -166,8 +166,14 @@ impl SheetReader {
         let participants_db = dict_to_hashmap(participants_db);
         let answer_table = answer_table.map(|a| a.bind().clone());
 
-        // this is absolutely the worst fucking rust code i've ever written, but it is (kind of)
-        // necessary due to the main thread locking in godot if we use &mut self
+        // Esse é ABSOLUTAMENTE O PIOR CÓDIGO RUST QUE EU JÁ ESCREVI NA MINHA VIDA.
+        // Mas ele é meio necessário pq:
+        //  1. A main thread na godot trava se a gente usar &mut self na definição da função
+        //  2. A gente não consegue passar callables entre threads de modo seguro.
+        // Se algum mantainer futuro arranjar um jeito melhor de lidar com isso, por favor o faça.
+        // Mas por hora, isso não é muito perigoso de qualquer maneira pq é só um counter visual
+        // na tela do leitor, e o máximo de race condition que pode acontecer é o counter ficar
+        // dessincronizado.
         let counter =
             Mutex::new(unsafe { (&self.counter as *const u32 as *mut u32).as_mut_unchecked() });
 
