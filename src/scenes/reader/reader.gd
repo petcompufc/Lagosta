@@ -129,7 +129,6 @@ func get_participants_db(csv_path: String) -> Dictionary[int, Participante]:
 
 
 func popup_error(err: String) -> void:
-	print('a')
 	MouseBlocker.show_dialog(err, "Ok :(", "", MouseBlocker.LagostaIcon.SAD)
 
 

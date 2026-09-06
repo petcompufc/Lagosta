@@ -3,6 +3,7 @@ use std::ops::Deref;
 use std::path::PathBuf;
 use std::sync::Mutex;
 
+use godot::classes::ImageTexture;
 use godot::prelude::*;
 use image::{DynamicImage, GenericImageView, GrayImage, imageops};
 use rayon::iter::{IntoParallelIterator, ParallelIterator};
@@ -12,7 +13,7 @@ use crate::data::{OCIFase, OCIModalidade, Participante};
 use crate::reader::error::ReaderError;
 use crate::reader::params::{ItemGroup, ReadingParams, Rect};
 use crate::reader::reading::{Answer, AnswerTable, Answers, Reading};
-use crate::tools::imgtools::{clear_transparent, fit_image_to};
+use crate::tools::imgtools::{clear_transparent, create_godot_texture, fit_image_to};
 use crate::tools::{dict_to_hashmap, imgproc::*};
 
 // A5 proportion
@@ -126,6 +127,30 @@ impl SheetReader {
         Self::neg_image(imgdata, gamma);
         imgdata.threshold(threshold).erode(1).dilate(1);
         imgdata
+    }
+
+    #[func]
+    pub fn get_neg_texture(
+        file_path: GString,
+        reading_parameters: Gd<ReadingParams>,
+    ) -> Option<Gd<ImageTexture>> {
+        let mut imgdata = SheetReader::load_image(file_path.to_string()).ok()?;
+        SheetReader::neg_image(&mut imgdata, reading_parameters.bind().gamma);
+        create_godot_texture(&imgdata)
+    }
+
+    #[func]
+    pub fn get_processed_texture(
+        file_path: GString,
+        reading_parameters: Gd<ReadingParams>,
+    ) -> Option<Gd<ImageTexture>> {
+        let mut imgdata = SheetReader::load_image(file_path.to_string()).ok()?;
+        SheetReader::process_image(
+            &mut imgdata,
+            reading_parameters.bind().gamma,
+            reading_parameters.bind().threshold,
+        );
+        create_godot_texture(&imgdata)
     }
 
     #[func]
