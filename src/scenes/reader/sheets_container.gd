@@ -22,8 +22,6 @@ enum SORTING {
 }
 
 func _ready() -> void:
-	for i in range(10):
-		add_sheet("File %d" % i, Participante.create(str(i), "Nome %d" % i, "escola", 0))
 	set_order_crescent(order_crescent)
 
 
@@ -63,8 +61,8 @@ func update_sorting() -> void:
 		sheets_container.move_child(sheet, i)
 
 
-func add_sheet(file_name: String, participant: Participante, answers: Array[int] = []) -> void:
-	var participant_button := ParticipantButton.create(file_name, participant, answers)
+func add_sheet(file_name: String, reading: Reading, answers: Array[int] = []) -> void:
+	var participant_button := ParticipantButton.create(file_name, reading, answers)
 	participant_button.check_toggled.connect(_on_participant_button_checked.bind(participant_button))
 	participant_button.button_toggled.connect(_on_participant_button_clicked.bind(participant_button))
 	sheets_container.add_child(participant_button)

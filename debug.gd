@@ -16,14 +16,14 @@ func update_texture() -> void:
 	var threshold: int = floori(threshold_sb.value)
 	
 	var time := Time.get_ticks_usec()
-	var tex := SheetReader.process_image(file, gamma, threshold)
+	#var tex := SheetReader.process_image(file, gamma, threshold)
 	print("%.2fs" % ((Time.get_ticks_usec() - time) / 1e6))
 	
 	#var time = Time.get_ticks_usec()
 	#var tex := SheetReader.image_hough(file)
 	#print("Hough: %.2fs" % ((Time.get_ticks_usec() - time) / 1e6))
 	
-	%TextureRect.texture = tex
+	#%TextureRect.texture = tex
 
 
 func _input(event: InputEvent) -> void:

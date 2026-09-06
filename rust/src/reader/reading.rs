@@ -89,6 +89,11 @@ impl AnswerTable {
                 .unwrap_or((Answer::None, 0.0))
         })
     }
+
+    #[func]
+    fn empty() -> Gd<Self> {
+        Self::create(array![], array![], array![])
+    }
 }
 
 #[derive(GodotClass, Default)]

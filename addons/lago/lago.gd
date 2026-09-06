@@ -17,6 +17,15 @@ enum Fase {
 	NONE   = 3,
 }
 
+enum Answer {
+	A = 0,
+	B = 1,
+	C = 2, 
+	D = 3,
+	E = 4,
+	NONE = 5,
+}
+
 
 static func parse_modalidade(input: String) -> Modalidade:
 	match input.to_lower():
@@ -24,6 +33,16 @@ static func parse_modalidade(input: String) -> Modalidade:
 		"b", "2": return Modalidade.INI_B
 		"p", "3": return Modalidade.PROG
 		_: return Modalidade.NONE
+
+
+static func parse_answer(input: String) -> Answer:
+	match input.to_lower():
+		"a", "1": return Answer.A
+		"b", "2": return Answer.B
+		"c", "3": return Answer.C
+		"d", "4": return Answer.D
+		"e", "5": return Answer.E
+		_: return Answer.NONE
 
 
 static func parse_inscricao(input: String) -> String:

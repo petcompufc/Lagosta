@@ -17,7 +17,7 @@ const COLOR_ERROR := Color("#C1121F")
 		file_name = f
 		update_display()
 
-var info: Participante = Participante.new():
+var info: Reading:
 	set(i):
 		info = i
 		update_display()
@@ -27,7 +27,7 @@ var answers: Array[int]
 @onready var checkbox: CheckBox = %CheckBox
 
 
-static func create(_file_name: String, _info: Participante, _answers: Array[int] = []) -> ParticipantButton:
+static func create(_file_name: String, _info: Reading, _answers: Array[int] = []) -> ParticipantButton:
 	var new_button: ParticipantButton = BUTTON_SCENE.instantiate()
 	new_button.file_name = _file_name
 	new_button.info = _info
