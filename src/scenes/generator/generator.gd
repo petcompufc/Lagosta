@@ -102,7 +102,7 @@ func load_csv() -> void:
 			notify_error("(%d) - Número de inscrição inválido: %s" % [l, line[0]])
 			continue
 		var modalidade := Lago.parse_modalidade(line[3])
-		if modalidade == -1:
+		if modalidade == Lago.Modalidade.NONE:
 			notify_error("(%d) - Modalidade inválida: %s" % [l, line[3]])
 			continue
 

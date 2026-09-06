@@ -1,3 +1,4 @@
+class_name DragRect
 extends Control
 
 signal points_changed(points: PackedVector2Array)

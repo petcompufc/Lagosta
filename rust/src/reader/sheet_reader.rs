@@ -1,12 +1,18 @@
+use std::collections::HashMap;
+use std::ops::Deref;
+use std::path::PathBuf;
+use std::sync::Mutex;
+
 use godot::prelude::*;
 use image::{DynamicImage, GenericImageView, GrayImage, imageops};
+use rayon::iter::{IntoParallelIterator, ParallelIterator};
 use zxingcpp::BarcodeFormat;
 
 use crate::data::{OCIFase, OCIModalidade, Participante};
 use crate::reader::params::{ItemGroup, ReadingParams, Rect};
 use crate::reader::reading::{Answer, AnswerTable, Answers, Reading};
-use crate::tools::imgproc::*;
 use crate::tools::imgtools::{clear_transparent, fit_image_to};
+use crate::tools::{dict_to_hashmap, imgproc::*};
 
 // A5 proportion
 const SHEET_WIDTH: u32 = 1264;
@@ -53,11 +59,42 @@ const ITEM_GROUPS: [ItemGroup; 2] = [
 #[derive(GodotClass)]
 #[class(init, singleton)]
 pub struct SheetReader {
+    counter: u32,
     base: Base<Object>,
 }
 
 #[godot_api]
 impl SheetReader {
+    #[func]
+    pub fn init_folder(path: String) -> Array<Gd<Reading>> {
+        let entries = if let Ok(e) = std::fs::read_dir(path) {
+            e
+        } else {
+            return Array::new();
+        };
+
+        entries
+            .filter_map(|entry| {
+                let path = entry.ok()?.path();
+                if path.is_file() { Some(path) } else { None }
+            })
+            .flat_map(Self::init_file)
+            .collect()
+    }
+
+    pub fn init_file(path: PathBuf) -> Vec<Gd<Reading>> {
+        match path.extension() {
+            // TODO: check extensions
+            Some(_) => {
+                vec![Gd::from_object(Reading {
+                    file_path: path.to_string_lossy().to_string().to_gstring(),
+                    ..Default::default()
+                })]
+            }
+            None => Vec::new(),
+        }
+    }
+
     // clear_transparent(imgdata);
     pub fn load_image(path: String) -> Option<GrayImage> {
         let mut imgdata = image::open(path).ok().map(DynamicImage::into_luma_alpha8)?;
@@ -80,12 +117,66 @@ impl SheetReader {
     }
 
     #[func]
+    pub fn read_many(
+        &mut self,
+        paths: Array<GString>,
+        participants_db: Dictionary<i32, Gd<Participante>>,
+        answer_table: Option<Gd<AnswerTable>>,
+    ) -> Array<Gd<Reading>> {
+        let reading_params = ReadingParams::default();
+        let participants_db = dict_to_hashmap(participants_db);
+        let answer_table = answer_table.map(|a| a.bind().clone());
+
+        // Reset progress counter
+        self.counter = 0;
+        let counter = Mutex::new(&mut self.counter);
+
+        paths
+            .iter_shared()
+            .collect::<Vec<GString>>()
+            .into_par_iter()
+            .map(|path| {
+                let reading = Self::read_internal(
+                    path,
+                    &reading_params,
+                    &participants_db,
+                    answer_table.as_ref(),
+                )
+                .unwrap_or(Reading::default());
+                // Increment self counter
+                **counter.lock().unwrap() += 1;
+                reading
+            })
+            .collect::<Vec<Reading>>()
+            .into_iter()
+            .map(Gd::from_object) // UGLY but I DON'T FUCKING CARE
+            .collect()
+    }
+
+    #[func]
     fn read(
         path: GString,
         reading_params: Gd<ReadingParams>,
         participants_db: Dictionary<i32, Gd<Participante>>,
         answer_table: Option<Gd<AnswerTable>>,
     ) -> Option<Gd<Reading>> {
+        let participants_db = dict_to_hashmap(participants_db);
+        let answer_table = answer_table.map(|t| t.bind().clone());
+        Self::read_internal(
+            path,
+            reading_params.bind().deref(),
+            &participants_db,
+            answer_table.as_ref(),
+        )
+        .map(Gd::from_object)
+    }
+
+    fn read_internal(
+        path: GString,
+        reading_params: &ReadingParams,
+        participants_db: &HashMap<i32, Participante>,
+        answer_table: Option<&AnswerTable>,
+    ) -> Option<Reading> {
         let mut imgdata = Self::load_image(path.to_string())?;
 
         // Lê o código QR na imagem >original<
@@ -94,28 +185,25 @@ impl SheetReader {
         Self::process_image(&mut imgdata, 3.0, 30);
 
         // Lê as respostas do gabarito
-        let answers = Self::read_answers(
-            &imgdata,
-            reading_params.bind().rect.clone().map(|r| *r.bind()),
-        );
+        let answers = Self::read_answers(&imgdata, reading_params.rect.clone().map(|r| *r.bind()));
 
         // Calcula pontuação
         let score = if let Some(at) = answer_table {
-            Self::get_score(&answers, at.bind().clone(), participante.modalidade)
+            Self::get_score(&answers, at.clone(), participante.modalidade)
         } else {
             0.0
         };
 
         // TODO: errors and warnings
-        Some(Gd::from_object(Reading::new(
+        Some(Reading::new(
             path,
-            -1,
+            0,
             participante,
             fase,
             *answers.as_array().unwrap(),
             score,
             Array::new(),
-        )))
+        ))
     }
 
     #[must_use]
@@ -128,7 +216,7 @@ impl SheetReader {
         // Lê as respostas do gabarito
         *ITEM_GROUPS
             .iter()
-            .flat_map(|ig| Self::read_item_group(imgdata, ig.clone(), rect, 7, 6))
+            .flat_map(|ig| Self::read_item_group(imgdata, ig.clone(), &rect, 7, 6))
             .collect::<Vec<Answer>>()
             .as_array()
             .unwrap()
@@ -137,7 +225,7 @@ impl SheetReader {
     #[must_use]
     fn read_barcode(
         imgdata: &GrayImage,
-        participants_db: Dictionary<i32, Gd<Participante>>,
+        participants_db: &HashMap<i32, Participante>,
     ) -> (Participante, OCIFase) {
         let reader = zxingcpp::read().formats([BarcodeFormat::Aztec]);
         let text;
@@ -156,8 +244,8 @@ impl SheetReader {
             (
                 // Participante encontrado na db ou default com inscrição e modalidade preenchidos.
                 participants_db
-                    .get(inscricao.parse::<i32>().unwrap())
-                    .map(|p| p.bind().clone())
+                    .get(&inscricao.parse::<i32>().unwrap())
+                    .cloned()
                     .unwrap_or(Participante {
                         inscricao: inscricao.to_gstring(),
                         modalidade,
@@ -208,7 +296,7 @@ impl SheetReader {
     fn read_item_group(
         image: &GrayImage,
         item_group: ItemGroup,
-        rect: Rect,
+        rect: &Rect,
         item_radius: u32,
         count_threshold: u32,
     ) -> [Answer; GROUP_ITEM_COUNT] {
@@ -284,22 +372,16 @@ impl SheetReader {
             OCIModalidade::None => unreachable!(),
         };
 
-        let total_weight: f32 = table
-            .iter_shared()
-            .map(|d| d.get("weight").unwrap_or(1.0.to_variant()).to::<f32>())
-            .sum();
+        let total_weight: f32 = table.iter().map(|(_, weight)| weight).sum();
 
         let correct_sum = table
-            .iter_shared()
+            .iter()
             .zip(answers)
-            .map(|(d, answer)| {
-                let expected = d
-                    .get("answer")
-                    .unwrap_or(Answer::None.to_variant())
-                    .to::<Answer>();
-                let weight = d.get("weight").unwrap_or(1.0.to_variant()).to::<f32>();
-                if *answer == expected { weight } else { 0.0 }
-            })
+            .map(
+                |((expected, weight), answer)| {
+                    if answer == expected { *weight } else { 0.0 }
+                },
+            )
             .sum::<f32>();
 
         correct_sum / total_weight

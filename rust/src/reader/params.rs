@@ -43,3 +43,13 @@ pub struct ReadingParams {
     #[init(val = 6)]
     pub mark_threshold: u32,
 }
+
+unsafe impl Sync for ReadingParams {}
+unsafe impl Send for ReadingParams {}
+
+
+impl Default for ReadingParams {
+    fn default() -> Self {
+        Self::new_gd().bind().clone()
+    }
+}

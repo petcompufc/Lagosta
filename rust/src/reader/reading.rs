@@ -64,27 +64,42 @@ impl Display for ReadingError {
     }
 }
 
-/// Expects dict in format: `{answer: Answer, weight: float}
 #[derive(GodotClass, Clone, Debug)]
 #[class(no_init)]
 pub struct AnswerTable {
-    #[var]
-    pub ini_a: Array<AnyDictionary>,
-    #[var]
-    pub ini_b: Array<AnyDictionary>,
-    #[var]
-    pub prog: Array<AnyDictionary>,
+    pub ini_a: Vec<(Answer, f32)>,
+    pub ini_b: Vec<(Answer, f32)>,
+    pub prog: Vec<(Answer, f32)>,
 }
 
 #[godot_api]
 impl AnswerTable {
     #[func]
+    /// Expects dict in format: `{answer: Answer, weight: float}
     fn create(
         ini_a: Array<AnyDictionary>,
         ini_b: Array<AnyDictionary>,
         prog: Array<AnyDictionary>,
     ) -> Gd<Self> {
-        Gd::from_object(Self { ini_a, ini_b, prog })
+        Gd::from_object(Self {
+            ini_a: Self::array_to_table(ini_a),
+            ini_b: Self::array_to_table(ini_b),
+            prog: Self::array_to_table(prog),
+        })
+    }
+
+    fn array_to_table(array: Array<AnyDictionary>) -> Vec<(Answer, f32)> {
+        array
+            .iter_shared()
+            .map(|dict| {
+                (
+                    dict.get("answer")
+                        .unwrap_or(Answer::None.to_variant())
+                        .to::<Answer>(),
+                    dict.get("weight").unwrap_or(1.0.to_variant()).to::<f32>(),
+                )
+            })
+            .collect()
     }
 }
 
@@ -92,25 +107,28 @@ impl AnswerTable {
 #[class(no_init)]
 pub struct Reading {
     #[var]
-    participante: Gd<Participante>,
+    pub participante: Gd<Participante>,
     #[var]
-    fase: OCIFase,
+    pub fase: OCIFase,
     #[var]
-    errors: Array<ReadingError>,
+    pub errors: Array<ReadingError>,
     #[var]
-    score: f32,
+    pub score: f32,
     #[var]
-    pdf_page: i32,
+    pub pdf_page: u32,
     #[var]
-    file_path: GString,
-    answers: Answers,
+    pub file_path: GString,
+    pub answers: Answers,
 }
+
+unsafe impl Send for Reading {}
+unsafe impl Sync for Reading {}
 
 #[godot_api]
 impl Reading {
     pub fn new(
         file_path: GString,
-        pdf_page: i32,
+        pdf_page: u32,
         participante: Participante,
         fase: OCIFase,
         answers: Answers,

@@ -14,6 +14,8 @@ var answers_path: String = ""
 @onready var answers_warning_texture: TextureRect = %AnswersWarningTexture
 @onready var reading_h_split: HSplitContainer = %ReadingHSplit
 @onready var info_panel: InfoPanel = %InfoPanel
+@onready var sheet_preview_texture: TextureRect = %SheetPreviewTextureRect
+@onready var drag_rect: DragRect = %DragRect
 
 
 func _on_directory_selected(new_directory: String) -> void:
