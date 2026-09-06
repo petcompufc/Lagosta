@@ -181,7 +181,6 @@ func _on_dir_selected(dir: String) -> void:
 					)
 				else:
 					MouseBlocker.hide()
-				thread.wait_to_finish() # this is nastier lol
 		)
 
 	thread.start(f) # nyeh heh.

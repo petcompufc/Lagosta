@@ -1,6 +1,6 @@
 [gd_scene format=3 uid="uid://dbnk37sbg6o5m"]
 
-[ext_resource type="Script" uid="uid://ywtm3m44rdad" path="res://debug.gd" id="1_1uwqr"]
+[ext_resource type="Script" uid="uid://ywtm3m44rdad" path="res://src/scenes/debug.gd" id="1_1uwqr"]
 [ext_resource type="Texture2D" uid="uid://dbr5525sjatyc" path="res://assets/icons/ui/folder.svg" id="2_lvjdj"]
 
 [node name="Control" type="Control" unique_id=516567]

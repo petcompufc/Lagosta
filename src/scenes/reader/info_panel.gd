@@ -12,6 +12,7 @@ const ERROR_LABEL := preload("res://src/scenes/generator/error_label.tscn")
 @onready var scroll_container: ScrollContainer = %ScrollContainer
 @onready var warnings_v_box: VBoxContainer = %WarningsVBox
 @onready var outer_warnings_v_box: VBoxContainer = %OuterWarningsVBox
+@onready var score_label: Label = %ScoreLabel
 
 var tracked_button: ParticipantButton = null
 
@@ -56,6 +57,7 @@ func update_info() -> void:
 	school_input.text = tracked_button.info.participante.escola
 	modality_input.select(modality_input.get_item_index(tracked_button.info.participante.modalidade))
 	phase_input.select(phase_input.get_item_index(tracked_button.info.fase))
+	score_label.text = "Nota: %.2f" % tracked_button.info.score
 	
 	var children := items_container.get_children()
 	for i in range(20):

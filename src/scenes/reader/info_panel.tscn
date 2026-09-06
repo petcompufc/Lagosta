@@ -18,6 +18,7 @@ script = ExtResource("1_yihxd")
 
 [node name="ScrollContainer" type="ScrollContainer" parent="." unique_id=528154042]
 unique_name_in_owner = true
+visible = false
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -215,8 +216,16 @@ rounded = true
 allow_greater = true
 select_all_on_focus = true
 
+[node name="ScoreLabel" type="Label" parent="ScrollContainer/OuterVBox/MarginContainer/InfoVBox" unique_id=2096266950]
+unique_name_in_owner = true
+layout_mode = 2
+tooltip_text = "O número de inscrição do participante."
+mouse_filter = 1
+text = "Nota: 0.0"
+
 [node name="OuterWarningsVBox" type="VBoxContainer" parent="ScrollContainer/OuterVBox" unique_id=1932504875]
 unique_name_in_owner = true
+visible = false
 layout_mode = 2
 
 [node name="WarningsSeparator" type="HSeparator" parent="ScrollContainer/OuterVBox/OuterWarningsVBox" unique_id=2052904545]

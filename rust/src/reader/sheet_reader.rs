@@ -238,7 +238,7 @@ impl SheetReader {
         Self::process_image(&mut imgdata, 3.0, 30);
 
         // Lê as respostas do gabarito
-        let (answers, answer_errors) = Self::read_answers(&imgdata, reading_params);
+        let (answers, rect, answer_errors) = Self::read_answers(&imgdata, reading_params);
         for err in answer_errors {
             errors.push(&err.to_string().to_gstring());
         }
@@ -256,6 +256,7 @@ impl SheetReader {
             fase,
             *answers.as_array().unwrap(),
             score,
+            rect,
             errors,
         )
     }
@@ -264,7 +265,7 @@ impl SheetReader {
     fn read_answers(
         imgdata: &GrayImage,
         reading_params: &ReadingParams,
-    ) -> (Answers, Vec<ReaderError>) {
+    ) -> (Answers, Gd<Rect>, Vec<ReaderError>) {
         let mut errors = Vec::new();
 
         let rect: Rect = match reading_params.rect.as_ref() {
@@ -310,7 +311,7 @@ impl SheetReader {
             ));
         }
 
-        (answers, errors)
+        (answers, Gd::from_object(rect), errors)
     }
 
     #[allow(dead_code)]
@@ -423,8 +424,9 @@ impl SheetReader {
             }
 
             // Participante encontrado na db ou default com inscrição e modalidade preenchidos.
+            let insc = inscricao.parse::<i32>().unwrap();
             let participante = participants_db
-                .get(&inscricao.parse::<i32>().unwrap())
+                .get(&insc)
                 .cloned()
                 .unwrap_or_else(|| {
                     errors.push(ReaderError::DatabaseError(inscricao.into()));
@@ -507,6 +509,6 @@ impl SheetReader {
             })
             .sum::<f32>();
 
-        correct_sum / total_weight
+        (correct_sum / total_weight) * 10.0
     }
 }

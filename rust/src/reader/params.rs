@@ -27,6 +27,16 @@ pub struct Rect {
 #[godot_api]
 impl Rect {
     #[func]
+    pub fn from_array(array: PackedVector2Array) -> Gd<Self> {
+        Gd::from_object(Self {
+            p1: array[0],
+            p2: array[1],
+            p3: array[2],
+            p4: array[3],
+        })
+    }
+
+    #[func]
     pub fn array(&self) -> Array<Vector2> {
         array![self.p1, self.p2, self.p3, self.p4]
     }

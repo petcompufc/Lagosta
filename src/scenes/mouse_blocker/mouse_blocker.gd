@@ -9,14 +9,16 @@ enum LagostaIcon {
 	SCARED,
 	ANGRY,
 	SURPRISED,
+	CONFUSED
 }
 
-var icons: Dictionary[int, Texture2D] = {
+var icons: Dictionary[LagostaIcon, Texture2D] = {
 	LagostaIcon.PENCIL: preload("res://assets/icons/lagosta/lagosta_lapis.png"),
 	LagostaIcon.SAD: preload("res://assets/icons/lagosta/lagosta_triste.png"),
 	LagostaIcon.SCARED: preload("res://assets/icons/lagosta/lagosta_assustada.png"),
 	LagostaIcon.ANGRY: preload("res://assets/icons/lagosta/lagosta_raiva.png"),
 	LagostaIcon.SURPRISED: preload("res://assets/icons/lagosta/lagosta_surpresa.png"),
+	LagostaIcon.CONFUSED: preload("res://assets/icons/lagosta/lagosta_confusa.png"),
 }
 
 @onready var loading_image: TextureRect = %LoadingImage
@@ -42,15 +44,15 @@ func show_dialog(message: String, ok_string: String = "Ok", cancel_string: Strin
 	reset_signals()
 	dialog_panel.show()
 	loading_panel.hide()
-	
+
 	dialog_image.texture = icons[icon]
 	dialog_label.text = message
-	
+
 	ok_button.text = ok_string
 	cancel_button.text = cancel_string
 	ok_button.visible = not ok_string.is_empty()
 	cancel_button.visible = not cancel_string.is_empty()
-	
+
 	show()
 
 
@@ -64,13 +66,13 @@ func show_loading(message: String = "Carregando...", show_progress: bool = false
 	reset_signals()
 	dialog_panel.hide()
 	loading_panel.show()
-	
+
 	loading_label.text = message
 	progress_bar.value = 0
 	progress_bar.max_value = max_progress
-	
+
 	progress_container.visible = show_progress
-	
+
 	show()
 
 func set_progress(progress: float) -> void:

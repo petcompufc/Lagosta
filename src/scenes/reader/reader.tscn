@@ -14,6 +14,7 @@
 [ext_resource type="Texture2D" uid="uid://dxq3n2l5d6ax3" path="res://assets/icons/ui/alert-triangle.svg" id="8_l4k60"]
 [ext_resource type="Script" uid="uid://cn5m4x00rp52k" path="res://src/scenes/reader/thing.gd" id="12_jtwn3"]
 [ext_resource type="Texture2D" uid="uid://dfoucxi8vafj3" path="res://assets/icons/ui/return.png" id="14_0ro0v"]
+[ext_resource type="PackedScene" uid="uid://bnpfnpabj1roo" path="res://src/scenes/balls/balls_rect.tscn" id="14_jtwn3"]
 [ext_resource type="Texture2D" uid="uid://f1mg7f1o0u3" path="res://assets/icons/ui/eye.svg" id="15_82gi8"]
 [ext_resource type="Script" uid="uid://ebpub5noejls" path="res://src/scenes/reader/view_mode_button.gd" id="16_dgryh"]
 
@@ -342,8 +343,9 @@ stretch_mode = 2
 
 [node name="DragRect" parent="HSplitContainer/ReadingPanel/ReadingHSplit/VBoxContainer/SheetImagePanel/VBoxContainer/CenterContainer/Thing/SubViewportContainer/SubViewport" unique_id=690383394 instance=ExtResource("7_i43hm")]
 unique_name_in_owner = true
-offset_right = 0.0
-offset_bottom = 0.0
+
+[node name="BallsRect" parent="HSplitContainer/ReadingPanel/ReadingHSplit/VBoxContainer/SheetImagePanel/VBoxContainer/CenterContainer/Thing/SubViewportContainer/SubViewport" unique_id=1328149183 instance=ExtResource("14_jtwn3")]
+unique_name_in_owner = true
 
 [node name="HSeparator" type="HSeparator" parent="HSplitContainer/ReadingPanel/ReadingHSplit/VBoxContainer/SheetImagePanel/VBoxContainer" unique_id=834436463]
 layout_mode = 2
@@ -356,7 +358,7 @@ theme = ExtResource("5_j4xan")
 unique_name_in_owner = true
 custom_minimum_size = Vector2(45, 45)
 layout_mode = 2
-tooltip_text = "Reseta os parâmetros de leitura"
+tooltip_text = "Reseta todos os parâmetros de leitura"
 icon = ExtResource("14_0ro0v")
 icon_alignment = 1
 expand_icon = true
@@ -390,9 +392,8 @@ text = "Gamma:"
 unique_name_in_owner = true
 layout_mode = 2
 tooltip_text = "O gamma usado no processamento da imagem. Padrão: 3.0"
-min_value = 0.01
-max_value = 10.0
-step = 0.01
+min_value = 0.1
+step = 0.1
 value = 3.0
 
 [node name="VBoxContainer2" type="VBoxContainer" parent="HSplitContainer/ReadingPanel/ReadingHSplit/VBoxContainer/SheetImagePanel/VBoxContainer/HBoxContainer" unique_id=1510237197]
@@ -420,6 +421,14 @@ title = "Open a Directory"
 file_mode = 2
 access = 2
 filters = PackedStringArray("*.png", "*.jpg", "*.jpeg", "*.webp", "*.bmp")
+use_native_dialog = true
+file_filter_toggle_enabled = false
+
+[node name="SaveDialog" type="FileDialog" parent="." unique_id=1677235710]
+unique_name_in_owner = true
+oversampling_override = 1.0
+access = 2
+filters = PackedStringArray("*.csv")
 use_native_dialog = true
 file_filter_toggle_enabled = false
 
@@ -454,9 +463,14 @@ file_filter_toggle_enabled = false
 [connection signal="text_submitted" from="HSplitContainer/LeftContainer/SavingContainer/AnswersFileSelectContainer/AnswersLineEdit" to="." method="_on_answers_file_selected"]
 [connection signal="pressed" from="HSplitContainer/LeftContainer/SavingContainer/AnswersFileSelectContainer/AnswersFilePickButton" to="." method="_on_answers_file_pick_button_pressed"]
 [connection signal="id_pressed" from="HSplitContainer/LeftContainer/SavingContainer/ReadButton" to="." method="_on_read_button_id_pressed" flags=3]
+[connection signal="id_pressed" from="HSplitContainer/LeftContainer/SavingContainer/SaveButton" to="." method="_on_save_button_id_pressed"]
 [connection signal="resized" from="HSplitContainer/ReadingPanel/ReadingHSplit/VBoxContainer/SheetImagePanel/VBoxContainer/CenterContainer/Thing" to="HSplitContainer/ReadingPanel/ReadingHSplit/VBoxContainer/SheetImagePanel/VBoxContainer/CenterContainer/Thing" method="_on_resized"]
+[connection signal="points_changed" from="HSplitContainer/ReadingPanel/ReadingHSplit/VBoxContainer/SheetImagePanel/VBoxContainer/CenterContainer/Thing/SubViewportContainer/SubViewport/DragRect" to="." method="_on_drag_rect_points_changed"]
 [connection signal="pressed" from="HSplitContainer/ReadingPanel/ReadingHSplit/VBoxContainer/SheetImagePanel/VBoxContainer/HBoxContainer/ResetParamsButton" to="." method="_on_reset_params_button_pressed"]
+[connection signal="toggled" from="HSplitContainer/ReadingPanel/ReadingHSplit/VBoxContainer/SheetImagePanel/VBoxContainer/HBoxContainer/ViewModeButton" to="." method="update_sheet_view"]
 [connection signal="toggled" from="HSplitContainer/ReadingPanel/ReadingHSplit/VBoxContainer/SheetImagePanel/VBoxContainer/HBoxContainer/ViewModeButton" to="HSplitContainer/ReadingPanel/ReadingHSplit/VBoxContainer/SheetImagePanel/VBoxContainer/HBoxContainer/ViewModeButton" method="_on_toggled"]
+[connection signal="value_changed" from="HSplitContainer/ReadingPanel/ReadingHSplit/VBoxContainer/SheetImagePanel/VBoxContainer/HBoxContainer/VBoxContainer/GammaSpinBox" to="." method="_on_gamma_spin_box_value_changed"]
+[connection signal="value_changed" from="HSplitContainer/ReadingPanel/ReadingHSplit/VBoxContainer/SheetImagePanel/VBoxContainer/HBoxContainer/VBoxContainer2/ThresholdSpinBox" to="." method="_on_threshold_spin_box_value_changed"]
 [connection signal="canceled" from="FolderDialog" to="." method="_on_dialog_canceled"]
 [connection signal="dir_selected" from="FolderDialog" to="." method="_on_directory_selected"]
 [connection signal="canceled" from="DBFileDialog" to="." method="_on_dialog_canceled"]

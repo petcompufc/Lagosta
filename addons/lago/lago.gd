@@ -26,6 +26,10 @@ enum Answer {
 	NONE = 5,
 }
 
+const MODALIDADE_CHAR: Array[String] = ["A","B","P","-"]
+const FASE_CHAR: Array[String] = ["1","2","3","-"]
+const ANSWER_CHAR: Array[String] = ["a","b","c","d","e","-"]
+
 
 static func parse_modalidade(input: String) -> Modalidade:
 	match input.to_lower():
@@ -49,3 +53,7 @@ static func parse_inscricao(input: String) -> String:
 	if not input.is_valid_int():
 		return ""
 	return "%08d" % input.to_int()
+
+
+static func answers_str(answers: Array[int]) -> String:
+	return "".join(answers.map(func(a: int): return ANSWER_CHAR[a]))

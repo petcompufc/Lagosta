@@ -3,6 +3,7 @@ use std::fmt::Display;
 use crate::data::OCIFase;
 use crate::data::Participante;
 use crate::reader::params::ReadingParams;
+use crate::reader::params::Rect;
 use crate::reader::sheet_reader::SheetReader;
 use crate::tools::imgtools::create_godot_texture;
 use godot::classes::ImageTexture;
@@ -109,6 +110,8 @@ pub struct Reading {
     pub score: f32,
     #[var]
     pub file_path: GString,
+    #[var]
+    pub rect: Gd<Rect>,
     pub answers: Answers,
 }
 
@@ -123,6 +126,7 @@ impl Reading {
         fase: OCIFase,
         answers: Answers,
         score: f32,
+        rect: Gd<Rect>,
         errors: Array<GString>,
     ) -> Self {
         Self {
@@ -131,6 +135,7 @@ impl Reading {
             fase,
             answers,
             score,
+            rect,
             errors,
         }
     }

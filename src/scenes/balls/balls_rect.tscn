@@ -1,0 +1,13 @@
+[gd_scene format=3 uid="uid://bnpfnpabj1roo"]
+
+[ext_resource type="Script" uid="uid://b30jubx3ofubt" path="res://src/scenes/balls/balls_rect.gd" id="1_pt6pj"]
+
+[node name="BallsRect" type="Control" unique_id=690383394]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+script = ExtResource("1_pt6pj")

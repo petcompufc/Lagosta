@@ -25,11 +25,11 @@ func _ready() -> void:
 		but.button_up.connect(_on_button_released)
 
 
-#func _draw() -> void:
-	#draw_rect(get_rect(), Color.RED, true)
-
-
 func _process(_delta: float) -> void:
+	update_points()
+	queue_redraw()
+
+func update_points() -> void:
 	var bsize := buttons[0].size / 2.0
 	polygon2d.polygon = [
 		buttons[0].position + bsize,
@@ -37,12 +37,11 @@ func _process(_delta: float) -> void:
 		buttons[3].position + bsize,
 		buttons[2].position + bsize,
 	]
-	
-	queue_redraw()
 
 func set_coords(coords: PackedVector2Array) -> void:
+	var bsize := buttons[0].size / 2.0
 	for i in range(4):
-		buttons[i].position = coords[i]
+		buttons[i].position = coords[i] - bsize
 
 
 func set_global_coords(coords: PackedVector2Array) -> void:
@@ -50,17 +49,18 @@ func set_global_coords(coords: PackedVector2Array) -> void:
 		buttons[i].global_position = coords[i]
 
 
-func get_points_relative() -> Array[Vector2]:
+func get_points() -> Array[Vector2]:
 	return [
-		buttons[0].pos() / size,
-		buttons[1].pos() / size,
-		buttons[2].pos() / size,
-		buttons[3].pos() / size,
+		buttons[0].pos(),
+		buttons[1].pos(),
+		buttons[2].pos(),
+		buttons[3].pos(),
 	]
 
 
 func _on_button_released() -> void:
-	points_changed.emit(polygon2d.polygon)
+	update_points()
+	points_changed.emit(get_points())
 
 
 func _on_resized() -> void:
