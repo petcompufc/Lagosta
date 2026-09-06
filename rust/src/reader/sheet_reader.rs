@@ -108,7 +108,6 @@ impl SheetReader {
         }
     }
 
-    // clear_transparent(imgdata);
     pub fn load_image(path: String) -> Result<GrayImage, ReaderError> {
         let mut imgdata = image::open(path)
             .map(DynamicImage::into_luma_alpha8)
@@ -425,17 +424,14 @@ impl SheetReader {
 
             // Participante encontrado na db ou default com inscrição e modalidade preenchidos.
             let insc = inscricao.parse::<i32>().unwrap();
-            let participante = participants_db
-                .get(&insc)
-                .cloned()
-                .unwrap_or_else(|| {
-                    errors.push(ReaderError::DatabaseError(inscricao.into()));
-                    Participante {
-                        inscricao: inscricao.to_gstring(),
-                        modalidade,
-                        ..Default::default()
-                    }
-                });
+            let participante = participants_db.get(&insc).cloned().unwrap_or_else(|| {
+                errors.push(ReaderError::DatabaseError(inscricao.into()));
+                Participante {
+                    inscricao: inscricao.to_gstring(),
+                    modalidade,
+                    ..Default::default()
+                }
+            });
 
             (participante, fase, errors)
         } else {
@@ -457,7 +453,11 @@ impl SheetReader {
                 let mut hough_img = imgdata
                     .view(corner.0, corner.1, CORNER_SIZE, CORNER_SIZE)
                     .to_image();
-                hough_img.normalized_gradient().threshold(1);
+                hough_img
+                    .dilate(1)
+                    .remove_large_blobs(350)
+                    .normalized_gradient()
+                    .threshold(1);
 
                 // TODO: remove larger line blobs from the analysis
                 //  - IDEA: dilate(2), remove large blobs, erode(2)

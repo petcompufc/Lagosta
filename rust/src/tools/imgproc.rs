@@ -1,6 +1,7 @@
 use std::ops::{Deref, Range};
 
-use image::GrayImage;
+use image::{ExtendedColorType, GrayAlphaImage, GrayImage, imageops};
+use itertools::Itertools;
 use rayon::prelude::*;
 
 use crate::tools::imgtools::{AsNormal, AsRgb};
@@ -86,6 +87,8 @@ pub trait ImageFilter {
 
     fn pixel(&self, x: u32, y: u32) -> u8;
 
+    fn set_pixel(&mut self, x: u32, y: u32, val: u8);
+
     fn apply<OP>(&mut self, op: OP) -> &mut Self
     where
         OP: Fn(&mut u8) + Sync + Send;
@@ -120,6 +123,8 @@ pub trait ImageFilter {
     ) -> HoughParameterSpace;
 
     fn pixels_in_line(&self, theta: f32, rho: f32, threshold: f32) -> u32;
+
+    fn remove_large_blobs(&mut self, size_threshold: u32) -> &mut Self;
 }
 
 impl ImageFilter for GrayImage {
@@ -131,6 +136,12 @@ impl ImageFilter for GrayImage {
     #[inline]
     fn pixelf(&self, x: u32, y: u32) -> f32 {
         self.as_raw()[(y * self.width() + x) as usize].to_normal()
+    }
+
+    #[inline]
+    fn set_pixel(&mut self, x: u32, y: u32, val: u8) {
+        let width = self.width();
+        self.as_mut()[(y * width + x) as usize] = val
     }
 
     #[inline]
@@ -359,6 +370,105 @@ impl ImageFilter for GrayImage {
 
         count
     }
+
+    fn remove_large_blobs(&mut self, size_threshold: u32) -> &mut GrayImage {
+        let width = self.width();
+        let height = self.height();
+
+        let mut clone = imageops::grayscale_alpha(self);
+        let blobs = (0..width)
+            .cartesian_product(0..height)
+            .filter_map(|(x, y)| {
+                if get_alpha(&clone, x, y) != 1 && get_value(&clone, x, y) == 255 {
+                    Some(depth_search(&mut clone, x, y))
+                } else {
+                    None
+                }
+            });
+
+        for blob in blobs {
+            if blob.len() > size_threshold as usize {
+                image::save_buffer_with_format(
+                    "thing.png",
+                    self,
+                    self.width(),
+                    self.height(),
+                    ExtendedColorType::L8,
+                    image::ImageFormat::Png,
+                ).unwrap();
+                blob.into_iter().for_each(|(x, y)| self.set_pixel(x, y, 0));
+                image::save_buffer_with_format(
+                    "thing2.png",
+                    self,
+                    self.width(),
+                    self.height(),
+                    ExtendedColorType::L8,
+                    image::ImageFormat::Png,
+                ).unwrap();
+            }
+        }
+
+        self
+    }
+}
+
+fn get_value(imgdata: &GrayAlphaImage, x: u32, y: u32) -> u8 {
+    let idx = (x * 2) + (y * imgdata.width() * 2);
+    imgdata.as_ref()[idx as usize]
+}
+
+fn get_alpha(imgdata: &GrayAlphaImage, x: u32, y: u32) -> u8 {
+    let idx = (x * 2) + (y * imgdata.width() * 2) + 1;
+    imgdata.as_ref()[idx as usize]
+}
+
+fn set_alpha(imgdata: &mut GrayAlphaImage, x: u32, y: u32, value: u8) {
+    let idx = (x * 2) + (y * imgdata.width() * 2) + 1;
+    imgdata.as_mut()[idx as usize] = value
+}
+
+fn depth_search(imgdata: &mut GrayAlphaImage, start_x: u32, start_y: u32) -> Vec<(u32, u32)> {
+    let mut blob: Vec<(u32, u32)> = vec![];
+    let mut stack: Vec<(u32, u32)> = vec![(start_x, start_y)];
+
+    set_alpha(imgdata, start_x, start_y, 1); // mark start as visited
+    while let Some((x, y)) = stack.pop() {
+        let neighbours = get_unvisited_neighbours(imgdata, x, y);
+        stack.extend(neighbours);
+        if get_value(imgdata, x, y) == 255 {
+            blob.push((x, y)); // add white pixels coords to blob
+        }
+    }
+
+    blob
+}
+
+fn get_unvisited_neighbours(imgdata: &mut GrayAlphaImage, x: u32, y: u32) -> Vec<(u32, u32)> {
+    let mut neighbours = Vec::with_capacity(8);
+    let width = imgdata.width() as i32;
+    let height = imgdata.height() as i32;
+
+    (-1..=1).cartesian_product(-1..=1).for_each(|(i, j)| {
+        let yi = y as i32 + i;
+        if yi < 0 || yi >= height {
+            return; // skip borders
+        }
+
+        let xi = x as i32 + j;
+        if xi < 0
+            || xi >= width
+            || (j == 0 && i == 0)
+            || get_value(imgdata, xi as u32, yi as u32) == 0
+            || get_alpha(imgdata, xi as u32, yi as u32) == 1
+        {
+            return; // skip center, borders, black pixels, and marked pixels.
+        }
+
+        set_alpha(imgdata, xi as u32, yi as u32, 1); // mark as visited
+        neighbours.push((xi as u32, yi as u32));
+    });
+
+    neighbours
 }
 
 fn pixels_in_line_buffer(buffer: &Vec<(u32, u32)>, theta: f32, rho: f32, threshold: f32) -> u32 {
