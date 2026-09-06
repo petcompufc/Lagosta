@@ -19,7 +19,9 @@ pub enum OCIModalidade {
     None = 3,
 }
 
-#[derive(GodotConvert, Var, Export, Default, Clone, Debug, Copy)]
+#[derive(
+    GodotConvert, Var, Export, Default, Clone, Debug, Copy, PartialEq, Eq, PartialOrd, Ord,
+)]
 #[godot(via=u8)]
 #[repr(u8)]
 pub enum OCIFase {

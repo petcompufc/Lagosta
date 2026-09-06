@@ -417,7 +417,7 @@ oversampling_override = 1.0
 title = "Open a Directory"
 file_mode = 2
 access = 2
-filters = PackedStringArray("*.png", "*.jpg", "*.jpeg", "*.webp", "*.bmp", "*.pdf")
+filters = PackedStringArray("*.png", "*.jpg", "*.jpeg", "*.webp", "*.bmp")
 use_native_dialog = true
 file_filter_toggle_enabled = false
 

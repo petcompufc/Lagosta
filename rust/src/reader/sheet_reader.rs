@@ -9,6 +9,7 @@ use rayon::iter::{IntoParallelIterator, ParallelIterator};
 use zxingcpp::BarcodeFormat;
 
 use crate::data::{OCIFase, OCIModalidade, Participante};
+use crate::reader::error::ReaderError;
 use crate::reader::params::{ItemGroup, ReadingParams, Rect};
 use crate::reader::reading::{Answer, AnswerTable, Answers, Reading};
 use crate::tools::imgtools::{clear_transparent, fit_image_to};
@@ -96,10 +97,12 @@ impl SheetReader {
     }
 
     // clear_transparent(imgdata);
-    pub fn load_image(path: String) -> Option<GrayImage> {
-        let mut imgdata = image::open(path).ok().map(DynamicImage::into_luma_alpha8)?;
+    pub fn load_image(path: String) -> Result<GrayImage, ReaderError> {
+        let mut imgdata = image::open(path)
+            .map(DynamicImage::into_luma_alpha8)
+            .map_err(ReaderError::from)?;
         clear_transparent(&mut imgdata);
-        Some(imageops::grayscale(&imgdata))
+        Ok(imageops::grayscale(&imgdata))
     }
 
     // TODO: apply filters only in the reading parts of the image
@@ -141,9 +144,9 @@ impl SheetReader {
                     &reading_params,
                     &participants_db,
                     answer_table.as_ref(),
-                )
-                .unwrap_or(Reading::default());
+                );
                 // Increment self counter
+                // Unwrap: these threads shouldn't panic... right?
                 **counter.lock().unwrap() += 1;
                 reading
             })
@@ -159,16 +162,15 @@ impl SheetReader {
         reading_params: Gd<ReadingParams>,
         participants_db: Dictionary<i32, Gd<Participante>>,
         answer_table: Option<Gd<AnswerTable>>,
-    ) -> Option<Gd<Reading>> {
+    ) -> Gd<Reading> {
         let participants_db = dict_to_hashmap(participants_db);
         let answer_table = answer_table.map(|t| t.bind().clone());
-        Self::read_internal(
+        Gd::from_object(Self::read_internal(
             path,
             reading_params.bind().deref(),
             &participants_db,
             answer_table.as_ref(),
-        )
-        .map(Gd::from_object)
+        ))
     }
 
     fn read_internal(
@@ -176,16 +178,29 @@ impl SheetReader {
         reading_params: &ReadingParams,
         participants_db: &HashMap<i32, Participante>,
         answer_table: Option<&AnswerTable>,
-    ) -> Option<Reading> {
-        let mut imgdata = Self::load_image(path.to_string())?;
+    ) -> Reading {
+        let mut imgdata = if let Ok(img) = Self::load_image(path.to_string()) {
+            img
+        } else {
+            return Reading::default();
+        };
+
+        let mut errors = Array::new();
 
         // Lê o código QR na imagem >original<
-        let (participante, fase) = Self::read_barcode(&imgdata, participants_db);
+        let (participante, fase, barcode_errors) = Self::read_barcode(&imgdata, participants_db);
+        for err in barcode_errors {
+            errors.push(&err.to_string().to_gstring());
+        }
 
         Self::process_image(&mut imgdata, 3.0, 30);
 
         // Lê as respostas do gabarito
-        let answers = Self::read_answers(&imgdata, reading_params.rect.clone().map(|r| *r.bind()));
+        let (answers, answer_errors) =
+            Self::read_answers(&imgdata, reading_params.rect.clone().map(|r| *r.bind()));
+        for err in answer_errors {
+            errors.push(&err.to_string().to_gstring());
+        }
 
         // Calcula pontuação
         let score = if let Some(at) = answer_table {
@@ -195,67 +210,73 @@ impl SheetReader {
         };
 
         // TODO: errors and warnings
-        Some(Reading::new(
+        Reading::new(
             path,
-            0,
             participante,
             fase,
             *answers.as_array().unwrap(),
             score,
-            Array::new(),
-        ))
+            errors,
+        )
     }
 
     #[must_use]
-    fn read_answers(imgdata: &GrayImage, reading_rect: Option<Rect>) -> Answers {
+    fn read_answers(
+        imgdata: &GrayImage,
+        reading_rect: Option<Rect>,
+    ) -> (Answers, Vec<ReaderError>) {
         let rect: Rect = match reading_rect {
             Some(r) => r,
             None => Self::get_rect(imgdata),
         };
 
         // Lê as respostas do gabarito
-        *ITEM_GROUPS
-            .iter()
-            .flat_map(|ig| Self::read_item_group(imgdata, ig.clone(), &rect, 7, 6))
-            .collect::<Vec<Answer>>()
-            .as_array()
-            .unwrap()
+        (
+            *ITEM_GROUPS
+                .iter()
+                .flat_map(|ig| Self::read_item_group(imgdata, ig.clone(), &rect, 7, 6).0)
+                .collect::<Vec<Answer>>()
+                .as_array()
+                .unwrap(),
+            vec![],
+        )
     }
 
+    #[allow(dead_code)]
     #[must_use]
-    fn read_barcode(
-        imgdata: &GrayImage,
-        participants_db: &HashMap<i32, Participante>,
-    ) -> (Participante, OCIFase) {
-        let reader = zxingcpp::read().formats([BarcodeFormat::Aztec]);
-        let text;
-        if let Ok(barcodes) = reader.from(imgdata)
-            && let Some(barcode) = barcodes.first()
-        {
-            text = barcode.text();
-            let modalidade = OCIModalidade::from_char(text.chars().nth(0).unwrap_or('-'));
-            let fase = OCIFase::from_char(text.chars().nth(1).unwrap_or('-'));
-            let inscricao = if text.len() > 2 {
-                &text[2..]
-            } else {
-                "00000000" // TODO: type inscrição && impl default?
-            };
+    fn read_item_group(
+        image: &GrayImage,
+        item_group: ItemGroup,
+        rect: &Rect,
+        item_radius: u32,
+        count_threshold: u32,
+    ) -> ([Answer; GROUP_ITEM_COUNT], Vec<ReaderError>) {
+        // TODO: Check for multiple marks
+        // TODO: Check for possible alignment errors
+        let answers = std::array::from_fn(|i| {
+            let y_lerp = item_group.item01a_y + item_group.item_spacing_y * i as f32;
+            (0..CHOICE_COUNT)
+                .filter_map(|c| {
+                    let x_lerp = item_group.item01a_x + item_group.item_spacing_x * c as f32;
 
-            (
-                // Participante encontrado na db ou default com inscrição e modalidade preenchidos.
-                participants_db
-                    .get(&inscricao.parse::<i32>().unwrap())
-                    .cloned()
-                    .unwrap_or(Participante {
-                        inscricao: inscricao.to_gstring(),
-                        modalidade,
-                        ..Default::default()
-                    }),
-                fase,
-            )
-        } else {
-            (Participante::default(), OCIFase::None)
-        }
+                    let vx_top = rect.p1.lerp(rect.p2, x_lerp);
+                    let vx_bottom = rect.p3.lerp(rect.p4, x_lerp);
+                    let item_pos = vx_top.lerp(vx_bottom, y_lerp);
+
+                    let reading =
+                        Self::read_circle(image, item_pos.x as u32, item_pos.y as u32, item_radius);
+
+                    if reading > count_threshold {
+                        Some((c, reading))
+                    } else {
+                        None
+                    }
+                })
+                .max_by(|(_, c1), (_, c2)| c1.cmp(c2))
+                .map(|(c, _)| Answer::from_u8(c))
+                .unwrap_or(Answer::None)
+        });
+        (answers, vec![])
     }
 
     #[must_use]
@@ -291,39 +312,58 @@ impl SheetReader {
         count
     }
 
-    #[allow(dead_code)]
     #[must_use]
-    fn read_item_group(
-        image: &GrayImage,
-        item_group: ItemGroup,
-        rect: &Rect,
-        item_radius: u32,
-        count_threshold: u32,
-    ) -> [Answer; GROUP_ITEM_COUNT] {
-        // TODO: Check for multiple marks
-        std::array::from_fn(|i| {
-            let y_lerp = item_group.item01a_y + item_group.item_spacing_y * i as f32;
-            (0..CHOICE_COUNT)
-                .filter_map(|c| {
-                    let x_lerp = item_group.item01a_x + item_group.item_spacing_x * c as f32;
+    fn read_barcode(
+        imgdata: &GrayImage,
+        participants_db: &HashMap<i32, Participante>,
+    ) -> (Participante, OCIFase, Vec<ReaderError>) {
+        let reader = zxingcpp::read().formats([BarcodeFormat::Aztec]);
+        let text;
+        if let Ok(barcodes) = reader.from(imgdata)
+            && let Some(barcode) = barcodes.first()
+        {
+            let mut errors = Vec::new();
 
-                    let vx_top = rect.p1.lerp(rect.p2, x_lerp);
-                    let vx_bottom = rect.p3.lerp(rect.p4, x_lerp);
-                    let item_pos = vx_top.lerp(vx_bottom, y_lerp);
+            text = barcode.text();
 
-                    let reading =
-                        Self::read_circle(image, item_pos.x as u32, item_pos.y as u32, item_radius);
+            let modalidade = OCIModalidade::from_char(text.chars().nth(0).unwrap_or('-'));
+            let fase = OCIFase::from_char(text.chars().nth(1).unwrap_or('-'));
+            let inscricao = if text.len() > 2 {
+                &text[2..]
+            } else {
+                "00000000" // TODO: type inscrição && impl default?
+            };
 
-                    if reading > count_threshold {
-                        Some((c, reading))
-                    } else {
-                        None
+            if modalidade == OCIModalidade::None || fase == OCIFase::None || inscricao == "00000000"
+            {
+                errors.push(ReaderError::BarcodeRead(format!(
+                    "Código de barras em formato inválido: {text}",
+                )));
+            }
+
+            // Participante encontrado na db ou default com inscrição e modalidade preenchidos.
+            let participante = participants_db
+                .get(&inscricao.parse::<i32>().unwrap())
+                .cloned()
+                .unwrap_or_else(|| {
+                    errors.push(ReaderError::DatabaseError(inscricao.into()));
+                    Participante {
+                        inscricao: inscricao.to_gstring(),
+                        modalidade,
+                        ..Default::default()
                     }
-                })
-                .max_by(|(_, c1), (_, c2)| c1.cmp(c2))
-                .map(|(c, _)| Answer::from_u8(c))
-                .unwrap_or(Answer::None)
-        })
+                });
+
+            (participante, fase, errors)
+        } else {
+            (
+                Participante::default(),
+                OCIFase::None,
+                vec![ReaderError::BarcodeRead(
+                    "Código de barras não encontrado".into(),
+                )],
+            )
+        }
     }
 
     #[must_use]

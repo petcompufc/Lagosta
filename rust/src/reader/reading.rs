@@ -50,20 +50,6 @@ impl Answer {
     }
 }
 
-#[derive(GodotConvert, Clone, Copy, Default, Debug, PartialEq, Eq, PartialOrd, Ord)]
-#[repr(u8)]
-#[godot(via = u8)]
-pub enum ReadingError {
-    #[default]
-    Todo,
-}
-
-impl Display for ReadingError {
-    fn fmt(&self, _f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        todo!()
-    }
-}
-
 #[derive(GodotClass, Clone, Debug)]
 #[class(no_init)]
 pub struct AnswerTable {
@@ -111,11 +97,9 @@ pub struct Reading {
     #[var]
     pub fase: OCIFase,
     #[var]
-    pub errors: Array<ReadingError>,
+    pub errors: Array<GString>,
     #[var]
     pub score: f32,
-    #[var]
-    pub pdf_page: u32,
     #[var]
     pub file_path: GString,
     pub answers: Answers,
@@ -128,12 +112,11 @@ unsafe impl Sync for Reading {}
 impl Reading {
     pub fn new(
         file_path: GString,
-        pdf_page: u32,
         participante: Participante,
         fase: OCIFase,
         answers: Answers,
         score: f32,
-        errors: Array<ReadingError>,
+        errors: Array<GString>,
     ) -> Self {
         Self {
             participante: Gd::from_object(participante),
@@ -141,7 +124,6 @@ impl Reading {
             fase,
             answers,
             score,
-            pdf_page,
             errors,
         }
     }
@@ -173,7 +155,7 @@ impl Reading {
         &self,
         reading_parameters: Gd<ReadingParams>,
     ) -> Option<Gd<ImageTexture>> {
-        let mut imgdata = SheetReader::load_image(self.file_path.to_string())?;
+        let mut imgdata = SheetReader::load_image(self.file_path.to_string()).ok()?;
         SheetReader::neg_image(&mut imgdata, reading_parameters.bind().gamma);
         create_godot_texture(&imgdata)
     }
@@ -183,7 +165,7 @@ impl Reading {
         &self,
         reading_parameters: Gd<ReadingParams>,
     ) -> Option<Gd<ImageTexture>> {
-        let mut imgdata = SheetReader::load_image(self.file_path.to_string())?;
+        let mut imgdata = SheetReader::load_image(self.file_path.to_string()).ok()?;
         SheetReader::process_image(
             &mut imgdata,
             reading_parameters.bind().gamma,
