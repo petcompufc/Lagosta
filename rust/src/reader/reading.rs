@@ -53,9 +53,9 @@ impl Answer {
 #[derive(GodotClass, Clone, Debug)]
 #[class(no_init)]
 pub struct AnswerTable {
-    pub ini_a: Vec<(Answer, f32)>,
-    pub ini_b: Vec<(Answer, f32)>,
-    pub prog: Vec<(Answer, f32)>,
+    pub ini_a: [(Answer, f32); TOTAL_ITEM_COUNT],
+    pub ini_b: [(Answer, f32); TOTAL_ITEM_COUNT],
+    pub prog: [(Answer, f32); TOTAL_ITEM_COUNT],
 }
 
 #[godot_api]
@@ -74,18 +74,20 @@ impl AnswerTable {
         })
     }
 
-    fn array_to_table(array: Array<AnyDictionary>) -> Vec<(Answer, f32)> {
-        array
-            .iter_shared()
-            .map(|dict| {
-                (
-                    dict.get("answer")
-                        .unwrap_or(Answer::None.to_variant())
-                        .to::<Answer>(),
-                    dict.get("weight").unwrap_or(1.0.to_variant()).to::<f32>(),
-                )
-            })
-            .collect()
+    fn array_to_table(array: Array<AnyDictionary>) -> [(Answer, f32); TOTAL_ITEM_COUNT] {
+        std::array::from_fn(|i| {
+            array
+                .get(i)
+                .map(|dict| {
+                    (
+                        dict.get("answer")
+                            .unwrap_or(Answer::None.to_variant())
+                            .to::<Answer>(),
+                        dict.get("weight").unwrap_or(1.0.to_variant()).to::<f32>(),
+                    )
+                })
+                .unwrap_or((Answer::None, 0.0))
+        })
     }
 }
 

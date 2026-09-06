@@ -461,11 +461,13 @@ impl SheetReader {
         let correct_sum = table
             .iter()
             .zip(answers)
-            .map(
-                |((expected, weight), answer)| {
-                    if answer == expected { *weight } else { 0.0 }
-                },
-            )
+            .map(|((expected, weight), answer)| {
+                if answer == expected || *expected == Answer::None {
+                    *weight
+                } else {
+                    0.0
+                }
+            })
             .sum::<f32>();
 
         correct_sum / total_weight
