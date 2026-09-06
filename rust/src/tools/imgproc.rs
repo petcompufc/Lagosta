@@ -1,6 +1,6 @@
 use std::ops::{Deref, Range};
 
-use image::{ExtendedColorType, GrayAlphaImage, GrayImage, imageops};
+use image::{GrayAlphaImage, GrayImage, imageops};
 use itertools::Itertools;
 use rayon::prelude::*;
 
@@ -388,23 +388,7 @@ impl ImageFilter for GrayImage {
 
         for blob in blobs {
             if blob.len() > size_threshold as usize {
-                image::save_buffer_with_format(
-                    "thing.png",
-                    self,
-                    self.width(),
-                    self.height(),
-                    ExtendedColorType::L8,
-                    image::ImageFormat::Png,
-                ).unwrap();
                 blob.into_iter().for_each(|(x, y)| self.set_pixel(x, y, 0));
-                image::save_buffer_with_format(
-                    "thing2.png",
-                    self,
-                    self.width(),
-                    self.height(),
-                    ExtendedColorType::L8,
-                    image::ImageFormat::Png,
-                ).unwrap();
             }
         }
 
