@@ -33,6 +33,8 @@ const CORNERS: [(u32, u32); 4] = [
     (CORNER_X2, CORNER_Y2),
 ];
 
+const SUPPORTED_EXTENSIONS: [&str; 5] = ["png", "jpg", "jpeg", "webp", "bmp"];
+
 const EXPECTED_HOUGH_COUNT: u32 = 24;
 
 /// Valores calculados de forma relativa usando uma imagem 1323x932 do gabarito oficial
@@ -77,22 +79,26 @@ impl SheetReader {
         entries
             .filter_map(|entry| {
                 let path = entry.ok()?.path();
-                if path.is_file() { Some(path) } else { None }
+                if path.is_file() {
+                    Self::init_file(path)
+                } else {
+                    None
+                }
             })
-            .flat_map(Self::init_file)
             .collect()
     }
 
-    pub fn init_file(path: PathBuf) -> Vec<Gd<Reading>> {
-        match path.extension() {
-            // TODO: check extensions
-            Some(_) => {
-                vec![Gd::from_object(Reading {
-                    file_path: path.to_string_lossy().to_string().to_gstring(),
-                    ..Default::default()
-                })]
-            }
-            None => Vec::new(),
+    pub fn init_file(path: PathBuf) -> Option<Gd<Reading>> {
+        if path.extension().is_some_and(|ext| {
+            ext.to_str()
+                .is_some_and(|ext_str| SUPPORTED_EXTENSIONS.contains(&ext_str))
+        }) {
+            Some(Gd::from_object(Reading {
+                file_path: path.to_string_lossy().to_string().to_gstring(),
+                ..Default::default()
+            }))
+        } else {
+            None
         }
     }
 
@@ -105,7 +111,6 @@ impl SheetReader {
         Ok(imageops::grayscale(&imgdata))
     }
 
-    // TODO: apply filters only in the reading parts of the image
     pub fn neg_image(imgdata: &mut GrayImage, gamma: f32) -> &mut GrayImage {
         *imgdata = imageops::grayscale(imgdata);
         *imgdata = fit_image_to(imgdata, SHEET_WIDTH, SHEET_HEIGHT);
@@ -196,8 +201,7 @@ impl SheetReader {
         Self::process_image(&mut imgdata, 3.0, 30);
 
         // Lê as respostas do gabarito
-        let (answers, answer_errors) =
-            Self::read_answers(&imgdata, reading_params.rect.clone().map(|r| *r.bind()));
+        let (answers, answer_errors) = Self::read_answers(&imgdata, reading_params);
         for err in answer_errors {
             errors.push(&err.to_string().to_gstring());
         }
@@ -209,7 +213,6 @@ impl SheetReader {
             0.0
         };
 
-        // TODO: errors and warnings
         Reading::new(
             path,
             participante,
@@ -223,23 +226,54 @@ impl SheetReader {
     #[must_use]
     fn read_answers(
         imgdata: &GrayImage,
-        reading_rect: Option<Rect>,
+        reading_params: &ReadingParams,
     ) -> (Answers, Vec<ReaderError>) {
-        let rect: Rect = match reading_rect {
-            Some(r) => r,
-            None => Self::get_rect(imgdata),
+        let mut errors = Vec::new();
+
+        let rect: Rect = match reading_params.rect.as_ref() {
+            Some(r) => *r.bind(),
+            None => {
+                let r = Self::get_rect(imgdata);
+
+                // Checa se existe algum ângulo anormal no retângulo detectado.
+                let angles = r.get_angles();
+                if angles
+                    .iter()
+                    .any(|a| (90.0 - a.abs()).abs() > reading_params.angle_threshold)
+                {
+                    errors.push(ReaderError::AlignmentError(
+                        "Ângulo anormal entre alinhadores.".into(),
+                    ));
+                }
+
+                r
+            }
         };
 
         // Lê as respostas do gabarito
-        (
-            *ITEM_GROUPS
-                .iter()
-                .flat_map(|ig| Self::read_item_group(imgdata, ig.clone(), &rect, 7, 6).0)
-                .collect::<Vec<Answer>>()
-                .as_array()
-                .unwrap(),
-            vec![],
-        )
+        let answers = *ITEM_GROUPS
+            .iter()
+            .flat_map(|ig| {
+                Self::read_item_group(
+                    imgdata,
+                    ig.clone(),
+                    &rect,
+                    reading_params.item_radius,
+                    reading_params.mark_threshold,
+                    1,
+                )
+            })
+            .collect::<Vec<Answer>>()
+            .as_array()
+            .unwrap();
+
+        if answers.iter().filter(|a| **a == Answer::None).count() > 5 {
+            errors.push(ReaderError::AlignmentError(
+                "Foram detectados muitos itens em branco".into(),
+            ));
+        }
+
+        (answers, errors)
     }
 
     #[allow(dead_code)]
@@ -249,34 +283,44 @@ impl SheetReader {
         item_group: ItemGroup,
         rect: &Rect,
         item_radius: u32,
-        count_threshold: u32,
-    ) -> ([Answer; GROUP_ITEM_COUNT], Vec<ReaderError>) {
-        // TODO: Check for multiple marks
-        // TODO: Check for possible alignment errors
-        let answers = std::array::from_fn(|i| {
+        mark_threshold: u32,
+        double_marking_threshold: u32,
+    ) -> [Answer; GROUP_ITEM_COUNT] {
+        std::array::from_fn(|i| {
             let y_lerp = item_group.item01a_y + item_group.item_spacing_y * i as f32;
-            (0..CHOICE_COUNT)
-                .filter_map(|c| {
-                    let x_lerp = item_group.item01a_x + item_group.item_spacing_x * c as f32;
+            let markings = (0..CHOICE_COUNT).filter_map(|c| {
+                let x_lerp = item_group.item01a_x + item_group.item_spacing_x * c as f32;
 
-                    let vx_top = rect.p1.lerp(rect.p2, x_lerp);
-                    let vx_bottom = rect.p3.lerp(rect.p4, x_lerp);
-                    let item_pos = vx_top.lerp(vx_bottom, y_lerp);
+                let vx_top = rect.p1.lerp(rect.p2, x_lerp);
+                let vx_bottom = rect.p3.lerp(rect.p4, x_lerp);
+                let item_pos = vx_top.lerp(vx_bottom, y_lerp);
 
-                    let reading =
-                        Self::read_circle(image, item_pos.x as u32, item_pos.y as u32, item_radius);
+                let reading =
+                    Self::read_circle(image, item_pos.x as u32, item_pos.y as u32, item_radius);
 
-                    if reading > count_threshold {
-                        Some((c, reading))
-                    } else {
-                        None
-                    }
-                })
-                .max_by(|(_, c1), (_, c2)| c1.cmp(c2))
-                .map(|(c, _)| Answer::from_u8(c))
-                .unwrap_or(Answer::None)
-        });
-        (answers, vec![])
+                if reading > mark_threshold {
+                    Some((c, reading))
+                } else {
+                    None
+                }
+            });
+
+            let highest = if let Some(h) = markings.clone().max_by(|(_, c1), (_, c2)| c1.cmp(c2)) {
+                h
+            } else {
+                return Answer::None;
+            };
+
+            // Checks for double markings
+            let second_highest = markings
+                .filter(|m| m.0 != highest.0)
+                .max_by(|(_, c1), (_, c2)| c1.cmp(c2));
+            if second_highest.is_some_and(|sh| (highest.1 - sh.1) <= double_marking_threshold) {
+                return Answer::None;
+            }
+
+            Answer::from_u8(highest.0)
+        })
     }
 
     #[must_use]
@@ -331,7 +375,7 @@ impl SheetReader {
             let inscricao = if text.len() > 2 {
                 &text[2..]
             } else {
-                "00000000" // TODO: type inscrição && impl default?
+                "00000000"
             };
 
             if modalidade == OCIModalidade::None || fase == OCIFase::None || inscricao == "00000000"

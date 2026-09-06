@@ -54,10 +54,6 @@ impl HoughParameterSpace {
             .max_by(|a, b| a.value.cmp(&b.value))
             .unwrap()
     }
-
-    pub fn at_tr(&self, _theta: f32, _rho: f32) -> HoughPoint {
-        todo!()
-    }
 }
 
 impl Deref for HoughParameterSpace {

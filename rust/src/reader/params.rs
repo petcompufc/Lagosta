@@ -24,6 +24,22 @@ pub struct Rect {
     pub p4: Vector2,
 }
 
+impl Rect {
+    pub fn get_angles(&self) -> [f32; 4] {
+        [
+            (self.p1, self.p2, self.p4),
+            (self.p2, self.p4, self.p3),
+            (self.p4, self.p3, self.p1),
+            (self.p3, self.p1, self.p2),
+        ]
+        .map(|points| {
+            let p1 = points.0 - points.1;
+            let p2 = points.2 - points.1;
+            p1.angle_to(p2).to_degrees()
+        })
+    }
+}
+
 #[derive(GodotClass, Clone, Debug)]
 #[class(init)]
 pub struct ReadingParams {
@@ -42,11 +58,16 @@ pub struct ReadingParams {
     #[var]
     #[init(val = 6)]
     pub mark_threshold: u32,
+    #[var]
+    #[init(val = 1.5)]
+    pub angle_threshold: f32,
+    #[var]
+    #[init(val = 26)]
+    pub double_marking_threshold: u32,
 }
 
 unsafe impl Sync for ReadingParams {}
 unsafe impl Send for ReadingParams {}
-
 
 impl Default for ReadingParams {
     fn default() -> Self {
