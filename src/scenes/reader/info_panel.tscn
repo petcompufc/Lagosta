@@ -216,7 +216,7 @@ allow_greater = true
 select_all_on_focus = true
 
 [node name="OuterWarningsVBox" type="VBoxContainer" parent="ScrollContainer/OuterVBox" unique_id=1932504875]
-visible = false
+unique_name_in_owner = true
 layout_mode = 2
 
 [node name="WarningsSeparator" type="HSeparator" parent="ScrollContainer/OuterVBox/OuterWarningsVBox" unique_id=2052904545]
@@ -241,4 +241,11 @@ theme_override_constants/margin_right = 8
 theme_override_constants/margin_bottom = 8
 
 [node name="WarningsVBox" type="VBoxContainer" parent="ScrollContainer/OuterVBox/OuterWarningsVBox/WarningsContainer" unique_id=1957499634]
+unique_name_in_owner = true
 layout_mode = 2
+
+[connection signal="text_changed" from="ScrollContainer/OuterVBox/MarginContainer/InfoVBox/NameInput" to="." method="_on_name_input_text_changed"]
+[connection signal="text_changed" from="ScrollContainer/OuterVBox/MarginContainer/InfoVBox/SchoolInput" to="." method="_on_school_input_text_changed"]
+[connection signal="item_selected" from="ScrollContainer/OuterVBox/MarginContainer/InfoVBox/ModalityInput" to="." method="_on_modality_input_item_selected"]
+[connection signal="item_selected" from="ScrollContainer/OuterVBox/MarginContainer/InfoVBox/PhaseInput" to="." method="_on_phase_input_item_selected"]
+[connection signal="value_changed" from="ScrollContainer/OuterVBox/MarginContainer/InfoVBox/IDInput" to="." method="_on_id_input_value_changed"]

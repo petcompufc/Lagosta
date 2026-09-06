@@ -51,18 +51,23 @@ func update_sorting() -> void:
 				return a.file_name.naturalnocasecmp_to(b.file_name) * order < 0)
 		SORTING.NAME:
 			sheets.sort_custom(func(a: ParticipantButton, b: ParticipantButton):
-				return a.info.nome.naturalnocasecmp_to(b.info.nome) * order < 0)
+				return a.info.participante.nome.naturalnocasecmp_to(b.info.participante.nome) * order < 0)
 		SORTING.ID:
 			sheets.sort_custom(func(a: ParticipantButton, b: ParticipantButton):
-				return a.info.inscricao.casecmp_to(b.info.inscricao) * order < 0)
+				return a.info.participante.inscricao.casecmp_to(b.info.participante.inscricao) * order < 0)
 	for i in range(len(sheets)):
 		var sheet: ParticipantButton = sheets[i]
 		sheet.display = sort_option_button.selected as SORTING
 		sheets_container.move_child(sheet, i)
 
 
-func add_sheet(file_name: String, reading: Reading, answers: Array[int] = []) -> void:
-	var participant_button := ParticipantButton.create(file_name, reading, answers)
+func add_sheets(readings: Array[Reading]) -> void:
+	for reading in readings:
+		add_sheet(reading)
+
+
+func add_sheet(reading: Reading) -> void:
+	var participant_button := ParticipantButton.create(reading)
 	participant_button.check_toggled.connect(_on_participant_button_checked.bind(participant_button))
 	participant_button.button_toggled.connect(_on_participant_button_clicked.bind(participant_button))
 	sheets_container.add_child(participant_button)

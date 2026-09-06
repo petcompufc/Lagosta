@@ -91,7 +91,7 @@ func load_csv() -> void:
 
 		var line := csv_file.get_csv_line()
 		if len(line) != NUM_ARGS_CSV:
-			notify_error("(%d) - Linha inválida: %s" % [l, ",".join(line)])
+			notify_error("(Linha %d) - Linha inválida: %s" % [l, ",".join(line)])
 			continue
 
 		if is_header(line):
@@ -99,11 +99,11 @@ func load_csv() -> void:
 
 		var inscricao := Lago.parse_inscricao(line[0])
 		if inscricao == "":
-			notify_error("(%d) - Número de inscrição inválido: %s" % [l, line[0]])
+			notify_error("(Linha %d) - Número de inscrição inválido: %s" % [l, line[0]])
 			continue
 		var modalidade := Lago.parse_modalidade(line[3])
 		if modalidade == Lago.Modalidade.NONE:
-			notify_error("(%d) - Modalidade inválida: %s" % [l, line[3]])
+			notify_error("(Linha %d) - Modalidade inválida: %s" % [l, line[3]])
 			continue
 
 		var participant := Participante.create(inscricao, line[1], line[2], modalidade)

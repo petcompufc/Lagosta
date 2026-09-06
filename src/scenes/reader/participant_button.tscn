@@ -2,11 +2,15 @@
 
 [ext_resource type="Theme" uid="uid://dp5uhom4k4ewr" path="res://assets/resources/ui/ui_themeSQR.tres" id="1_1gy7i"]
 [ext_resource type="Script" uid="uid://fhuwxwpsy7t6" path="res://src/scenes/reader/participant_button.gd" id="2_0potq"]
+[ext_resource type="Texture2D" uid="uid://dxq3n2l5d6ax3" path="res://assets/icons/ui/alert-triangle.svg" id="3_nhlbg"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_nhlbg"]
+bg_color = Color(0.15686275, 0.14509805, 0.14117648, 1)
 
 [node name="ParticipantButton" type="HBoxContainer" unique_id=2003497465]
 custom_minimum_size = Vector2(0, 24)
-offset_right = 40.0
-offset_bottom = 40.0
+offset_right = 228.0
+offset_bottom = 25.0
 theme = ExtResource("1_1gy7i")
 script = ExtResource("2_0potq")
 
@@ -23,6 +27,27 @@ toggle_mode = true
 text = "Placeholder"
 alignment = 0
 text_overrun_behavior = 5
+
+[node name="WarningPanel" type="Panel" parent="." unique_id=1782929215]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(25, 25)
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_nhlbg")
+
+[node name="TextureRect" type="TextureRect" parent="WarningPanel" unique_id=1649157212]
+modulate = Color(0.9254902, 0.5176471, 0.2784314, 1)
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+offset_transform_enabled = true
+offset_transform_scale = Vector2(0.75, 0.75)
+tooltip_text = "Ocorreu algum erro na leitura deste gabarito!"
+texture = ExtResource("3_nhlbg")
+expand_mode = 5
+stretch_mode = 5
 
 [connection signal="toggled" from="CheckBox" to="." method="_on_check_box_toggled"]
 [connection signal="toggled" from="Button" to="." method="_on_button_toggled"]

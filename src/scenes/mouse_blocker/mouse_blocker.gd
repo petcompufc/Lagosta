@@ -27,7 +27,8 @@ var icons: Dictionary[int, Texture2D] = {
 @onready var dialog_label: Label = %DialogLabel
 @onready var ok_button: Button = %OkButton
 @onready var cancel_button: Button = %CancelButton
-
+@onready var progress_container: MarginContainer = %ProgressContainer
+@onready var progress_bar: ProgressBar = %ProgressBar
 
 func _ready() -> void:
 	hide()
@@ -59,15 +60,21 @@ func show_empty() -> void:
 	show()
 
 
-func show_loading(message: String = "Carregando...") -> void:
+func show_loading(message: String = "Carregando...", show_progress: bool = false, max_progress: float = 100.0) -> void:
 	reset_signals()
 	dialog_panel.hide()
 	loading_panel.show()
 	
 	loading_label.text = message
+	progress_bar.value = 0
+	progress_bar.max_value = max_progress
+	
+	progress_container.visible = show_progress
 	
 	show()
 
+func set_progress(progress: float) -> void:
+	progress_bar.value = progress
 
 func reset_signals() -> void:
 	for connection in ok_pressed.get_connections():

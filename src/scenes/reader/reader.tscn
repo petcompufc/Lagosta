@@ -67,7 +67,7 @@ theme = ExtResource("2_x0da4")
 [node name="LeftContainer" type="VBoxContainer" parent="HSplitContainer" unique_id=197022153]
 layout_mode = 2
 size_flags_horizontal = 3
-size_flags_stretch_ratio = 0.25
+size_flags_stretch_ratio = 0.28
 theme_override_constants/separation = 0
 
 [node name="FolderSelectContainer" type="HBoxContainer" parent="HSplitContainer/LeftContainer" unique_id=685766879]
@@ -100,6 +100,7 @@ expand_icon = true
 layout_mode = 2
 
 [node name="SheetsContainer" parent="HSplitContainer/LeftContainer" unique_id=201001680 instance=ExtResource("4_tjl07")]
+unique_name_in_owner = true
 layout_mode = 2
 
 [node name="SavingContainer" type="VBoxContainer" parent="HSplitContainer/LeftContainer" unique_id=136785124]
@@ -319,7 +320,7 @@ offset_right = 632.0
 offset_bottom = 446.50003
 grow_horizontal = 2
 grow_vertical = 2
-scale = Vector2(0.3504747, 0.35046318)
+scale = Vector2(0.3425633, 0.34255198)
 pivot_offset_ratio = Vector2(0.5, 0.5)
 
 [node name="SubViewport" type="SubViewport" parent="HSplitContainer/ReadingPanel/ReadingHSplit/VBoxContainer/SheetImagePanel/VBoxContainer/CenterContainer/Thing/SubViewportContainer" unique_id=410250312]

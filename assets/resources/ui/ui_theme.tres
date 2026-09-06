@@ -99,7 +99,23 @@ border_color = Color(0.18039216, 0.16862746, 0.16078432, 1)
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_s3qd0"]
 bg_color = Color(0.09803922, 0.09411765, 0.09411765, 1)
 
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_itxbe"]
+bg_color = Color(0, 0, 0, 1)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.99215686, 0.9411765, 0.8352941, 1)
+
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_lmikw"]
+bg_color = Color(0.39203447, 0.62328863, 0.37571263, 1)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.8, 0.8, 0.8, 0)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_5lttn"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_7o5st"]
 bg_color = Color(0.0627451, 0.0627451, 0.0627451, 1)
@@ -159,8 +175,10 @@ LineEdit/font_sizes/font_size = 12
 LineEdit/styles/focus = SubResource("StyleBoxEmpty_7o5st")
 LineEdit/styles/normal = SubResource("StyleBoxFlat_41ran")
 Panel/styles/panel = SubResource("StyleBoxFlat_s3qd0")
+ProgressBar/styles/background = SubResource("StyleBoxFlat_itxbe")
+ProgressBar/styles/fill = SubResource("StyleBoxFlat_lmikw")
 TabContainer/constants/side_margin = 0
-TabContainer/styles/panel = SubResource("StyleBoxFlat_lmikw")
+TabContainer/styles/panel = SubResource("StyleBoxFlat_5lttn")
 TabContainer/styles/tabbar_background = SubResource("StyleBoxFlat_7o5st")
 TooltipPanel/styles/panel = SubResource("StyleBoxFlat_giflr")
 VBoxContainer/constants/separation = 0

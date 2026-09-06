@@ -21,11 +21,11 @@ var answer_table: AnswerTable = null
 @onready var info_panel: InfoPanel = %InfoPanel
 @onready var sheet_preview_texture: TextureRect = %SheetPreviewTextureRect
 @onready var drag_rect: DragRect = %DragRect
+@onready var sheets_container: SheetsContainer = %SheetsContainer
 
 
 func _ready() -> void:
-	await get_tree().create_timer(1.0).timeout
-	get_answer_table("/home/julia/Downloads/template.csv")
+	reading_h_split.hide()
 
 
 static func is_header(line: PackedStringArray) -> bool:
@@ -61,7 +61,7 @@ func get_answer_table(csv_path: String) -> AnswerTable:
 		var line := csv_file.get_csv_line()
 		if len(line) != NUM_ARGS_ANSWERS_CSV:
 			_on_answers_file_selected("")
-			popup_error("(%d) - Linha inválida: %s" % [l, ",".join(line)])
+			popup_error("(Linha %d) - Linha inválida: %s" % [l, ",".join(line)])
 			return null
 		
 		if is_answer_header(line):
@@ -72,7 +72,7 @@ func get_answer_table(csv_path: String) -> AnswerTable:
 		var p3 := line[5].replace(",", ".")
 		if not p1.is_valid_float() or not p2.is_valid_float() or not p3.is_valid_float():
 			_on_answers_file_selected("")
-			popup_error("(%d) - Peso inválido: %s" % [l, ",".join(line)])
+			popup_error("(Linha %d) - Peso inválido: %s" % [l, ",".join(line)])
 			return null
 		
 		ini_a.push_back({
@@ -104,7 +104,7 @@ func get_participants_db(csv_path: String) -> Dictionary[int, Participante]:
 		var line := csv_file.get_csv_line()
 		if len(line) != NUM_ARGS_PARTICIPANTES_CSV:
 			_on_db_file_selected("")
-			popup_error("(%d) - Linha inválida: %s" % [l, ",".join(line)])
+			popup_error("(Linha %d) - Linha inválida: %s" % [l, ",".join(line)])
 			return {}
 
 		if is_header(line):
@@ -113,13 +113,13 @@ func get_participants_db(csv_path: String) -> Dictionary[int, Participante]:
 		var inscricao := Lago.parse_inscricao(line[0])
 		if inscricao == "":
 			_on_db_file_selected("")
-			popup_error("(%d) - Número de inscrição inválido: %s" % [l, line[0]])
+			popup_error("(Linha %d) - Número de inscrição inválido: %s" % [l, line[0]])
 			return {}
 
 		var modalidade := Lago.parse_modalidade(line[3])
 		if modalidade == Lago.Modalidade.NONE:
 			_on_db_file_selected("")
-			popup_error("(%d) - Modalidade inválida: %s" % [l, line[3]])
+			popup_error("(Linha %d) - Modalidade inválida: %s" % [l, line[3]])
 			return {}
 
 		participantes[inscricao.to_int()] = Participante.create(inscricao, line[1], line[2], modalidade)
@@ -137,6 +137,8 @@ func _on_directory_selected(new_directory: String) -> void:
 	MouseBlocker.hide()
 	if new_directory.is_empty() or DirAccess.dir_exists_absolute(new_directory):
 		directory_path = new_directory
+		sheets_container.clear_sheets()
+		sheets_container.add_sheets(SheetReader.init_folder(directory_path))
 	folder_line_edit.tooltip_text = "Pasta contendo os scans dos gabaritos.\n%s" % directory_path
 	folder_line_edit.text = directory_path # resets to old path if invalid folder
 
@@ -180,14 +182,24 @@ func _on_dialog_canceled() -> void:
 	MouseBlocker.hide()
 
 
-func _on_read_button_id_pressed(_id: int) -> void:
+func _on_read_button_id_pressed(id: int) -> void:
 	MouseBlocker.show_dialog(
 		"Tem certeza?\nIsso vai resetar quaisquer alterações nas imagens relidas!",
 		"Sim",
 		"Cancelar",
 		MouseBlocker.LagostaIcon.SURPRISED,
 	)
-	MouseBlocker.ok_pressed.connect(func(): pass, CONNECT_ONE_SHOT)
+	MouseBlocker.ok_pressed.connect(func(): _on_read_confirm(id), CONNECT_ONE_SHOT)
+
+
+func _on_read_confirm(id: int) -> void:
+	match id:
+		0: # ler atual
+			pass
+		1: # ler selecionados
+			pass
+		2: # ler tudo
+			pass
 
 
 func _on_folder_line_edit_editing_toggled(toggled_on: bool) -> void:
@@ -208,6 +220,7 @@ func _on_answers_line_edit_editing_toggled(toggled_on: bool) -> void:
 func _on_sheets_container_participant_clicked(participant: ParticipantButton, toggled_on: bool) -> void:
 	if not toggled_on:
 		reading_h_split.hide()
-		return
-	info_panel.set_info(participant)
-	reading_h_split.show()
+		info_panel.track(null)
+	else:
+		reading_h_split.show()
+		info_panel.track(participant)

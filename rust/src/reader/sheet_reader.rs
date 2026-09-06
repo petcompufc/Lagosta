@@ -70,6 +70,10 @@ pub struct SheetReader {
 impl SheetReader {
     #[func]
     pub fn init_folder(path: String) -> Array<Gd<Reading>> {
+        if path.is_empty() {
+            return array![];
+        }
+
         let entries = if let Ok(e) = std::fs::read_dir(path) {
             e
         } else {
@@ -150,7 +154,7 @@ impl SheetReader {
                     &participants_db,
                     answer_table.as_ref(),
                 );
-                // Increment self counter
+                // Increment progress counter
                 // Unwrap: these threads shouldn't panic... right?
                 **counter.lock().unwrap() += 1;
                 reading

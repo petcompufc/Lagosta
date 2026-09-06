@@ -21,17 +21,15 @@ var info: Reading:
 	set(i):
 		info = i
 		update_display()
-var answers: Array[int]
 
 @onready var button: Button = %Button
 @onready var checkbox: CheckBox = %CheckBox
+@onready var warning_panel: Panel = %WarningPanel
 
 
-static func create(_file_name: String, _info: Reading, _answers: Array[int] = []) -> ParticipantButton:
+static func create(_info: Reading) -> ParticipantButton:
 	var new_button: ParticipantButton = BUTTON_SCENE.instantiate()
-	new_button.file_name = _file_name
 	new_button.info = _info
-	new_button.answers = _answers
 	return new_button
 
 
@@ -65,11 +63,15 @@ func update_display() -> void:
 		await ready
 	match display:
 		SheetsContainer.SORTING.FILE_NAME:
-			button.text = file_name
+			button.text = info.file_path
 		SheetsContainer.SORTING.NAME:
-			button.text = info.nome
+			button.text = info.participante.nome
 		SheetsContainer.SORTING.ID:
-			button.text = info.inscricao
+			button.text = info.participante.inscricao
+	if len(info.errors) > 0:
+		warning_panel.show()
+	else:
+		warning_panel.hide()
 
 
 func _on_button_toggled(toggled_on: bool) -> void:

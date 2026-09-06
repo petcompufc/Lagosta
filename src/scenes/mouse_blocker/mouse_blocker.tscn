@@ -25,7 +25,6 @@ grow_vertical = 2
 
 [node name="LoadingPanel" type="Panel" parent="Background" unique_id=1750734002]
 unique_name_in_owner = true
-visible = false
 layout_mode = 1
 anchors_preset = 8
 anchor_left = 0.5
@@ -40,16 +39,21 @@ grow_horizontal = 2
 grow_vertical = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_ikpo3")
 
-[node name="HBoxContainer" type="HBoxContainer" parent="Background/LoadingPanel" unique_id=1209600780]
+[node name="VBoxContainer" type="VBoxContainer" parent="Background/LoadingPanel" unique_id=1493613798]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+theme_override_constants/separation = 8
 alignment = 1
 
-[node name="LoadingImage" type="TextureRect" parent="Background/LoadingPanel/HBoxContainer" unique_id=1287254507]
+[node name="HBoxContainer" type="HBoxContainer" parent="Background/LoadingPanel/VBoxContainer" unique_id=1209600780]
+layout_mode = 2
+alignment = 1
+
+[node name="LoadingImage" type="TextureRect" parent="Background/LoadingPanel/VBoxContainer/HBoxContainer" unique_id=1287254507]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(64, 64)
 custom_maximum_size = Vector2(64, 64)
@@ -61,7 +65,7 @@ texture = ExtResource("1_itxbe")
 expand_mode = 3
 stretch_mode = 5
 
-[node name="LoadingLabel" type="Label" parent="Background/LoadingPanel/HBoxContainer" unique_id=1028366546]
+[node name="LoadingLabel" type="Label" parent="Background/LoadingPanel/VBoxContainer/HBoxContainer" unique_id=1028366546]
 unique_name_in_owner = true
 process_thread_group = 2
 process_thread_group_order = 0
@@ -75,8 +79,22 @@ text = "Salvando gabaritos...
 horizontal_alignment = 1
 autowrap_mode = 3
 
+[node name="ProgressContainer" type="MarginContainer" parent="Background/LoadingPanel/VBoxContainer" unique_id=1558676040]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_constants/margin_left = 16
+theme_override_constants/margin_right = 16
+
+[node name="ProgressBar" type="ProgressBar" parent="Background/LoadingPanel/VBoxContainer/ProgressContainer" unique_id=1856373759]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 24)
+layout_mode = 2
+step = 1.0
+value = 50.0
+
 [node name="DialogPanel" type="Panel" parent="Background" unique_id=860534516]
 unique_name_in_owner = true
+visible = false
 layout_mode = 1
 anchors_preset = 8
 anchor_left = 0.5

@@ -2,6 +2,7 @@
 class_name ItemButton
 extends HBoxContainer
 
+signal item_selected(answer: Lago.Answer)
 @onready var label: Label = %Label
 @onready var option_button: OptionButton = %OptionButton
 
@@ -18,10 +19,12 @@ var selected_answer: int = 0:
 		selected_answer = clampi(a, 0, 5)
 		if not option_button:
 			await ready
-		option_button.selected = selected_answer
+		option_button.select(option_button.get_item_index(selected_answer))
+
 
 func _on_option_button_item_selected(index: int) -> void:
-	selected_answer = index
+	selected_answer = option_button.get_item_id(index)
+	item_selected.emit(selected_answer as Lago.Answer)
 
 
 func set_answer(a: int) -> void:
