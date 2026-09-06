@@ -33,6 +33,13 @@ func get_checked() -> Array[ParticipantButton]:
 	return checked
 
 
+func get_all() -> Array[ParticipantButton]:
+	var all: Array[ParticipantButton] = []
+	for sheet: ParticipantButton in sheets_container.get_children():
+		all.push_back(sheet)
+	return all
+
+
 func set_order_crescent(toggle: bool = not order_crescent) -> void:
 	order_crescent = toggle
 	if order_crescent:

@@ -22,6 +22,8 @@ var answer_table: AnswerTable = null
 @onready var sheet_preview_texture: TextureRect = %SheetPreviewTextureRect
 @onready var drag_rect: DragRect = %DragRect
 @onready var sheets_container: SheetsContainer = %SheetsContainer
+@onready var gamma_spin_box: SpinBox = %GammaSpinBox
+@onready var threshold_spin_box: SpinBox = %ThresholdSpinBox
 
 
 func _ready() -> void:
@@ -192,14 +194,60 @@ func _on_read_button_id_pressed(id: int) -> void:
 
 
 func _on_read_confirm(id: int) -> void:
+	var reading_params := ReadingParams.new() # reset to default reading parameters
 	match id:
 		0: # ler atual
-			pass
+			if info_panel.tracked_button:
+				info_panel.tracked_button.reading_params = reading_params
+				info_panel.tracked_button.info = SheetReader.read(
+					info_panel.tracked_button.info.file_path,
+					ReadingParams.new(),
+					participant_db,
+					answer_table,
+				)
+				info_panel.tracked_button.update_display()
+				info_panel.update_info()
 		1: # ler selecionados
-			pass
+			var selected := sheets_container.get_checked()
+			var paths: Array[String] = []
+			for button in selected:
+				paths.push_back(button.info.file_path)
+			read_threaded(paths, selected)
 		2: # ler tudo
-			pass
+			var all := sheets_container.get_all()
+			var paths: Array[String] = []
+			for button in all:
+				paths.push_back(button.info.file_path)
+			read_threaded(paths, all)
 
+
+var reading: bool = false
+var thread: Thread
+func _process(_delta: float) -> void:
+	if reading:
+		print('cu')
+		MouseBlocker.set_progress(SheetReader.counter)
+
+
+func read_threaded(paths: Array[String], buttons: Array[ParticipantButton]) -> void:
+	thread = Thread.new()
+	
+	var f := func() -> void:
+		var readings := SheetReader.read_many(paths, participant_db, answer_table)
+		update_readings.call_deferred(readings, buttons)
+		MouseBlocker.hide.call_deferred()
+		reading = false
+	
+	MouseBlocker.show_loading("Lendo gabaritos...", true, len(paths))
+	reading = true
+	thread.start(f)
+
+func update_readings(readings: Array[Reading], buttons: Array[ParticipantButton]) -> void:
+	for i in range(len(readings)):
+		buttons[i].info = readings[i]
+		buttons[i].update_display()
+		if buttons[i] == info_panel.tracked_button:
+			info_panel.update_info()
 
 func _on_folder_line_edit_editing_toggled(toggled_on: bool) -> void:
 	if not toggled_on and folder_line_edit.text != directory_path:
@@ -220,6 +268,13 @@ func _on_sheets_container_participant_clicked(participant: ParticipantButton, to
 	if not toggled_on:
 		reading_h_split.hide()
 		info_panel.track(null)
+		sheet_preview_texture.texture = null
 	else:
 		reading_h_split.show()
 		info_panel.track(participant)
+		sheet_preview_texture.texture = participant.info.get_processed_texture(participant.reading_params)
+
+
+func _on_reset_params_button_pressed() -> void:
+	gamma_spin_box.value = 3.0
+	threshold_spin_box.value = 30

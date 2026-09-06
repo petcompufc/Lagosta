@@ -24,7 +24,18 @@ pub struct Rect {
     pub p4: Vector2,
 }
 
+#[godot_api]
 impl Rect {
+    #[func]
+    pub fn array(&self) -> Array<Vector2> {
+        array![self.p1, self.p2, self.p3, self.p4]
+    }
+
+    #[func]
+    pub fn angles(&self) -> Array<f32> {
+        Array::from_iter(self.get_angles())
+    }
+
     pub fn get_angles(&self) -> [f32; 4] {
         [
             (self.p1, self.p2, self.p4),

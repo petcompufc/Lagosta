@@ -18,7 +18,7 @@ use crate::tools::{dict_to_hashmap, imgproc::*};
 
 // A5 proportion
 const SHEET_WIDTH: u32 = 1264;
-const SHEET_HEIGHT: u32 = 893;
+const SHEET_HEIGHT: u32 = 920;
 
 const CORNER_SIZE: u32 = 125;
 const CORNER_X2: u32 = SHEET_WIDTH - CORNER_SIZE;
@@ -63,6 +63,7 @@ const ITEM_GROUPS: [ItemGroup; 2] = [
 #[derive(GodotClass)]
 #[class(init, singleton)]
 pub struct SheetReader {
+    #[var]
     counter: u32,
     base: Base<Object>,
 }
@@ -155,7 +156,7 @@ impl SheetReader {
 
     #[func]
     pub fn read_many(
-        &mut self,
+        &self,
         paths: Array<GString>,
         participants_db: Dictionary<i32, Gd<Participante>>,
         answer_table: Option<Gd<AnswerTable>>,
@@ -164,14 +165,15 @@ impl SheetReader {
         let participants_db = dict_to_hashmap(participants_db);
         let answer_table = answer_table.map(|a| a.bind().clone());
 
-        // Reset progress counter
-        self.counter = 0;
-        let counter = Mutex::new(&mut self.counter);
+        // this is absolutely the worst fucking rust code i've ever written, but it is (kind of)
+        // necessary due to the main thread locking in godot if we use &mut self
+        let counter =
+            Mutex::new(unsafe { (&self.counter as *const u32 as *mut u32).as_mut_unchecked() });
 
         paths
             .iter_shared()
             .collect::<Vec<GString>>()
-            .into_par_iter()
+            .into_par_iter() // Can't use par_bridge: Needs to mantain original order
             .map(|path| {
                 let reading = Self::read_internal(
                     path,
@@ -179,9 +181,8 @@ impl SheetReader {
                     &participants_db,
                     answer_table.as_ref(),
                 );
-                // Increment progress counter
-                // Unwrap: these threads shouldn't panic... right?
-                **counter.lock().unwrap() += 1;
+                let mut lock = counter.lock().unwrap();
+                **lock += 1;
                 reading
             })
             .collect::<Vec<Reading>>()

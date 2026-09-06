@@ -41,7 +41,10 @@ func clear_warnings() -> void:
 
 
 func update_warnings_visibility() -> void:
-	outer_warnings_v_box.visible = warnings_v_box.get_child_count() > 0
+	if tracked_button:
+		outer_warnings_v_box.visible = len(tracked_button.info.errors) > 0
+	else:
+		outer_warnings_v_box.visible = warnings_v_box.get_child_count() > 0
 
 
 func update_info() -> void:

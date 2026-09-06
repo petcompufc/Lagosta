@@ -14,7 +14,7 @@ grow_vertical = 2
 script = ExtResource("1_vk6xm")
 
 [node name="Polygon2D" type="Polygon2D" parent="." unique_id=981151831]
-color = Color(0, 0.6862745, 0.7176471, 0.2509804)
+color = Color(0, 0.6862745, 0.7176471, 0.09411765)
 antialiased = true
 
 [connection signal="resized" from="." to="." method="_on_resized"]

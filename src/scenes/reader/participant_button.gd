@@ -22,6 +22,8 @@ var info: Reading:
 		info = i
 		update_display()
 
+var reading_params: ReadingParams = ReadingParams.new()
+
 @onready var button: Button = %Button
 @onready var checkbox: CheckBox = %CheckBox
 @onready var warning_panel: Panel = %WarningPanel
