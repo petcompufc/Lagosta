@@ -10,6 +10,7 @@ var answers: Array[int] = []
 
 const ITEM_SPACING_X := 0.04735
 const ITEM_SPACING_Y := 0.042
+const ITEM_RADIUS := 7
 const ACTIVE_COLOR := Color(Color.GREEN, 0.5)
 const INACTIVE_COLOR := Color(Color.RED, 0.5)
 
