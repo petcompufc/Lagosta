@@ -20,7 +20,7 @@ use crate::tools::{dict_to_hashmap, imgproc::*};
 const SHEET_WIDTH: u32 = 1264;
 const SHEET_HEIGHT: u32 = 920;
 
-const CORNER_SIZE: u32 = 125;
+const CORNER_SIZE: u32 = 150;
 const CORNER_X2: u32 = SHEET_WIDTH - CORNER_SIZE;
 const CORNER_Y2: u32 = SHEET_HEIGHT - CORNER_SIZE;
 
