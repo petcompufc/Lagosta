@@ -175,6 +175,8 @@ func update_readings(readings: Array[Reading], buttons: Array[ParticipantButton]
 
 
 func update_rect(button: ParticipantButton) -> void:
+	gamma_spin_box.set_value_no_signal(button.reading_params.gamma)
+	threshold_spin_box.set_value_no_signal(button.reading_params.threshold)
 	balls_rect.rect = button.info.rect
 	balls_rect.answers = button.info.get_answers()
 	drag_rect.set_coords(button.info.rect.array())
