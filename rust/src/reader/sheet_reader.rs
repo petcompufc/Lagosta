@@ -227,16 +227,14 @@ impl SheetReader {
         } else {
             return Reading::default();
         };
-
+        Self::process_image(&mut imgdata, 3.0, 30);
         let mut errors = Array::new();
 
-        // Lê o código QR na imagem >original<
+        // Lê o código QR na imagem processada (pós-denoise)
         let (participante, fase, barcode_errors) = Self::read_barcode(&imgdata, participants_db);
         for err in barcode_errors {
             errors.push(&err.to_string().to_gstring());
         }
-
-        Self::process_image(&mut imgdata, 3.0, 30);
 
         // Lê as respostas do gabarito
         let (answers, rect, answer_errors) = Self::read_answers(&imgdata, reading_params);
@@ -400,14 +398,14 @@ impl SheetReader {
         imgdata: &GrayImage,
         participants_db: &HashMap<i32, Participante>,
     ) -> (Participante, OCIFase, Vec<ReaderError>) {
-        let reader = zxingcpp::read().formats([BarcodeFormat::Aztec]);
-        let text;
+        let mut reader = zxingcpp::read().formats([BarcodeFormat::Aztec]);
+        reader.set_try_invert(true);
+
         if let Ok(barcodes) = reader.from(imgdata)
             && let Some(barcode) = barcodes.first()
         {
             let mut errors = Vec::new();
-
-            text = barcode.text();
+            let text = barcode.text();
 
             let modalidade = OCIModalidade::from_char(text.chars().nth(0).unwrap_or('-'));
             let fase = OCIFase::from_char(text.chars().nth(1).unwrap_or('-'));
