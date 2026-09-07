@@ -63,7 +63,7 @@ func set_display(d: SheetsContainer.SORTING) -> void:
 func update_display() -> void:
 	if not button:
 		await ready
-	tooltip_text = info.file_path
+	button.tooltip_text = info.file_path
 	match display:
 		SheetsContainer.SORTING.FILE_NAME:
 			button.text = info.file_path

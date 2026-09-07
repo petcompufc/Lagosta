@@ -219,7 +219,8 @@ select_all_on_focus = true
 [node name="ScoreLabel" type="Label" parent="ScrollContainer/OuterVBox/MarginContainer/InfoVBox" unique_id=2096266950]
 unique_name_in_owner = true
 layout_mode = 2
-tooltip_text = "O número de inscrição do participante."
+tooltip_text = "A nota calculada pro participante a partir do gabarito fornecido.
+OBS: Se não foi fornecido um gabarito, a nota vai ser zero."
 mouse_filter = 1
 text = "Nota: 0.0"
 
