@@ -447,6 +447,9 @@ impl SheetReader {
 
     #[must_use]
     fn get_rect(imgdata: &GrayImage) -> Rect {
+        let width_limit = imgdata.width() as f32 - 1.0;
+        let height_limit = imgdata.height() as f32 - 1.0;
+
         let corners: Vec<(f32, f32)> = CORNERS
             .iter()
             .map(|corner| {
@@ -470,7 +473,7 @@ impl SheetReader {
                 let point = r1.intersection_point(r2);
                 let point = (point.0 + corner.0 as f32, point.1 + corner.1 as f32);
 
-                (point.0, point.1)
+                (point.0.clamp(0.0, width_limit), point.1.clamp(0.0, height_limit))
             })
             .collect();
 
