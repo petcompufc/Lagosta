@@ -1,5 +1,5 @@
 # Lagosta 🦞
-<img width="128" height="128" alt="Lagosta" src="assets/lagosta.png" />
+<img width="128" height="128" alt="Lagosta" src="assets/icons/lagosta/lagosta_lapis.png" />
 
 [Ícone tirado do emoji kitchen da google](https://emojikitchen.dev/)
 
