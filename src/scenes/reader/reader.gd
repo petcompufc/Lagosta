@@ -1,3 +1,4 @@
+class_name ReaderPanel
 extends Panel
 
 const NUM_ARGS_PARTICIPANTES_CSV := 4

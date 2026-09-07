@@ -463,8 +463,6 @@ impl SheetReader {
                 let r1 = h1.closest_to(EXPECTED_HOUGH_COUNT);
                 let r2 = h2.closest_to(EXPECTED_HOUGH_COUNT);
 
-                godot_print!("r1: {}, r2: {}", r1.value, r2.value);
-
                 let point = r1.intersection_point(r2);
                 let point = (point.0 + corner.0 as f32, point.1 + corner.1 as f32);
 

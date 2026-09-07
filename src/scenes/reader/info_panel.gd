@@ -8,11 +8,13 @@ const ERROR_LABEL := preload("res://src/scenes/generator/error_label.tscn")
 @onready var school_input: LineEdit = %SchoolInput
 @onready var phase_input: OptionButton = %PhaseInput
 @onready var modality_input: OptionButton = %ModalityInput
+@onready var id_input: SpinBox = %IDInput
 @onready var items_container: HFlowContainer = %ItemsContainer
 @onready var scroll_container: ScrollContainer = %ScrollContainer
 @onready var warnings_v_box: VBoxContainer = %WarningsVBox
 @onready var outer_warnings_v_box: VBoxContainer = %OuterWarningsVBox
 @onready var score_label: Label = %ScoreLabel
+@export var reader_panel: ReaderPanel
 
 var tracked_button: ParticipantButton = null
 
@@ -57,6 +59,7 @@ func update_info() -> void:
 	school_input.text = tracked_button.info.participante.escola
 	modality_input.select(modality_input.get_item_index(tracked_button.info.participante.modalidade))
 	phase_input.select(phase_input.get_item_index(tracked_button.info.fase))
+	id_input.set_value_no_signal(tracked_button.info.participante.inscricao.to_int())
 	score_label.text = "Nota: %.2f" % tracked_button.info.score
 	
 	var children := items_container.get_children()
@@ -104,8 +107,15 @@ func _on_phase_input_item_selected(index: int) -> void:
 
 func _on_id_input_value_changed(value: float) -> void:
 	if tracked_button:
-		tracked_button.info.participante.inscricao = "%08d" % value
+		var participante: Participante = reader_panel.participant_db.get(value as int)
+		if participante:
+			tracked_button.info.participante = participante
+		else:
+			var insc_str := "%08d" % value
+			tracked_button.info.errors.push_back("(AJUSTE MANUAL) - Participante não encontrado na database: %s" % insc_str)
+			tracked_button.info.participante.inscricao = insc_str
 		tracked_button.update_display()
+		update_info()
 
 
 func _on_error_dismissed(error_idx: int) -> void:
