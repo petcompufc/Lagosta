@@ -39,11 +39,11 @@ const SUPPORTED_EXTENSIONS: [&str; 10] = [
 ];
 
 const EXPECTED_HOUGH_COUNT: u32 = 24;
+const MAX_BLOB_SIZE: u32 = 450;
 
 /// Valores calculados de forma relativa usando uma imagem 1323x932 do gabarito oficial
 /// como base, levando em conta que a área lida pelo leitor é a área interna demarcada
 /// pelos marcadores de alinhamento.
-#[allow(dead_code)]
 #[allow(clippy::excessive_precision)]
 const ITEM_GROUPS: [ItemGroup; 2] = [
     // Itens 01 a 10
@@ -305,7 +305,7 @@ impl SheetReader {
             .unwrap();
 
         if answers.iter().filter(|a| **a == Answer::None).count() > 5 {
-            errors.push(ReaderError::AlignmentError(
+            errors.push(ReaderError::AnswersError(
                 "Foram detectados muitos itens em branco".into(),
             ));
         }
@@ -313,7 +313,6 @@ impl SheetReader {
         (answers, Gd::from_object(rect), errors)
     }
 
-    #[allow(dead_code)]
     #[must_use]
     fn read_item_group(
         image: &GrayImage,
@@ -456,24 +455,23 @@ impl SheetReader {
                 let mut hough_img = imgdata
                     .view(corner.0, corner.1, CORNER_SIZE, CORNER_SIZE)
                     .to_image();
-                hough_img
-                    .dilate(1)
-                    .remove_large_blobs(350)
-                    .normalized_gradient()
-                    .threshold(1);
+                hough_img.dilate(2).remove_large_blobs(MAX_BLOB_SIZE).erode(2);
 
-                // TODO: remove larger line blobs from the analysis
-                //  - IDEA: dilate(2), remove large blobs, erode(2)
                 // TODO: pick lines closest to expected position
                 let h1 = hough_img.hough_analysis(80.0..100.0, 1.0, 0.5);
                 let h2 = hough_img.hough_analysis(-10.0..10.0, 1.0, 0.5);
                 let r1 = h1.closest_to(EXPECTED_HOUGH_COUNT);
                 let r2 = h2.closest_to(EXPECTED_HOUGH_COUNT);
 
+                godot_print!("r1: {}, r2: {}", r1.value, r2.value);
+
                 let point = r1.intersection_point(r2);
                 let point = (point.0 + corner.0 as f32, point.1 + corner.1 as f32);
 
-                (point.0.clamp(0.0, width_limit), point.1.clamp(0.0, height_limit))
+                (
+                    point.0.clamp(0.0, width_limit),
+                    point.1.clamp(0.0, height_limit),
+                )
             })
             .collect();
 

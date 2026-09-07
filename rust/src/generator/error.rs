@@ -8,7 +8,6 @@ use zxingcpp::Error as ZXingError;
 
 #[derive(Debug)]
 #[repr(u8)]
-#[allow(dead_code)]
 pub enum AnswerSheetError {
     BarcodeCreate(ZXingError),
     BarcodeEncode(ImageError),

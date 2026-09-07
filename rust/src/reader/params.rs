@@ -1,7 +1,6 @@
 use godot::prelude::*;
 
 /// Posição relativa de uma tabela de itens no gabarito (em relação aos alinhadores)
-#[allow(dead_code)]
 #[derive(Clone, Debug)]
 pub struct ItemGroup {
     pub item01a_x: f32,

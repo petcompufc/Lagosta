@@ -1,8 +1,6 @@
-#![allow(dead_code)]
-
 use godot::classes::{Image, ImageTexture, image::Format};
 use godot::prelude::*;
-use image::{GrayAlphaImage, GrayImage, RgbImage, imageops};
+use image::{ExtendedColorType, GrayAlphaImage, GrayImage, RgbImage, imageops};
 use rayon::prelude::*;
 
 pub fn apply_filter<F>(pixels: &mut [u8], mut filter: F)
@@ -145,4 +143,16 @@ pub fn clear_transparent(image: &mut GrayAlphaImage) {
             p[1] = 255;
         }
     });
+}
+
+pub fn save_img_png(image: &GrayImage, path: &str) {
+    image::save_buffer_with_format(
+        path,
+        image,
+        image.width(),
+        image.height(),
+        ExtendedColorType::L8,
+        image::ImageFormat::Png,
+    )
+    .ok();
 }

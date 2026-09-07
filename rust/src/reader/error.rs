@@ -4,7 +4,6 @@ use image::ImageError;
 
 #[derive(Debug)]
 #[repr(u8)]
-#[allow(dead_code)]
 pub enum ReaderError {
     BarcodeRead(String),
     ImageError(ImageError),
