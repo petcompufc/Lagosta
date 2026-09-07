@@ -384,14 +384,14 @@ size_flags_horizontal = 3
 
 [node name="GammaLabel" type="Label" parent="HSplitContainer/ReadingPanel/ReadingHSplit/VBoxContainer/SheetImagePanel/VBoxContainer/HBoxContainer/VBoxContainer" unique_id=1336011490]
 layout_mode = 2
-tooltip_text = "O gamma usado no processamento da imagem. Padrão: 3.0"
+tooltip_text = "O gamma usado no processamento da imagem. Um valor maior aumenta o contraste. Padrão: 3.0"
 mouse_filter = 1
-text = "Gamma:"
+text = "Contraste:"
 
 [node name="GammaSpinBox" type="SpinBox" parent="HSplitContainer/ReadingPanel/ReadingHSplit/VBoxContainer/SheetImagePanel/VBoxContainer/HBoxContainer/VBoxContainer" unique_id=950750715]
 unique_name_in_owner = true
 layout_mode = 2
-tooltip_text = "O gamma usado no processamento da imagem. Padrão: 3.0"
+tooltip_text = "O gamma usado no processamento da imagem. Um valor maior aumenta o contraste. Padrão: 3.0"
 min_value = 0.1
 step = 0.1
 value = 3.0
@@ -420,7 +420,7 @@ oversampling_override = 1.0
 title = "Open a Directory"
 file_mode = 2
 access = 2
-filters = PackedStringArray("*.png", "*.jpg", "*.jpeg", "*.webp", "*.bmp")
+filters = PackedStringArray("*.png", "*.jpg", "*.jpeg", "*.jfif", "*.webp", "*.bmp", "*.avif", "*.tif", "*.tiff", "*.gif")
 use_native_dialog = true
 file_filter_toggle_enabled = false
 

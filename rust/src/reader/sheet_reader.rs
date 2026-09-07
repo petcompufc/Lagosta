@@ -34,7 +34,9 @@ const CORNERS: [(u32, u32); 4] = [
     (CORNER_X2, CORNER_Y2),
 ];
 
-const SUPPORTED_EXTENSIONS: [&str; 5] = ["png", "jpg", "jpeg", "webp", "bmp"];
+const SUPPORTED_EXTENSIONS: [&str; 10] = [
+    "png", "jpg", "jpeg", "webp", "bmp", "avif", "tif", "tiff", "jfif", "gif",
+];
 
 const EXPECTED_HOUGH_COUNT: u32 = 24;
 
