@@ -227,7 +227,7 @@ impl SheetReader {
         } else {
             return Reading::default();
         };
-        Self::process_image(&mut imgdata, 3.0, 30);
+        Self::process_image(&mut imgdata, reading_params.gamma, reading_params.threshold);
         let mut errors = Array::new();
 
         // Lê o código QR na imagem processada (pós-denoise)
