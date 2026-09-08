@@ -17,7 +17,7 @@ func update_texture() -> void:
 	params.threshold = floori(threshold_sb.value)
 	
 	var time := Time.get_ticks_usec()
-	var tex := SheetReader.get_processed_texture(file, params)
+	var tex := SheetReader.get_denoised_texture(file, params)
 	print("%.2fs" % ((Time.get_ticks_usec() - time) / 1e6))
 	
 	#var time = Time.get_ticks_usec()

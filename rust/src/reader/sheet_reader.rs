@@ -39,7 +39,11 @@ const SUPPORTED_EXTENSIONS: [&str; 10] = [
 ];
 
 const EXPECTED_HOUGH_COUNT: u32 = 30;
-const MAX_BLOB_SIZE: u32 = 500;
+
+const MIN_BLOB_SIZE: u32 = 380;
+const MAX_BLOB_SIZE: u32 = 700;
+const ALIGNMENT_SQUARE_MAX_SIZE: u32 = 36;
+const SQUARENESS_THRESHOLD: u32 = 8;
 
 /// Valores calculados de forma relativa usando uma imagem 1323x932 do gabarito oficial
 /// como base, levando em conta que a área lida pelo leitor é a área interna demarcada
@@ -124,9 +128,8 @@ impl SheetReader {
         imgdata
     }
 
-    pub fn process_image(imgdata: &mut GrayImage, gamma: f32, threshold: u8) -> &mut GrayImage {
-        Self::neg_image(imgdata, gamma);
-        imgdata.threshold(threshold).erode(1).dilate(1);
+    pub fn denoise_image(imgdata: &mut GrayImage, denoise_factor: u32) -> &mut GrayImage {
+        imgdata.erode(denoise_factor).dilate(denoise_factor);
         imgdata
     }
 
@@ -141,16 +144,14 @@ impl SheetReader {
     }
 
     #[func]
-    pub fn get_processed_texture(
+    pub fn get_denoised_texture(
         file_path: GString,
         reading_parameters: Gd<ReadingParams>,
     ) -> Option<Gd<ImageTexture>> {
         let mut imgdata = SheetReader::load_image(file_path.to_string()).ok()?;
-        SheetReader::process_image(
-            &mut imgdata,
-            reading_parameters.bind().gamma,
-            reading_parameters.bind().threshold,
-        );
+        SheetReader::neg_image(&mut imgdata, reading_parameters.bind().gamma);
+        imgdata.threshold(reading_parameters.bind().threshold);
+        SheetReader::denoise_image(&mut imgdata, 1);
         create_godot_texture(&imgdata)
     }
 
@@ -232,11 +233,7 @@ impl SheetReader {
         imgdata.threshold(reading_params.threshold);
 
         // Lê o código QR na imagem processada (pós-denoise)
-        let mut denoised = imgdata.clone();
-        denoised.erode(2);
-        denoised.dilate(2);
-        denoised.neg();
-        let (participante, fase, barcode_errors) = Self::read_barcode(&denoised, participants_db);
+        let (participante, fase, barcode_errors) = Self::read_barcode(&imgdata, participants_db);
         for err in barcode_errors {
             errors.push(&err.to_string().to_gstring());
         }
@@ -293,11 +290,13 @@ impl SheetReader {
         };
 
         // Lê as respostas do gabarito
+        let mut denoised = imgdata.clone();
+        Self::denoise_image(&mut denoised, 1);
         let answers = *ITEM_GROUPS
             .iter()
             .flat_map(|ig| {
                 Self::read_item_group(
-                    imgdata,
+                    &denoised,
                     ig.clone(),
                     &rect,
                     reading_params.item_radius,
@@ -403,9 +402,12 @@ impl SheetReader {
         participants_db: &HashMap<i32, Participante>,
     ) -> (Participante, OCIFase, Vec<ReaderError>) {
         let mut reader = zxingcpp::read().formats([BarcodeFormat::Aztec]);
-        reader.set_try_invert(true);
+        reader.set_try_invert(false);
 
-        if let Ok(barcodes) = reader.from(imgdata)
+        let mut imgdata = imgdata.clone();
+        Self::denoise_image(&mut imgdata, 2);
+        imgdata.neg();
+        if let Ok(barcodes) = reader.from(&imgdata)
             && let Some(barcode) = barcodes.first()
         {
             let mut errors = Vec::new();
@@ -461,7 +463,13 @@ impl SheetReader {
                     .view(corner.0, corner.1, CORNER_SIZE, CORNER_SIZE)
                     .to_image();
                 hough_img.dilate(3);
-                hough_img.remove_blobs(380, 700, 36, 36, 8);
+                hough_img.remove_blobs(
+                    MIN_BLOB_SIZE,
+                    MAX_BLOB_SIZE,
+                    ALIGNMENT_SQUARE_MAX_SIZE,
+                    ALIGNMENT_SQUARE_MAX_SIZE,
+                    SQUARENESS_THRESHOLD,
+                );
 
                 // TODO: pick lines closest to expected position
                 let h1 = hough_img.hough_analysis(80.0..100.0, 1.0, 0.5);
