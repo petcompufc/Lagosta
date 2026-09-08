@@ -64,12 +64,13 @@ func show_sheet(data: Participante):
 		notify_error("(Insc. %s) - %s" % [data.inscricao, sheet.error])
 
 
-func is_header(line: PackedStringArray) -> bool:
-	var inscricao := line[0].to_lower() == "inscricao" or line[0].to_lower() == "inscricão" or line[0].to_lower() == "inscrição"
-	var nome := line[1].to_lower() == "participante" or line[1].to_lower() == "nome"
+static func is_header(line: PackedStringArray) -> bool:
+	var inscricao := line[0].to_lower() == "id"
+	var nome := line[1].to_lower() == "nome"
 	var escola := line[2].to_lower() == "escola"
-	var modalidade := line[3].to_lower() == "modalidade" or line[3].to_lower() == "nivel"
-	return inscricao and nome and escola and modalidade
+	var modalidade := line[3].to_lower() == "modalidade"
+	var fase := line[4].to_lower() == "fase"
+	return inscricao and nome and escola and modalidade and fase
 
 
 func load_csv() -> void:
@@ -89,7 +90,7 @@ func load_csv() -> void:
 	while csv_file.get_position() < csv_file.get_length():
 		l += 1
 
-		var line := csv_file.get_csv_line()
+		var line := csv_file.get_csv_line(";")
 		if len(line) != NUM_ARGS_CSV:
 			notify_error("(Linha %d) - Linha inválida: %s" % [l, ",".join(line)])
 			continue
