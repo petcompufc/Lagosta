@@ -66,7 +66,7 @@ pub struct ReadingParams {
     #[var]
     pub rect: Option<Gd<Rect>>,
     #[var]
-    #[init(val = 3.0)]
+    #[init(val = 3.4)]
     pub gamma: f32,
     #[var]
     #[init(val = 30)]

@@ -18,7 +18,7 @@ use crate::tools::{dict_to_hashmap, imgproc::*};
 
 // A5 proportion
 const SHEET_WIDTH: u32 = 1264;
-const SHEET_HEIGHT: u32 = 920;
+const SHEET_HEIGHT: u32 = 910;
 
 const CORNER_SIZE: u32 = 150;
 const CORNER_X2: u32 = SHEET_WIDTH - CORNER_SIZE;
@@ -38,8 +38,8 @@ const SUPPORTED_EXTENSIONS: [&str; 10] = [
     "png", "jpg", "jpeg", "webp", "bmp", "avif", "tif", "tiff", "jfif", "gif",
 ];
 
-const EXPECTED_HOUGH_COUNT: u32 = 24;
-const MAX_BLOB_SIZE: u32 = 450;
+const EXPECTED_HOUGH_COUNT: u32 = 30;
+const MAX_BLOB_SIZE: u32 = 500;
 
 /// Valores calculados de forma relativa usando uma imagem 1323x932 do gabarito oficial
 /// como base, levando em conta que a área lida pelo leitor é a área interna demarcada
@@ -115,12 +115,11 @@ impl SheetReader {
             .map(DynamicImage::into_luma_alpha8)
             .map_err(ReaderError::from)?;
         clear_transparent(&mut imgdata);
-        Ok(imageops::grayscale(&imgdata))
+        let gray = imageops::grayscale(&imgdata);
+        Ok(fit_image_to(&gray, SHEET_WIDTH, SHEET_HEIGHT))
     }
 
     pub fn neg_image(imgdata: &mut GrayImage, gamma: f32) -> &mut GrayImage {
-        *imgdata = imageops::grayscale(imgdata);
-        *imgdata = fit_image_to(imgdata, SHEET_WIDTH, SHEET_HEIGHT);
         imgdata.neg().gamma(gamma);
         imgdata
     }
@@ -177,6 +176,7 @@ impl SheetReader {
         // dessincronizado.
         let counter =
             Mutex::new(unsafe { (&self.counter as *const u32 as *mut u32).as_mut_unchecked() });
+        **counter.lock().unwrap() = 0;
 
         paths
             .iter_shared()
@@ -227,11 +227,16 @@ impl SheetReader {
         } else {
             return Reading::default();
         };
-        Self::process_image(&mut imgdata, reading_params.gamma, reading_params.threshold);
         let mut errors = Array::new();
+        Self::neg_image(&mut imgdata, reading_params.gamma);
+        imgdata.threshold(reading_params.threshold);
 
         // Lê o código QR na imagem processada (pós-denoise)
-        let (participante, fase, barcode_errors) = Self::read_barcode(&imgdata, participants_db);
+        let mut denoised = imgdata.clone();
+        denoised.erode(2);
+        denoised.dilate(2);
+        denoised.neg();
+        let (participante, fase, barcode_errors) = Self::read_barcode(&denoised, participants_db);
         for err in barcode_errors {
             errors.push(&err.to_string().to_gstring());
         }
@@ -455,7 +460,8 @@ impl SheetReader {
                 let mut hough_img = imgdata
                     .view(corner.0, corner.1, CORNER_SIZE, CORNER_SIZE)
                     .to_image();
-                hough_img.dilate(2).remove_large_blobs(MAX_BLOB_SIZE).erode(2);
+                hough_img.dilate(3);
+                hough_img.remove_blobs(380, 700, 36, 36, 8);
 
                 // TODO: pick lines closest to expected position
                 let h1 = hough_img.hough_analysis(80.0..100.0, 1.0, 0.5);

@@ -125,6 +125,15 @@ pub trait ImageFilter {
     fn pixels_in_line(&self, theta: f32, rho: f32, threshold: f32) -> u32;
 
     fn remove_large_blobs(&mut self, size_threshold: u32) -> &mut Self;
+
+    fn remove_blobs(
+        &mut self,
+        min_size_threshold: u32,
+        max_size_threshold: u32,
+        max_width: u32,
+        max_height: u32,
+        squareness_threshold: u32,
+    ) -> &mut Self;
 }
 
 impl ImageFilter for GrayImage {
@@ -388,6 +397,52 @@ impl ImageFilter for GrayImage {
 
         for blob in blobs {
             if blob.len() > size_threshold as usize {
+                blob.into_iter().for_each(|(x, y)| self.set_pixel(x, y, 0));
+            }
+        }
+
+        self
+    }
+
+    fn remove_blobs(
+        &mut self,
+        min_size_threshold: u32,
+        max_size_threshold: u32,
+        max_width: u32,
+        max_height: u32,
+        squareness_threshold: u32,
+    ) -> &mut GrayImage {
+        let width = self.width();
+        let height = self.height();
+
+        let mut clone = imageops::grayscale_alpha(self);
+        let blobs = (0..width)
+            .cartesian_product(0..height)
+            .filter_map(|(x, y)| {
+                if get_alpha(&clone, x, y) != 1 && get_value(&clone, x, y) == 255 {
+                    Some(depth_search(&mut clone, x, y))
+                } else {
+                    None
+                }
+            });
+
+        for blob in blobs {
+            let len = blob.len() as u32;
+            let ((min_w, max_w), (min_h, max_h)): ((u32, u32), (u32, u32)) = blob
+                .iter()
+                .fold(((u32::MAX, 0), (u32::MAX, 0)), |(w, h), (x, y)| {
+                    ((w.0.min(*x), w.1.max(*x)), (h.0.min(*y), h.1.max(*y)))
+                });
+            let width = max_w - min_w;
+            let height = max_h - min_h;
+
+
+            if len < min_size_threshold
+                || len > max_size_threshold
+                || height > max_height
+                || width > max_width
+                || height.abs_diff(width) > squareness_threshold
+            {
                 blob.into_iter().for_each(|(x, y)| self.set_pixel(x, y, 0));
             }
         }

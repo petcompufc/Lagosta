@@ -5,6 +5,7 @@ use crate::data::Participante;
 use crate::reader::params::ReadingParams;
 use crate::reader::params::Rect;
 use crate::reader::sheet_reader::SheetReader;
+use crate::tools::imgproc::ImageFilter;
 use crate::tools::imgtools::create_godot_texture;
 use godot::classes::ImageTexture;
 use godot::prelude::*;
@@ -178,11 +179,11 @@ impl Reading {
         reading_parameters: Gd<ReadingParams>,
     ) -> Option<Gd<ImageTexture>> {
         let mut imgdata = SheetReader::load_image(self.file_path.to_string()).ok()?;
-        SheetReader::process_image(
-            &mut imgdata,
-            reading_parameters.bind().gamma,
-            reading_parameters.bind().threshold,
-        );
+        SheetReader::neg_image(&mut imgdata, reading_parameters.bind().gamma);
+        imgdata.threshold(reading_parameters.bind().threshold);
+        imgdata.erode(2);
+        imgdata.dilate(2);
+        imgdata.neg();
         create_godot_texture(&imgdata)
     }
 }
