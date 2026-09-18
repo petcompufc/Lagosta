@@ -83,7 +83,13 @@ func update_info() -> void:
 
 func _on_item_selected(answer: Lago.Answer, item: int) -> void:
 	if tracked_button:
+		print('pre: ', tracked_button.info.score, tracked_button.info.get_answers())
 		tracked_button.info.set_answer(item, answer as int)
+		if reader_panel.answer_table:
+			tracked_button.info.update_score(reader_panel.answer_table)
+		print("post: ", tracked_button.info.score, tracked_button.info.get_answers())
+		tracked_button.update_display()
+		update_info()
 
 
 func _on_name_input_text_changed(new_text: String) -> void:

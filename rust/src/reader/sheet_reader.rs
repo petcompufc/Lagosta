@@ -244,19 +244,12 @@ impl SheetReader {
             errors.push(&err.to_string().to_gstring());
         }
 
-        // Calcula pontuação
-        let score = if let Some(at) = answer_table {
-            Self::get_score(&answers, at.clone(), participante.modalidade)
-        } else {
-            0.0
-        };
-
         Reading::new(
             path,
             participante,
             fase,
             *answers.as_array().unwrap(),
-            score,
+            answer_table,
             rect,
             errors,
         )
@@ -493,35 +486,5 @@ impl SheetReader {
             p3: Vector2::new(corners[2].0, corners[2].1),
             p4: Vector2::new(corners[3].0, corners[3].1),
         }
-    }
-
-    #[must_use]
-    fn get_score(answers: &Answers, answer_table: AnswerTable, modalidade: OCIModalidade) -> f32 {
-        if modalidade == OCIModalidade::None {
-            return 0.0;
-        }
-
-        let table = match modalidade {
-            OCIModalidade::IniA => answer_table.ini_a,
-            OCIModalidade::IniB => answer_table.ini_b,
-            OCIModalidade::Prog => answer_table.prog,
-            OCIModalidade::None => unreachable!(),
-        };
-
-        let total_weight: f32 = table.iter().map(|(_, weight)| weight).sum();
-
-        let correct_sum = table
-            .iter()
-            .zip(answers)
-            .map(|((expected, weight), answer)| {
-                if answer == expected || *expected == Answer::None {
-                    *weight
-                } else {
-                    0.0
-                }
-            })
-            .sum::<f32>();
-
-        (correct_sum / total_weight) * 10.0
     }
 }

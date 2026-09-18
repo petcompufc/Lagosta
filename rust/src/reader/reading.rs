@@ -1,6 +1,7 @@
 use std::fmt::Display;
 
 use crate::data::OCIFase;
+use crate::data::OCIModalidade;
 use crate::data::Participante;
 use crate::reader::params::ReadingParams;
 use crate::reader::params::Rect;
@@ -124,16 +125,21 @@ impl Reading {
         participante: Participante,
         fase: OCIFase,
         answers: Answers,
-        score: f32,
+        answer_table: Option<&AnswerTable>,
         rect: Gd<Rect>,
         errors: Array<GString>,
     ) -> Self {
+        let score = if let Some(at) = answer_table {
+            Self::calculate_score(&answers, at, participante.modalidade)
+        } else {
+            0.0
+        };
         Self {
+            score,
             participante: Gd::from_object(participante),
             file_path,
             fase,
             answers,
-            score,
             rect,
             errors,
         }
@@ -162,6 +168,11 @@ impl Reading {
     }
 
     #[func]
+    pub fn update_score(&mut self, answer_table: Gd<AnswerTable>) {
+        self.score = Self::calculate_score(&self.answers, &answer_table.bind(), self.participante.bind().modalidade);
+    }
+
+    #[func]
     pub fn get_neg_texture(
         &self,
         reading_parameters: Gd<ReadingParams>,
@@ -175,5 +186,39 @@ impl Reading {
         reading_parameters: Gd<ReadingParams>,
     ) -> Option<Gd<ImageTexture>> {
         SheetReader::get_denoised_texture(self.file_path.clone(), reading_parameters)
+    }
+
+    #[must_use]
+    fn calculate_score(
+        answers: &Answers,
+        answer_table: &AnswerTable,
+        modalidade: OCIModalidade,
+    ) -> f32 {
+        if modalidade == OCIModalidade::None {
+            return 0.0;
+        }
+
+        let table = match modalidade {
+            OCIModalidade::IniA => answer_table.ini_a,
+            OCIModalidade::IniB => answer_table.ini_b,
+            OCIModalidade::Prog => answer_table.prog,
+            OCIModalidade::None => unreachable!(),
+        };
+
+        let total_weight: f32 = table.iter().map(|(_, weight)| weight).sum();
+
+        let correct_sum = table
+            .iter()
+            .zip(answers)
+            .map(|((expected, weight), answer)| {
+                if answer == expected || *expected == Answer::None {
+                    *weight
+                } else {
+                    0.0
+                }
+            })
+            .sum::<f32>();
+
+        (correct_sum / total_weight) * 10.0
     }
 }

@@ -407,6 +407,8 @@ func repeat_reading(participant: ParticipantButton) -> void:
 	
 	participant.info.rect = reading.rect
 	participant.info.set_answers(reading.get_answers())
+	if answer_table:
+		participant.info.update_score(answer_table)
 	participant.info.errors = reading.errors
 
 	if participant == info_panel.tracked_button:
