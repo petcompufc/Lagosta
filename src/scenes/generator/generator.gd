@@ -1,6 +1,6 @@
 extends Panel
 
-const NUM_ARGS_CSV := 4
+const NUM_ARGS_CSV := 5
 const EXPORT_DPI: float = 96.0
 const ENTRY_BUTTON := preload("res://src/scenes/generator/entry_button.tscn")
 const ERROR_LABEL := preload("res://src/scenes/generator/error_label.tscn")
