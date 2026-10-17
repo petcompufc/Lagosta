@@ -422,7 +422,6 @@ title = "Open a Directory"
 file_mode = 2
 access = 2
 filters = PackedStringArray("*.png", "*.jpg", "*.jpeg", "*.jfif", "*.webp", "*.bmp", "*.avif", "*.tif", "*.tiff", "*.gif")
-use_native_dialog = true
 file_filter_toggle_enabled = false
 
 [node name="SaveDialog" type="FileDialog" parent="." unique_id=1677235710]
