@@ -169,7 +169,11 @@ impl Reading {
 
     #[func]
     pub fn update_score(&mut self, answer_table: Gd<AnswerTable>) {
-        self.score = Self::calculate_score(&self.answers, &answer_table.bind(), self.participante.bind().modalidade);
+        self.score = Self::calculate_score(
+            &self.answers,
+            &answer_table.bind(),
+            self.participante.bind().modalidade,
+        );
     }
 
     #[func]
@@ -194,27 +198,33 @@ impl Reading {
         answer_table: &AnswerTable,
         modalidade: OCIModalidade,
     ) -> f32 {
-        if modalidade == OCIModalidade::None {
-            return 0.0;
-        }
-
         let table = match modalidade {
             OCIModalidade::IniA => answer_table.ini_a,
             OCIModalidade::IniB => answer_table.ini_b,
             OCIModalidade::Prog => answer_table.prog,
-            OCIModalidade::None => unreachable!(),
+            OCIModalidade::None => return 0.0, // early exit
         };
 
-        let total_weight: f32 = table.iter().map(|(_, weight)| weight).sum();
+        // Questões anuladas tem peso 0
+        let total_weight: f32 = table
+            .iter()
+            .map(|(a, weight)| if *a == Answer::None { 0.0 } else { *weight })
+            .sum();
+
+        // Caso onde todos os itens do gabarito estão anulados
+        if total_weight == 0.0 {
+            return 0.0;
+        }
 
         let correct_sum = table
             .iter()
             .zip(answers)
             .map(|((expected, weight), answer)| {
-                if answer == expected || *expected == Answer::None {
-                    *weight
-                } else {
+                // Pula as questões anuladas
+                if answer != expected || *expected == Answer::None {
                     0.0
+                } else {
+                    *weight
                 }
             })
             .sum::<f32>();
