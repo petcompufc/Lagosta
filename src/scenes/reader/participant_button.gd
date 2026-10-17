@@ -12,10 +12,6 @@ const COLOR_ERROR := Color("#C1121F")
 
 @export var display: SheetsContainer.SORTING:
 	set = set_display
-@export var file_name: String = "":
-	set(f):
-		file_name = f
-		update_display()
 
 var info: Reading:
 	set(i):

@@ -42,6 +42,7 @@ func get_all() -> Array[ParticipantButton]:
 
 func set_order_crescent(toggle: bool = not order_crescent) -> void:
 	order_crescent = toggle
+	if not sort_button: await ready
 	if order_crescent:
 		sort_button.icon = ARROW_DOWN
 	else:
@@ -55,7 +56,7 @@ func update_sorting() -> void:
 	match sort_option_button.selected:
 		SORTING.FILE_NAME:
 			sheets.sort_custom(func(a: ParticipantButton, b: ParticipantButton):
-				return a.file_name.naturalnocasecmp_to(b.file_name) * order < 0)
+				return a.info.file_path.naturalnocasecmp_to(b.info.file_path) * order < 0)
 		SORTING.NAME:
 			sheets.sort_custom(func(a: ParticipantButton, b: ParticipantButton):
 				return a.info.participante.nome.naturalnocasecmp_to(b.info.participante.nome) * order < 0)
