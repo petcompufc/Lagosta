@@ -26,6 +26,7 @@ const CORNER_Y2: u32 = SHEET_HEIGHT - CORNER_SIZE;
 
 const GROUP_ITEM_COUNT: usize = 10;
 const CHOICE_COUNT: u8 = 5;
+const TOO_MANY_BLANKS_THRESHOLD: u8 = 4;
 
 const CORNERS: [(u32, u32); 4] = [
     (0, 0),
@@ -301,7 +302,8 @@ impl SheetReader {
             .as_array()
             .unwrap();
 
-        if answers.iter().filter(|a| **a == Answer::None).count() > 5 {
+        if answers.iter().filter(|a| **a == Answer::None).count() >= TOO_MANY_BLANKS_THRESHOLD.into()
+        {
             errors.push(ReaderError::AnswersError(
                 "Foram detectados muitos itens em branco".into(),
             ));
