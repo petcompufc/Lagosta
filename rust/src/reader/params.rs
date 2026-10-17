@@ -72,17 +72,17 @@ pub struct ReadingParams {
     #[init(val = 30)]
     pub threshold: u8,
     #[var]
-    #[init(val = 7)]
+    #[init(val = 9)]
     pub item_radius: u32,
     /// Threshold to count an item choice as marked when reading
     #[var]
-    #[init(val = 6)]
+    #[init(val = 10)]
     pub mark_threshold: u32,
     #[var]
     #[init(val = 1.5)]
     pub angle_threshold: f32,
     #[var]
-    #[init(val = 26)]
+    #[init(val = 35)]
     pub double_marking_threshold: u32,
 }
 

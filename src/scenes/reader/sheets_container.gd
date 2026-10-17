@@ -114,15 +114,18 @@ func _unhandled_input(event: InputEvent) -> void:
 	var child_count := sheets_container.get_child_count()
 	if child_count == 0:
 		return
+	
 	var children := sheets_container.get_children()
 	if event.is_action_pressed("page_next"):
 		var next_idx := (children.find(current_selected) + 1) % child_count
 		var child: ParticipantButton = sheets_container.get_child(next_idx)
-		child.set_pressed(true)
-		_on_participant_button_clicked(true, child)
+		if child:
+			child.set_pressed(true)
+			_on_participant_button_clicked(true, child)
 	elif event.is_action_pressed("page_prev"):
 		var prev_idx := maxi(-1, children.find(current_selected) - 1)
 		var child: ParticipantButton = sheets_container.get_child(prev_idx)
-		child.set_pressed(true)
-		_on_participant_button_clicked(true, child)
+		if child:
+			child.set_pressed(true)
+			_on_participant_button_clicked(true, child)
 		

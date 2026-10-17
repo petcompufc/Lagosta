@@ -302,7 +302,8 @@ impl SheetReader {
             .as_array()
             .unwrap();
 
-        if answers.iter().filter(|a| **a == Answer::None).count() >= TOO_MANY_BLANKS_THRESHOLD.into()
+        if answers.iter().filter(|a| **a == Answer::None).count()
+            >= TOO_MANY_BLANKS_THRESHOLD.into()
         {
             errors.push(ReaderError::AnswersError(
                 "Foram detectados muitos itens em branco".into(),
@@ -340,7 +341,10 @@ impl SheetReader {
                 }
             });
 
-            let highest = if let Some(h) = markings.clone().max_by(|(_, c1), (_, c2)| c1.cmp(c2)) {
+            let highest = if let Some(h) = markings
+                .clone()
+                .max_by(|(_, count1), (_, count2)| count1.cmp(count2))
+            {
                 h
             } else {
                 return Answer::None;
